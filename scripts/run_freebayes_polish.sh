@@ -22,7 +22,7 @@ reference=$3
 module load minimap2 samtools java
 
 bam=$(echo $reference | sed -e 's/\.fasta/.bam/' -e 's/\.fas/.bam/' -e 's/\.fa/.bam/')
-consensus=$(echo $reference | sed -e 's/\.fasta/.cons.fasta/' -e 's/\.fas/.cons.fasta/' -e 's/\.fa/.frby.fasta/')
+consensus=$(echo $reference | sed -e 's/\.fasta$/.cons.fasta/' -e 's/\.fas$/.cons.fasta/' -e 's/\.fa$/.frby.fasta/')
 
 printf "\tMapping short reads\n";
 minimap2 -t 24 -ax sr ${reference} ${fastq1} ${fastq2} | samtools view -bh >${reference}.bam;
