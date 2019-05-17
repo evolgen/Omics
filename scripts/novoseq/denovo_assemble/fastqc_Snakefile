@@ -1,0 +1,41 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile: "/global/home/users/rohitkolora/SCRIPTS/novoseq/denovo_assemble/config.json"
+
+def get_inputs(wildcards):
+	inputs = []	
+	pattern = "{species}/{smp}/fastqc/R1_fastqc.zip"
+	for s in config["SAMPLES"]:
+		species, sample = s.split("/")
+		inputs.append(pattern.format(species=species,
+									 smp=sample))
+	return inputs
+
+rule all: 
+	input: 
+  		get_inputs
+
+
+rule fastqc_raw:
+  input: 
+    fwd=lambda wildcards: glob("../fastq/{sp}/{smp}/*_R1_*.fastq".format(sp=wildcards.species,smp=wildcards.smp)),
+    rev=lambda wildcards: glob("../fastq/{sp}/{smp}/*_R2_*.fastq".format(sp=wildcards.species,smp=wildcards.smp)),
+  output: 
+    fwdqc="{species}/{smp}/fastqc/R1_fastqc.zip",
+    revqc="{species}/{smp}/fastqc/R2_fastqc.zip",
+  shell: """
+    module load fastqc;
+    fastqc --outdir ../output/{wildcards.species}/{wildcards.smp}/fastqc \
+		-f fastq \
+		{input.fwd} {input.rev}
+  """
+
+
+

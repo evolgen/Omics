@@ -1,0 +1,67 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile:"config.json"
+
+def get_inputs(wildcards):
+	inputs = []
+	for sinfo in config["illumina_samples"]:
+		pattern = "kmer_histo/{species}/{sample}/{identity}.histo"
+		species, sample, identity = sinfo.split("/")
+		inputs.append(pattern.format\
+			(species=species,sample=sample,identity=identity))
+	return inputs
+
+rule all:
+    input:
+        get_inputs
+
+rule kmers_jellyfish:
+    input:
+        fwdread=lambda wildcards: "{genome_path}"
+                                    "/{species}"
+                                    "/{sample}"
+                                    "/{identity}_R1_001.fastq.gz"
+                                    "".format(species=wildcards.species, \
+											sample=wildcards.sample, \
+											identity=wildcards.identity, \
+                                            genome_path=config['genome_path']),
+        revread=lambda wildcards: "{genome_path}"
+                                "/{species}"
+                                "/{sample}"
+                                "/{identity}_R2_001.fastq.gz"
+                                "".format(species=wildcards.species, \
+										sample=wildcards.sample, \
+										identity=wildcards.identity, \
+                                        genome_path=config['genome_path'])
+    output:
+        histo="kmer_histo/{species}/{sample}/{identity}.histo",
+#		jf="illumina/kmer_histo/{species}/{sample}/{identity}.jf"
+    params:
+        slurm_opts=lambda wildcards: "-n32 " \
+                                     "--time 0-24:00:00 " \
+									 "-A co_genomicdata " \
+#									 "--qos=savio_lowprio " \
+									 "-p savio3_bigmem " \
+									 "-o logs/illumina_kmer_histo/{sample}.log " \
+									 "-J JF_{sample} " \
+									 .format(sample=wildcards.sample)
+    shell:"""
+        module load jellyfish2 gcc zlib; 
+		jellyfish count -C -m 21 -s 1G --bf-size 200G -t 32 \
+				<(zcat {input.fwdread}) <(zcat {input.revread}) \
+				-o kmer_histo/{wildcards.species}/{wildcards.sample}/{wildcards.identity}.jf;
+		jellyfish histo -t 32 \
+				kmer_histo/{wildcards.species}/{wildcards.sample}/{wildcards.identity}.jf >{output.histo};
+		rm kmer_histo/{wildcards.species}/{wildcards.sample}/{wildcards.identity}.jf;	
+		Rscript /global/scratch/rohitkolora/Software/genomescope/genomescope.R \
+				{output.histo} 21 150 \
+				kmer_histo/{wildcards.species}/{wildcards.sample}
+		"""
+

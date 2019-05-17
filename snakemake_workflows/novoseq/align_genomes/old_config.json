@@ -1,0 +1,24 @@
+{
+    "genomes":[
+        "minia_B-alascanus_SEB-32_k61",
+        "minia_B-altivelis_xSEB-32_k61",
+        "minia_S-aleutianus_SEB-111_k61",
+        "minia_S-atrovirens_xSEB-24_k61",
+        "minia_S-carnatus_xSEB-21_k61",
+        "minia_S-chlorostictus_xSEB-10_k61",
+        "minia_S-crameri_SEB-6_k61",
+        "minia_S-dalli_xSEB-31_k61",
+        "minia_S-entomelas_SEB-8_k61",
+        "minia_S-flavidus_SEB-19_k61",
+        "minia_S-hopkinsi_xSEB-7_k61",
+        "minia_S-moseri_SEB-9_k61",
+        "minia_S-mystinus_SEB-17_k61",
+        "minia_S-nigrocinctus_UW156953_k61",
+        "minia_S-pinniger_SEB-72_k61",
+        "minia_S-rastrelliger_xSEB-1_k61",
+        "minia_S-reedi_SEB-7_k61",
+        "minia_S-rosaceus_xSEB-30_k61",
+        "minia_S-rubrivinctus_UW156309_k61",
+        "minia_S-semicinctus_xSEB-12_k61",
+        "minia_S-umbrosus_SEB-10_k61"]
+}

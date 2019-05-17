@@ -1,0 +1,60 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile:"config.json"
+
+def get_inputs(wildcards):
+	inputs = []
+
+	for sp1, sample1 in config["genomes_by_species"].items():
+        for sp2, sample2 in config["genomes_by_species"].items():
+			if species1==species2:
+				continue
+			inputs.append("wga/minia/{sp1}/{sp1}.{sp2}.maf".format(sp1=sp,sp=sp))
+	return inputs
+
+rule all:
+	input:
+		get_inputs
+
+'''
+rule pairmap_genomes:
+	input:
+		reference=lambda wildcards: glob("/global/scratch/rohitkolora/Rockfish/Genomes/\
+									sequencing/illumina/output/{species1}/*/assembly/minia_*_k61.contigs.fa"\
+									.format(species1=wildcards.species1)),
+		query=lambda wildcards: glob("/global/scratch/rohitkolora/Rockfish/Genomes/\
+									sequencing/illumina/output/{species2}/*/assembly/minia_*_k61.contigs.fa"\
+									.format(species2=wildcards.species2)),
+	output:
+		paf="wga/minia/{species1}/align.{species1}.{species2}.paf",
+		maf="wga/minia/{species1}/{species1}.{species2}.maf",
+	params:
+		slurm_opts=lambda wildcards: " -n32 " \
+			"--time 0-8:00:00 " \
+			"-J {wildcards.species1}-{wildcards.species2} " \
+			"".format(species1=wildcards.species1, species2=wildcards.species2)
+	shell:"""
+		module load minimap2;
+		minimap2 -t 32 -ax asm20 --cs=long -Lc \
+			{input.reference} {input.query} \
+			>wga/minia/{wildcards.species1}/{wildcards.species2}.tmp;
+		sort -T wga/minia/{wildcards.species1}/ \
+			--parallel=32 -k6,6 -k8,8n -k9,9nr \
+			wga/minia/{wildcards.species1}/{wildcards.species2}.tmp >{output.paf};
+		rm wga/minia/{wildcards.species1}/{wildcards.species2}.tmp;
+		printf "##maf version=1\n" >{output.maf};
+		paftools.js view -f maf {output.paf} \
+			| tail -n +2 | \
+			awk -v ref_species="${wildcards.species1}" -v query_species="${wildcards.species2}" \
+			'{if(NR%4==3) {gsub("^s ","s "ref_species".",$0)} else if(NR%4==0) \
+				gsub("^s ","s "query_species".",$0); \
+			else if(NR%4==2) gsub("^a ","a score=",$0); print}' >>{output.maf};
+	"""
+'''

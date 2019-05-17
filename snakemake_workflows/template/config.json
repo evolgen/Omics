@@ -1,0 +1,25 @@
+{
+    "genome_path":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/output",
+    "genomes_by_species" : {
+        "Sebastolobus_alascanus" : "B-alascanus_SEB-32",
+        "Sebastolobus_altivelis" : "B-altivelis_xSEB-32",
+        "Sebastes_aleutianus" : "S-aleutianus_SEB-111",
+        "Sebastes_atrovirens" : "S-atrovirens_xSEB-24",
+        "Sebastes_carnatus" : "S-carnatus_xSEB-21",
+        "Sebastes_chlorostictus" : "S-chlorostictus_xSEB-10",
+        "Sebastes_crameri" : "S-crameri_SEB-6",
+        "Sebastes_dalli" : "S-dalli_xSEB-31",
+        "Sebastes_entomelas" : "S-entomelas_SEB-8",
+        "Sebastes_flavidus" : "S-flavidus_SEB-19",
+        "Sebastes_hopkinsi" : "S-hopkinsi_xSEB-7",
+        "Sebastes_moseri" : "S-moseri_SEB-9",
+        "Sebastes_mystinus" : "S-mystinus_SEB-17",
+        "Sebastes_pinniger" : "S-pinniger_SEB-72",
+        "Sebastes_rastrelliger" : "S-rastrelliger_xSEB-1",
+        "Sebastes_reedi" : "S-reedi_SEB-7",
+        "Sebastes_rosaceus" : "S-rosaceus_xSEB-30",
+        "Sebastes_rubrivinctus" : "S-rubrivinctus_UW156309",
+        "Sebastes_semicinctus" : "S-semicinctus_xSEB-12",
+        "Sebastes_umbrosus" : "S-umbrosus_SEB-10"
+    }
+}

@@ -1,0 +1,47 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile: "config.json"
+
+#workdir: "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina"
+
+def get_inputs(wildcards):
+	inputs = []	
+	pattern = "output/{species}/{smp}/merged/overlapped.notCombined_1.fastq"
+	for s in config["SAMPLES"]:
+		species, sample = s.split("/")
+		inputs.append(pattern.format(species=species,
+									 smp=sample))
+	return inputs
+
+rule all: 
+	input: 
+  		get_inputs
+    #expand("output/{smp}/assembly/minia_k61.contigs.fa", smp=config["SAMPLES"])
+
+rule merge_corrected:
+	input: 
+		fwd="output/{species}/{smp}/corrected/corr.0", 
+		rev="output/{species}/{smp}/corrected/corr.1",
+	output: 
+		fwd="output/{species}/{smp}/merged/overlapped.notCombined_1.fastq",
+		rev="output/{species}/{smp}/merged/overlapped.notCombined_2.fastq",
+		ext="output/{species}/{smp}/merged/overlapped.extendedFrags.fastq",
+	threads:
+		8
+	shell: """
+		module load flash;
+		flash -m 35 -x 0.015 -M 140 \
+			-t {threads} {input.fwd} {input.rev} \
+			-d output/{wildcards.species}/{wildcards.smp}/merged \
+			-o overlapped \
+			&>output/{wildcards.species}/{wildcards.smp}/merged/flash.LOG
+		"""
+
+

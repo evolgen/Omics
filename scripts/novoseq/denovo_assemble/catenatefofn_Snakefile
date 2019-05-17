@@ -1,0 +1,41 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile: "config.json"
+
+def get_inputs(wildcards):
+	inputs = []	
+	pattern = "output/{species}/{smp}/assembly/input_fastq.fastq.gz"
+	for s in config["SAMPLES"]:
+		species, sample = s.split("/")
+		inputs.append(pattern.format(species=species,
+									 smp=sample))
+	return inputs
+
+rule all: 
+	input: 
+  		get_inputs
+
+rule concatenate_4minia:
+	input: 
+		fwd="output/{species}/{smp}/merged/overlapped.notCombined_1.fastq", 
+		rev="output/{species}/{smp}/merged/overlapped.notCombined_2.fastq", 
+		ext="output/{species}/{smp}/merged/overlapped.extendedFrags.fastq",
+	output:
+		out="output/{species}/{smp}/assembly/input_fastq.fastq.gz",
+	threads:
+		1
+	shell: """
+		module load minia;
+		ls -1 {input.ext} {input.fwd} {input.rev} \
+			>output/{wildcards.species}/{wildcards.smp}/assembly/input_fastq.fofn;
+		cat {input.ext} {input.fwd} {input.rev} | gzip - \
+			>output/{wildcards.species}/{wildcards.smp}/assembly/input_fastq.fastq.gz;
+		"""
+

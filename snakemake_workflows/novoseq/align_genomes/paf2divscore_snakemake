@@ -1,0 +1,53 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile:"config.json"
+
+def get_inputs(wildcards):
+    inputs = []
+    for sp1, sample1 in config["genomes_by_species"].items():
+        for sp2, sample2 in config["genomes_by_species"].items():
+            if sp1==sp2:
+                continue
+            inputs.append("wga/minia/{sp1}/align.{sp1}.{sp2}.paf".format(sp1=sp1,sp2=sp2))
+    return inputs
+
+rule all:
+    input:
+        get_inputs
+
+rule pairmap_genomes:
+    input:
+       paf="wga/minia/{sp1}/align.{sp1}.{sp2}.paf".\
+	   			format(sp1=wildcards.sp1,sp2=wildcards.sp2) 
+    output:
+       paf="wga/minia/{sp1}/{sp1}.{sp2}.paf",
+       maf="wga/minia/{sp1}/{sp1}.{sp2}.maf",
+    params:
+        slurm_opts=lambda wildcards: "-n1 " \
+                                     "--time 0-4:00:00 " \
+									 "-A co_genomicdata " \
+#									 "--qos=savio_lowprio " \
+									 "-p savio2_htc " \
+									 "-e wga/logs/{sp1}-{sp2}.log2 " \
+									 "-J {sp1}-{sp2} " \
+									 .format(sp1=wildcards.sp1, sp2=wildcards.sp2)
+    shell:"""
+		sort -T {input.paf} --parallel=24 \
+				-k6,6 -k8,8n -k9,9nr \
+				{input.paf} >{output.paf};
+		printf "##maf version=1\n" >{output.maf};
+		paftools.js view -f maf {output.paf} \
+				| tail -n +2 | \
+				awk -v ref_species="{wildcards.sp1}" -v query_species="{wildcards.sp2}" \
+					'{if(NR%4==3) {gsub("^s ","s "ref_species".",$0)} else if(NR%4==0) \
+						gsub("^s ","s "query_species".",$0); \
+					else if(NR%4==2) gsub("^a ","a score=",$0); print}' >>{output.maf}	
+		"""
+

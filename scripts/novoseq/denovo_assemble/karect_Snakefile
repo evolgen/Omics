@@ -1,0 +1,165 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile: "config.json"
+
+#workdir: "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina"
+
+def get_inputs(wildcards):
+	inputs = []	
+	pattern = "output/{species}/{smp}/corrected/corr_R1.fastq"
+	for s in config["SAMPLES"]:
+		species, sample = s.split("/")
+		inputs.append(pattern.format(species=species,
+									 smp=sample))
+	return inputs
+
+rule all: 
+	input: 
+  		get_inputs
+    #expand("output/{smp}/assembly/minia_k61.contigs.fa", smp=config["SAMPLES"])
+
+rule error_correction:
+	input: 
+		fwd=lambda wildcards: glob("fastq/{sp}/{smp}/*_R1_*.fastq".format(sp=wildcards.species,smp=wildcards.smp)), 
+		rev=lambda wildcards: glob("fastq/{sp}/{smp}/*_R2_*.fastq".format(sp=wildcards.species,smp=wildcards.smp))
+	output: 
+		fwd="output/{species}/{smp}/corrected/corr_R1.fastq",
+		rev="output/{species}/{smp}/corrected/corr_R2.fastq"
+	threads:
+		32
+	shell: 
+		"""
+		module load karect gcc/6.3.0;
+		karect -correct  \
+			  -tempdir=output/{wildcards.species}/{wildcards.smp}/corrected  \
+			  -inputfile={input.fwd} \
+			  -inputfile={input.rev}  \
+			  -resultprefix=corr_  \
+			  -celltype=diploid \
+			  -matchtype=hamming \
+			  -threads={threads} \
+			  -resultdir=output/{wildcards.species}/{wildcards.smp}/corrected  \
+			  -memory=360  \
+			  &>output/{wildcards.species}/{wildcards.smp}/corrected/karect.LOG;
+			  rm output/{wildcards.species}/{wildcards.smp}/corrected/input_file.txt \
+			  output/{wildcards.species}/{wildcards.smp}/corrected/res_graph_b.txt \
+			  output/{wildcards.species}/{wildcards.smp}/corrected/res_graph_a.txt
+	  	"""
+    
+
+rule merge_corrected:
+	input: 
+		fwd="output/{species}/{smp}/corrected/corr_R1.fastq", 
+		rev="output/{species}/{smp}/corrected/corr_R2.fastq",
+	output: 
+		fwd="output/{species}/{smp}/merged/overlapped.notCombined_1.fastq",
+		rev="output/{species}/{smp}/merged/overlapped.notCombined_2.fastq",
+		ext="output/{species}/{smp}/merged/overlapped.extendedFrags.fastq",
+	threads:
+		8
+	shell: """
+		module load flash
+		flash -m 35 -x 0.015 -M 140 \
+			-t {threads} {input.fwd} {input.rev} \
+			-d output/{wildcards.species}/{wildcards.smp}/merged \
+			-o overlapped \
+			&>{wildcards.workdir}/{wildcards.species}/{wildcards.smp}/merged/flash.LOG
+		"""
+
+rule minia_assembly:
+	input: 
+		fwd="output/{species}/{smp}/merged/overlapped.notCombined_1.fastq", 
+		rev="output/{species}/{smp}/merged/overlapped.notCombined_2.fastq", 
+		ext="output/{species}/{smp}/merged/overlapped.extendedFrags.fastq",
+	output:
+		asmb="output/{species}/{smp}/assembly/minia_k61.contigs.fa",
+	threads:
+		8
+	shell: """
+		module load minia;
+		ls -1 {input.fwd} {input.rev} {input.ext} >output/{species}/{smp}/assembly/input_fastq.fofn;
+		minia -max-memory 90000 \
+			-kmer-size 61 \
+			-out minia_k61 \
+			-out-dir output/{wildcards.species}/{wildcards.smp}/assembly/ \
+			-nb-cores {threads} \
+			-in output/{wildcards.species}/{wildcards.smp}/assembly/input_fastq.fofn \
+			&>output/{wildcards.species}/{wildcards.smp}/assembly/minia.LOG
+		"""
+
+
+###rule fastqc_raw:
+###  input: 
+###    fwd="{workdir}/{species}/{smp}/fastqc/{file}_R1_{lane}.fastq.gz", 
+###    rev="{workdir}/{species}/{smp}/fastqc/{file}_R2_{lane}.fastq.gz",
+###  output: 
+###    fwd="{workdir}/{species}/{smp}/{file}_R1_{lane}_fastq.zip",
+###    rev="{workdir}/{species}/{smp}/{file}_R2_{lane}_fastq.zip",
+####    fr="{workdir}/{species}/{smp}/{file}_R1_{lane}.fastq",
+####    rr="{workdir}/{species}/{smp}/{file}_R2_{lane}.fastq",
+###  message: """--- Quality check of raw data with Fastqc."""
+###  shell: """
+###    module load fastqc
+###    mkdir -p {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/fastqc
+####    zcat {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/{wildcards.file}_R1_{wildcards.lane}.fastq.gz >{wildcards.workdir}/{wildcards.species}/{wildcards.smp}/{wildcards.file}_R1_{wildcards.lane}.fastq
+####    zcat {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/{wildcards.file}_R2_{wildcards.lane}.fastq.gz >{wildcards.workdir}/{wildcards.species}/{wildcards.smp}/{wildcards.file}_R2_{wildcards.lane}.fastq
+###    fastqc --outdir {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/fastqc -f fastq {input.fwd} {input.rev}
+###  """
+
+
+
+###rule fastqc_erct:
+###  input:  
+###    fwd="{workdir}/{species}/{smp}/corrected/corr_R1.fastq", 
+###    rev="{workdir}/{species}/{smp}/corrected/corr_R2.fastq",
+###  output: 
+###    fwd="{workdir}/{species}/{smp}/corrected/fastqc/corr_R1_fastqc.zip", 
+###    rev="{workdir}/{species}/{smp}/corrected/fastqc/corr_R2_fastqc.zip",
+###  message: """--- Quality check of raw data with Fastqc."""
+###  shell: """
+###    module load fastqc
+###    mkdir -p {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/corrected/fastqc
+###    fastqc --outdir {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/fastqc/corrected -f fastq {input.fwd} {input.rev}
+###     """
+
+#rule merge_corrected:
+#  input: 
+#    fwd="{workdir}/{species}/{smp}/corrected/corr_R1.fastq", 
+#    rev="{workdir}/{species}/{smp}/corrected/corr_R2.fastq",
+#  output: 
+#    fwd="{workdir}/{species}/{smp}/merged/overlapped.notCombined_1.fastq",
+#    rev="{workdir}/{species}/{smp}/merged/overlapped.notCombined_2.fastq",
+#    ext="{workdir}/{species}/{smp}/merged/overlapped.extendedFrags.fastq",
+#  threads:
+#    8
+#  message: """--- Merging the overlapping PE reads"""
+#  shell: """
+#    module load flash
+#    mkdir -p {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/merged
+#    flash -m 35 -x 0.015 -M 140 -t {threads} {input.fwd} {input.rev} -d {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/merged -o overlapped &>{wildcards.workdir}/{wildcards.species}/{wildcards.smp}/merged/flash.LOG
+#  """
+#
+#rule minia_assembly:
+#  input: 
+#    fwd="{workdir}/{species}/{smp}/merged/overlapped.notCombined_1.fastq", 
+#    rev="{workdir}/{species}/{smp}/merged/overlapped.notCombined_2.fastq", 
+#    ext="{workdir}/{species}/{smp}/merged/overlapped.extendedFrags.fastq",
+#  output:
+#    asmb="{workdir}/{species}/{smp}/assembly/minia_k61.contigs.fa",
+#  threads:
+#    8
+#  message: """--- de novo assembling with Minia3"""
+#  shell: """
+#    module load minia
+#    mkdir -p {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/assembly
+#    ls -1 {input.fwd} {input.rev} {input.ext} >{wildcards.workdir}/{wildcards.species}/{wildcards.smp}/assembly/input_fastq.fofn
+#    minia -max-memory 90000 -kmer-size 61 -out minia_k61 -out-dir {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/assembly/ -nb-cores {threads} -in {wildcards.workdir}/{wildcards.species}/{wildcards.smp}/assembly/input_fastq.fofn &>{wildcards.workdir}/{wildcards.species}/{wildcards.smp}/assembly/minia.LOG
+#  """
+#

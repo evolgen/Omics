@@ -1,0 +1,117 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile: "/global/home/users/rohitkolora/SCRIPTS/novoseq/denovo_assemble/config.json"
+
+def get_inputs(wildcards):
+	inputs = []	
+	pattern = "output/{species}/{smp}/assembly/minia.LOG"
+	for s in config["other_samples"]:
+		species, sample = s.split("/")
+		inputs.append(pattern.format(species=species,
+									 smp=sample))
+	return inputs
+
+rule all: 
+	input: 
+  		get_inputs
+
+rule fastqc_raw:
+  input: 
+    fwd=lambda wildcards: glob("fastq/{species}/{smp}/*_R1_*.fastq".format(species=wildcards.species,smp=wildcards.smp)),
+    rev=lambda wildcards: glob("fastq/{species}/{smp}/*_R2_*.fastq".format(species=wildcards.species,smp=wildcards.smp)),
+  output: 
+    fwdqc="output/{species}/{smp}/fastqc/R1_fastqc.zip",
+    revqc="output/{species}/{smp}/fastqc/R2_fastqc.zip",
+  shell: """
+    module load fastqc;
+    fastqc --outdir output/{wildcards.species}/{wildcards.smp}/fastqc \
+		-f fastq \
+		{input.fwd} {input.rev}
+  """
+
+rule error_correction:
+	input: 
+		fwd=lambda wildcards: glob("fastq/{species}/{smp}/*_R1_*.fastq".format(species=wildcards.species,smp=wildcards.smp)), 
+		rev=lambda wildcards: glob("fastq/{species}/{smp}/*_R2_*.fastq".format(species=wildcards.species,smp=wildcards.smp))
+	output: 
+		fwd="output/{species}/{smp}/corrected/corr.0",
+		rev="output/{species}/{smp}/corrected/corr.1"
+	threads:
+		32
+	shell: 
+		"""
+		module load musket gcc/6.3.0;
+		musket -omulti output/{wildcards.species}/{wildcards.smp}/corrected/corr \
+			-p {threads} \
+			-inorder \
+			-k 21 5368709120 \
+			{input.fwd} {input.rev} \
+			&>output/{wildcards.species}/{wildcards.smp}/corrected/musket.LOG;
+	  	"""
+    
+rule merge_corrected:
+	input: 
+		fwd="output/{species}/{smp}/corrected/corr.0", 
+		rev="output/{species}/{smp}/corrected/corr.1",
+	output: 
+		fwd="output/{species}/{smp}/merged/overlapped.notCombined_1.fastq",
+		rev="output/{species}/{smp}/merged/overlapped.notCombined_2.fastq",
+		ext="output/{species}/{smp}/merged/overlapped.extendedFrags.fastq",
+	threads:
+		32
+	shell: """
+		module load flash;
+		flash -m 35 -x 0.015 -M 140 \
+			-t {threads} {input.fwd} {input.rev} \
+			-d output/{wildcards.species}/{wildcards.smp}/merged \
+			-o overlapped \
+			&>output/{wildcards.species}/{wildcards.smp}/merged/flash.LOG
+		"""
+
+rule concatenate_4minia:
+	input: 
+		fwd="output/{species}/{smp}/merged/overlapped.notCombined_1.fastq", 
+		rev="output/{species}/{smp}/merged/overlapped.notCombined_2.fastq", 
+		ext="output/{species}/{smp}/merged/overlapped.extendedFrags.fastq",
+	output:
+		out="output/{species}/{smp}/assembly/input_fastq.fastq.gz",
+	threads:
+		16
+	shell: """
+		module load minia;
+		ls -1 {input.ext} {input.fwd} {input.rev} \
+			>output/{wildcards.species}/{wildcards.smp}/assembly/input_fastq.fofn;
+		cat {input.ext} {input.fwd} {input.rev} | gzip - \
+			>output/{wildcards.species}/{wildcards.smp}/assembly/input_fastq.fastq.gz;
+		"""
+
+rule minia_assembly:
+	input: 
+		infq="output/{species}/{smp}/assembly/input_fastq.fastq.gz" 
+	output:
+		asmb="output/{species}/{smp}/assembly/minia_{wildcards.smp}_k61.contigs.fa",
+		log="output/{species}/{smp}/assembly/minia.LOG"
+	threads:
+		32
+	shell: """
+		module load minia;
+		minia -max-memory 360000 \
+			-kmer-size 61 \
+			-abundance-min 4 \
+			-out output/{wildcards.species}/{wildcards.smp}/assembly/minia_{wildcards.smp}_k61 \
+			-out-dir output/{wildcards.species}/{wildcards.smp}/assembly/ \
+			-out-tmp output/{wildcards.species}/{wildcards.smp}/assembly/ \
+			-nb-cores {threads} \
+			-in {input.infq} \
+			&>output/{wildcards.species}/{wildcards.smp}/assembly/minia.LOG;
+		rm output/{wildcards.species}/{wildcards.smp}/assembly/input_fastq.fastq.gz \ 
+			output/{wildcards.species}/{wildcards.smp}/assembly/minia_{wildcards.smp}_k61.h5 ;
+		"""
+

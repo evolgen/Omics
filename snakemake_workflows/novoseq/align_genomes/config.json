@@ -1,0 +1,25 @@
+{
+    "genomes_by_species" : {
+        "Sebastalobus_alascanus" : "minia_B-alascanus_SEB-32_k61",
+        "Sebastalobus_altivelis" : "minia_B-altivelis_xSEB-32_k61",
+        "Sebastes_aleutianus" : "minia_S-aleutianus_SEB-111_k61",
+        "Sebastes_atrovirens" : "minia_S-atrovirens_xSEB-24_k61",
+        "Sebastes_carnatus" : "minia_S-carnatus_xSEB-21_k61",
+        "Sebastes_chlorostictus" : "minia_S-chlorostictus_xSEB-10_k61",
+        "Sebastes_crameri" : "minia_S-crameri_SEB-6_k61",
+        "Sebastes_dalli" : "minia_S-dalli_xSEB-31_k61",
+        "Sebastes_entomelas" : "minia_S-entomelas_SEB-8_k61",
+        "Sebastes_flavidus" : "minia_S-flavidus_SEB-19_k61",
+        "Sebastes_hopkinsi" : "minia_S-hopkinsi_xSEB-7_k61",
+        "Sebastes_moseri" : "minia_S-moseri_SEB-9_k61",
+        "Sebastes_mystinus" : "minia_S-mystinus_SEB-17_k61",
+        "Sebastes_nigrocinctus" : "minia_S-nigrocinctus_UW156953_k61",
+        "Sebastes_pinniger" : "minia_S-pinniger_SEB-72_k61",
+        "Sebastes_rastrelliger" : "minia_S-rastrelliger_xSEB-1_k61",
+        "Sebastes_reedi" : "minia_S-reedi_SEB-7_k61",
+        "Sebastes_rosaceus" : "minia_S-rosaceus_xSEB-30_k61",
+        "Sebastes_rubrivinctus" : "minia_S-rubrivinctus_UW156309_k61",
+        "Sebastes_semicinctus" : "minia_S-semicinctus_xSEB-12_k61",
+        "Sebastes_umbrosus" : "minia_S-umbrosus_SEB-10_k61"
+    }
+}
