@@ -49,7 +49,9 @@ def get_wtdbg2_consensus_inputs(wildcards):
         inputs = ["ROHIT, make this the OUTPUT from wtbg2_assembly"]
     else:
         prev_V = int(wildcards.version)-1
-        inputs = ["{species}/{name}/wtdbg2/{name}.V{version}.fastq.gz"]
+        inputs = ["{species}/{name}/wtdbg2/{name}.V{version}.fastq.gz".format(species=wildcards.species, 
+                                                                              name=wildcards.name,
+                                                                              version=prev_V)]
     
     return inputs
 
