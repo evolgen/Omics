@@ -52,7 +52,7 @@ rule wtdbg2_consensus:
                     -a {wildcards.name}.V${count}.ctg.fa \
                     {input.pberc_fastq} | \
                     samtools view -bS >bam.bam;
-            samtools sort \
+            samtools sort -@ 32 \
                     -o {wildcards.name}.V${count}.ctg.map.srt.bam \
                     bam.bam;
             rm bam.bam;
