@@ -1,48 +1,48 @@
 {
 	"assemblies_by_name": [
 		{
-"species":"Sebastes_umbrosus",
-"common_name":"honeycomb_rockfish",
-"name":"sebumbr1",
-"pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/umbrosus_pacbio.fastq.gz",
-"corrected_pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/umbrosus_corrected.fastq.gz",
-"illumina_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_umbrosus/S-umbrosus_SEB-10/Seb10_S144_R1_001.fastq.gz",
-"illumina_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_umbrosus/S-umbrosus_SEB-10/Seb10_S144_R2_001.fastq.gz",
-"hic_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_10/PSKC1_SEB10_S2_L002_R1_001.fastq.gz",
-"hic_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_10/PSKC1_SEB10_S2_L002_R2_001.fastq.gz"
+            "species":"Sebastes_umbrosus",
+            "common_name":"honeycomb_rockfish",
+            "name":"sebumbr1",
+            "pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/umbrosus_pacbio.fastq.gz",
+            "corrected_pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/umbrosus_corrected.fastq.gz",
+            "illumina_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_umbrosus/S-umbrosus_SEB-10/Seb10_S144_R1_001.fastq.gz",
+            "illumina_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_umbrosus/S-umbrosus_SEB-10/Seb10_S144_R2_001.fastq.gz",
+            "hic_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_10/PSKC1_SEB10_S2_L002_R1_001.fastq.gz",
+            "hic_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_10/PSKC1_SEB10_S2_L002_R2_001.fastq.gz"
 		},
 		{
-"species":"Sebastes_entomelas",
-"common_name":"widow_rockfish",
-"name":"sebento1",
-"pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_entomelas/04.04.2019/entomelas_pacbio.fastq.gz",
-"corrected_pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_entomelas/04.04.2019/entomelas_canucorrected.fastq.gz",
-"illumina_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_entomelas/S-entomelas_SEB-8/Seb8_S126_R1_001.fastq.gz",
-"illumina_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_entomelas/S-entomelas_SEB-8/Seb8_S126_R2_001.fastq.gz",
-"hic_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_10/PSKC1_SEB10_S2_L002_R1_001.fastq.gz",
-"hic_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_10/PSKC1_SEB10_S2_L002_R2_001.fastq.gz"	
+            "species":"Sebastes_entomelas",
+            "common_name":"widow_rockfish",
+            "name":"sebento1",
+            "pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_entomelas/04.04.2019/entomelas_pacbio.fastq.gz",
+            "corrected_pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_entomelas/04.04.2019/entomelas_canucorrected.fastq.gz",
+            "illumina_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_entomelas/S-entomelas_SEB-8/Seb8_S126_R1_001.fastq.gz",
+            "illumina_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_entomelas/S-entomelas_SEB-8/Seb8_S126_R2_001.fastq.gz",
+            "hic_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_10/PSKC1_SEB10_S2_L002_R1_001.fastq.gz",
+            "hic_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_10/PSKC1_SEB10_S2_L002_R2_001.fastq.gz"	
 		},
 		{
-"species":"Sebastes_ruberrimus",
-"common_name":"yelloweye_rockfish",
-"name":"sebrube1",
-"pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_ruberrimus/04.29.2019/ruberrimus_pacbio.fastq.gz",
-"corrected_pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_ruberrimus/04.29.2019/ruberrimus_canu.correctedReads.fasta.gz",
-"illumina_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_ruberrimus/S-ruberrimus_SEB-74/Seb74_S138_R1_001.fastq.gz",
-"illumina_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_ruberrimus/S-ruberrimus_SEB-74/Seb74_S138_R2_001.fastq.gz",
-"hic_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_74/",
-"hic_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_74/"
+            "species":"Sebastes_ruberrimus",
+            "common_name":"yelloweye_rockfish",
+            "name":"sebrube1",
+            "pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_ruberrimus/04.29.2019/ruberrimus_pacbio.fastq.gz",
+            "corrected_pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_ruberrimus/04.29.2019/ruberrimus_canu.correctedReads.fasta.gz",
+            "illumina_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_ruberrimus/S-ruberrimus_SEB-74/Seb74_S138_R1_001.fastq.gz",
+            "illumina_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_ruberrimus/S-ruberrimus_SEB-74/Seb74_S138_R2_001.fastq.gz",
+            "hic_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_74/",
+            "hic_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_74/"
 		},
 		{
-"species":"Sebastes_pinniger",
-"common_name":"canary_rockfish",
-"name":"sebpinn1",
-"pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_pinniger/05.08.2019/pinniger_pacbio.fastq.gz",
-"corrected_pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_pinniger/05.08.2019/pinniger_canu.correctedReads.fasta",
-"illumina_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_pinniger/S-pinniger_SEB-72/Seb72_S148_R1_001.fastq.gz",
-"illumina_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_pinniger/S-pinniger_SEB-72/Seb72_S148_R2_001.fastq.gz",
-"hic_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_72/",
-"hic_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_72/"
+            "species":"Sebastes_pinniger",
+            "common_name":"canary_rockfish",
+            "name":"sebpinn1",
+            "pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_pinniger/05.08.2019/pinniger_pacbio.fastq.gz",
+            "corrected_pacbio_fastq":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_pinniger/05.08.2019/pinniger_canu.correctedReads.fasta",
+            "illumina_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_pinniger/S-pinniger_SEB-72/Seb72_S148_R1_001.fastq.gz",
+            "illumina_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_pinniger/S-pinniger_SEB-72/Seb72_S148_R2_001.fastq.gz",
+            "hic_fastq1":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_72/",
+            "hic_fastq2":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_KC/SEB_72/"
 		}	
 	]
 }
