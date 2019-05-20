@@ -21,7 +21,7 @@ rule all:
     input: 
           get_inputs
 
-rule wtdbg2:
+rule wtdbg2_consensus:
   input: 
     pbraw_fastq="{pacbio_fastq}",
     pberc_fastq="{corrected_pacbio_fastq}"
@@ -121,7 +121,7 @@ rule freebayes:
         cat ${reference} | vcf-consensus ${bam/%.bam/.vcf.gz} > ${consensus};
     """
 
-rule frby_busco:
+rule freebayes_busco:
   input:
     fasta=lambda wildcards: glob("{species}/{name}/wtdbg2/frby_consensus/{name}.V*.cons.fasta".format(species=wildcards.species,name=wildcards.name))
   output:
