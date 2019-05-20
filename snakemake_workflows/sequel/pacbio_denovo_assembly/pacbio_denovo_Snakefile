@@ -1,0 +1,146 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile: "pacbio_denovo.config.json"
+
+def get_inputs(wildcards):
+	inputs = []	
+	pattern = "{species}/{name}/wtdbg2/LOG"
+	for s in config["assemblies_by_name"]:
+		inputs.append(pattern.format(species=species, name=name,
+									))
+	return inputs
+
+rule all: 
+	input: 
+  		get_inputs
+
+rule wtdbg2:
+  input: 
+	pbraw_fastq="{pacbio_fastq}",
+	pberc_fastq="{corrected_pacbio_fastq}"
+#	rev=lambda wildcards: glob("fastq/{species}/{smp}/*_R2_*.fastq.gz".format(species=wildcards.species,smp=wildcards.smp)),
+  output: 
+	final="{species}/{name}/wtdbg2/{name}.V5.fa",
+	log="{species}/{name}/wtdbg2/LOG"
+  params:
+	slurm_opts=lambda wildcards: "-n32 " \
+								"--time 3-0:00:00 " \
+								"-A co_genomicdata " \
+								"-p savio3_bigmem " \
+								"-J combo_{smp} " \
+								.format(smp=wildcards.smp)	
+  shell: """
+		module load wtdbg2 minimap2 samtools/1.8;
+		wtdbg2 -p 21 -K 800.010010 \
+				-A -S 1.000000 -s 0.050000 \
+				-g 1g -e 3 \
+				-L 2000 -X 50 \
+				-o {wildcards.name}.V0 \
+				-i {input.pbraw_fastq} \
+				1>{wildcards.species}/{wildcards.name}/wtdbg2/LOG \
+				2>>{wildcards.species}/{wildcards.name}/wtdbg2/LOG;
+		for count in `seq 0 5`; do
+			version=$((count+1))
+			minimap2 -t 32 -k 19 -w 10 \
+					-a {wildcards.name}.V${count}.ctg.fa \
+					{input.pberc_fastq} | \
+					samtools view -bS >bam.bam;
+			samtools sort \
+					-o {wildcards.name}.V${count}.ctg.map.srt.bam \
+					bam.bam;
+			rm bam.bam;
+			wtpoa-cns -t 32 \
+					-d {wildcards.name}.V${count}.ctg.fa \
+					-i {wildcards.name}.V${count}.ctg.map.srt.bam \
+					-fo {wildcards.name}.V${version}.ctg.fa \
+					1>>{wildcards.species}/{wildcards.name}/wtdbg2/LOG \
+					2>>{wildcards.species}/{wildcards.name}/wtdbg2/LOG;
+			gzip < {wildcards.name}.V${version}.ctg.fa >{wildcards.name}.V${version}.ctg.fa.gz &
+		done
+  """
+
+rule busco:
+  input: 
+	fasta=lambda wildcards: glob("{species}/{name}/wtdbg2/{name}.V*.fastafastq/{species}/{smp}/*_R2_*.fastq.gz".format(species=wildcards.species,name=wildcards.name))
+  output: 
+	out="{species}/{name}/busco/wtdbg2/run_{name}_acti/short_summary_{name}_acti.txt",
+  params:
+  	slurm_opts=lambda wildcards: "-n24 " \
+							"--time 0-24:00:00 " \
+							"-A fc_genomicdata " \
+							"-p savio2_bigmem " \
+							"-J busco_{name} " \
+							.format(name=wildcards.name)
+  shell: """
+		module load busco/3.1 augustus/2.5.5 hmmer blast/2.2.26 gcc;
+		AUGUSTUS_CONFIG_PATH="/global/home/users/rohitkolora/local_modules_sw/augustus/2.5.5/config/";
+		python ~/local_modules_sw/busco/3.1/scripts/run_BUSCO.py \
+				-i {input.fasta} \
+				-o {name}_acti \
+				-c 24 \
+				-m geno -sp zebrafish \
+				-l /global/scratch/rohitkolora/databases/busco/actinopterygii_odb9;
+	"""
+
+rule freebayes:
+  input: 
+	fasta=lambda wildcards: glob("{species}/{name}/wtdbg2/{name}.V*.fasta".format(species=wildcards.species,name=wildcards.name)),
+	fastq1="{illumina_fastq1}",
+	fastq2="{illumina_fastq2}"
+  output:
+	out="{species}/{name}/busco/wtdbg2/frby_consensus/{name}.V*.cons.fasta"
+  params:
+	slurm_opts=lambda wildcards: "-n24 " \
+						"--time 0-24:00:00 " \
+						"-A fc_genomicdata " \
+						"-p savio2_bigmem " \
+						"-J frby_{name} " \
+							.format(smp=wildcards.smp)
+  shell: """
+		module load minimap2 samtools java;
+		minimap2 -t 24 -ax sr ${reference} ${input.fastq1} ${input.fastq2} | samtools view -bh >${reference}.bam;
+		samtools sort -@ 24 -T {species}/{name}/busco/wtdbg2 -o ${reference}.sort.bam ${reference}.bam;
+		rm ${reference}.bam &
+		source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+		conda activate gatk;
+		/global/scratch/rohitkolora/Software/gatk-4.1.2/gatk --java-options "-Xmx100G" MarkDuplicates --TMP_DIR $PWD --INPUT ${reference}.sort.bam --OUTPUT ${bam} --METRICS_FILE ${bam}.metrics --MAX_FILE_HANDLES 15000;
+		rm ${reference}.sort.bam &
+		conda deactivate;
+		module load samtools freebayes vcftools gcc;
+		samtools index ${bam};
+		freebayes -X -u --min-mapping-quality 30 --min-alternate-count 8 --min-coverage 8 --max-coverage 500 -f ${reference} ${bam} | vcffilter -f "QUAL > 39 & AF > 0.9" | vcffilter -f "TYPE = snp | TYPE = ins | TYPE = del" >${bam/%.bam/.vcf};
+		bgzip ${bam/%.bam/.vcf};
+		tabix -p vcf ${bam/%.bam/.vcf.gz};
+		cat ${reference} | vcf-consensus ${bam/%.bam/.vcf.gz} > ${consensus};
+	"""
+
+rule frby_busco:
+  input:
+    fasta=lambda wildcards: glob("{species}/{name}/wtdbg2/frby_consensus/{name}.V*.cons.fasta".format(species=wildcards.species,name=wildcards.name))
+  output:
+    out="{species}/{name}/busco/wtdbg2/busco/frby_consensus/run_{name}_V*_acti/short_summary_{name}_V*_acti.txt",
+  params:
+	slurm_opts=lambda wildcards: "-n24 " \
+								"--time 0-24:00:00 " \
+								"-A fc_genomicdata " \
+								"-p savio2_bigmem " \
+								"-J busco_{name} " \
+								.format(name=wildcards.name)
+  shell: """
+		module load busco/3.1 augustus/2.5.5 hmmer blast/2.2.26 gcc;
+		AUGUSTUS_CONFIG_PATH="/global/home/users/rohitkolora/local_modules_sw/augustus/2.5.5/config/";
+		python ~/local_modules_sw/busco/3.1/scripts/run_BUSCO.py \
+			-i {input.fasta} \
+			-o {name}_V*_frby_acti \
+			-c 24 \
+			-m geno -sp zebrafish \
+			-l /global/scratch/rohitkolora/databases/busco/actinopterygii_odb9;
+    """
+
