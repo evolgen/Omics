@@ -11,17 +11,87 @@ configfile: "pacbio_denovo.config.json"
 
 def get_inputs(wildcards):
     inputs = []    
-    pattern = "{species}/{name}/wtdbg2/LOG"
-    for s in config["assemblies_by_name"]:
-        inputs.append(pattern.format(species=species, name=name,
-                                    ))
+    pattern="{species}/{name}/wtdbg2/{name}.V5.fastq.gz"
+    for name, info in assemblies_by_name.values():
+        inputs.append(pattern.format(name=name,
+                                     species=info['species']))                                     
+    return inputs
+    
+rule all: 
+  input: 
+    get_inputs
+
+
+
+rule wtdbg2_assembly:
+  input:
+      lambda wildcards: config['assemblies_by_name'][wildcards.name]["pacbio_fastq"], 
+                        config['assemblies_by_name'][wildcards.name]["corrected_pacbio_fastq"]
+  output: 
+    "###ROHIT WRITE THE CORRECT OUTPUT HERE" 
+  shell:
+    """
+    ####ROHIT DOUBLE CHECK TO MAKE SURE THIS WORKS w/ correct inputs and outputs!
+        module load wtdbg2 minimap2 samtools/1.8;
+        wtdbg2 -p 21 -K 800.010010 \
+                -A -S 1.000000 -s 0.050000 \
+                -g 1g -e 3 \
+                -L 2000 -X 50 \
+                -o {wildcards.name}.V0 \
+                -i {input.pbraw_fastq} \
+                1>{wildcards.species}/{wildcards.name}/wtdbg2/LOG \
+                2>>{wildcards.species}/{wildcards.name}/wtdbg2/LOG;
+    """
+
+def get_wtdbg2_consensus_inputs(wildcards):
+    sample_inf = config['assemblies_by_name'][wildcards.name]  
+    if wildcards.version == "1": 
+        inputs = ["ROHIT, make this the OUTPUT from wtbg2_assembly"]
+    else:
+        prev_V = int(wildcards.version)-1
+        inputs = ["{species}/{name}/wtdbg2/{name}.V{version}.fastq.gz"]
+    
     return inputs
 
-rule all: 
-    input: 
-          get_inputs
-
 rule wtdbg2_consensus:
+  input:
+    get_wtdbg2_consensus_inputs
+  output: 
+    final="{species}/{name}/wtdbg2/{name}.V{version}.fastq.gz",
+    log="{species}/{name}/wtdbg2/LOG"
+  params:
+    slurm_opts=lambda wildcards: "-n32 " \
+                                "--time 3-0:00:00 " \
+                                "-A co_genomicdata " \
+                                "-p savio3_bigmem " \
+                                "-J combo_{smp} " \
+                                .format(smp=wildcards.smp)    
+  run:
+      shell_pattern = """\
+        minimap2 -t 32 -k 19 -w 10 \
+                -a {wildcards.name}.V${count}.ctg.fa \
+                {input.pberc_fastq} | \
+                samtools view -bS >bam.bam;
+        samtools sort \
+                -o {wildcards.name}.V${count}.ctg.map.srt.bam \
+                bam.bam;
+        rm bam.bam;
+        wtpoa-cns -t 32 \
+                -d {wildcards.name}.V${count}.ctg.fa \
+                -i {wildcards.name}.V${count}.ctg.map.srt.bam \
+                -fo {wildcards.name}.V${version}.ctg.fa \
+                1>>{wildcards.species}/{wildcards.name}/wtdbg2/LOG \
+                2>>{wildcards.species}/{wildcards.name}/wtdbg2/LOG;
+        gzip < {wildcards.name}.V${version}.ctg.fa >{wildcards.name}.V${version}.ctg.fa.gz &
+      """.format(name = wildcards.name,
+                 fn_in = input[0],
+                 version=wildcards.version,
+                 species=wildcards.species)
+      shell(shell_pattern)
+
+
+
+rule old_wtdbg2_consensus:
   input: 
     pbraw_fastq="{pacbio_fastq}",
     pberc_fastq="{corrected_pacbio_fastq}"
@@ -36,7 +106,8 @@ rule wtdbg2_consensus:
                                 "-p savio3_bigmem " \
                                 "-J combo_{smp} " \
                                 .format(smp=wildcards.smp)    
-  shell: """
+  shell:
+  """
         module load wtdbg2 minimap2 samtools/1.8;
         wtdbg2 -p 21 -K 800.010010 \
                 -A -S 1.000000 -s 0.050000 \
