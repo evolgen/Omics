@@ -11,23 +11,27 @@ configfile: "pacbio_denovo.config.json"
 
 def get_inputs(wildcards):
     inputs = []    
-    pattern="{species}/{name}/wtdbg2/{name}.V5.fastq.gz"
-    for name, info in assemblies_by_name.values():
+    pattern="{species}/{name}/wtdbg2/{name}.V5.ctg.fa"
+    for name, info in config['assemblies_by_name'].items():
+#    for name, info in assemblies_by_name.values():
         inputs.append(pattern.format(name=name,
-                                     species=info['species']))                                     
+                                     species=info['species'],
+                                     pacbio_fastq=info['pacbio_fastq'],
+                                     corrected_pacbio_fastq=info['corrected_pacbio_fastq'],
+                                     illumina_fastq1=info['illumina_fastq1'],
+                                     illumina_fastq2=info['illumina_fastq2']))                                     
     return inputs
     
 rule all: 
   input: 
     get_inputs
 
-
 rule wtdbg2_assembly:
   input:
       lambda wildcards: config['assemblies_by_name'][wildcards.name]["pacbio_fastq"], 
 #                        config['assemblies_by_name'][wildcards.name]["corrected_pacbio_fastq"]
   output: 
-    final="{species}/{name}/wtdbg2/{wildcards.name}.V0.ctg.fa",
+    final="{species}/{name}/wtdbg2/{name}.V0.ctg.fa",
 #"###ROHIT WRITE THE CORRECT OUTPUT HERE" 
   shell:
     """
@@ -52,13 +56,13 @@ def get_wtdbg2_consensus_inputs(wildcards):
         inputs = ["{species}/{name}/wtdbg2/{name}.V{version}.ctg.fa".format(species=wildcards.species, 
                                                                               name=wildcards.name,
                                                                               version=prev_V)]
-    
     return inputs
 
 rule wtdbg2_consensus:
   input:
       lambda wildcards: config['assemblies_by_name'][wildcards.name]["corrected_pacbio_fastq"],
       get_wtdbg2_consensus_inputs
+#      fasta=lambda wildcards: glob("{species}/{name}/wtdbg2/{name}.V*.fasta".format(species=wildcards.species,name=wildcards.name))
   output: 
     final="{species}/{name}/wtdbg2/{name}.V{version}.ctg.fa",
 #    log="{species}/{name}/wtdbg2/LOG"
@@ -73,7 +77,7 @@ rule wtdbg2_consensus:
       shell_pattern1 = """\
         minimap2 -t 32 -k 19 -w 10 \
                 -a {input} \
-                {input.pberc_fastq} | \
+                {wildcards.corrected_pacbio_fastq} | \
                 samtools view -bS >{wildcards.species}/{wildcards.name}/wtdbg2/bam.bam;
         samtools sort -@ 32 \
                 -o {wildcards.species}/{wildcards.name}/wtdbg2/{wildcards.name}.V{wildcards.version}.ctg.map.srt.bam \
@@ -90,6 +94,7 @@ rule wtdbg2_consensus:
       """.format(name = wildcards.name,
                  fn_in = input[0],
                  version=wildcards.version,
+                 corrected_pacbio_fastq=wildcards.corrected_pacbio_fastq,
                  species=wildcards.species)
       shell(shell_pattern1)
 
@@ -101,13 +106,14 @@ rule busco:
   output: 
     out="{species}/{name}/busco/wtdbg2/run_{name}_V{version}_acti/short_summary_{name}_V{version}_acti.txt",
   params:
-      slurm_opts=lambda wildcards: "-n24 " \
+    slurm_opts=lambda wildcards: "-n24 " \
                             "--time 0-24:00:00 " \
                             "-A fc_genomicdata " \
                             "-p savio2_bigmem " \
                             "-J busco_{name} " \
                             .format(name=wildcards.name)
-  shell: """
+  run:
+    shell_pattern2 = """\
         module load busco/3.1 augustus/2.5.5 hmmer blast/2.2.26 gcc;
         AUGUSTUS_CONFIG_PATH="/global/home/users/rohitkolora/local_modules_sw/augustus/2.5.5/config/";
         cd {wildcards.species}/{wildcards.name}/busco/wtdbg2/;
@@ -121,12 +127,13 @@ rule busco:
             fn_in = input[0],
             version=wildcards.version,
             species=wildcards.species)
+    shell(shell_pattern2)
 
 rule freebayes:
   input: 
 #    fasta=lambda wildcards: glob("{species}/{name}/wtdbg2/{name}.V*.fasta".format(species=wildcards.species,name=wildcards.name)),
     lambda wildcards: config['assemblies_by_name'][wildcards.name]["illumina_fastq1"],
-                        config['assemblies_by_name'][wildcards.name]["illumina_fastq2"],
+    lambda wildcards: config['assemblies_by_name'][wildcards.name]["illumina_fastq2"],
     get_wtdbg2_consensus_inputs
   output:
     consensus="{species}/{name}/busco/wtdbg2/frby_consensus/{name}.V{version}.cons.fasta"
@@ -138,9 +145,10 @@ rule freebayes:
                         "-J frby_{name} " \
                             .format(smp=wildcards.smp)
   run:
-    shell_pattern2 = """\
+    shell_pattern3 = """\
         module load minimap2 samtools java;
-        minimap2 -t 24 -ax sr {input} {input.illumina_fastq1} {input.illumina_fastq2} \
+        minimap2 -t 24 -ax sr \
+                {input} {input.illumina_fastq1} {input.illumina_fastq2} \
                 | samtools view -bh \
                 >{wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.map.bam;
         samtools sort -@ 24 \
@@ -154,9 +162,13 @@ rule freebayes:
                 --java-options "-Xmx100G" \
                 MarkDuplicates \
                 --TMP_DIR {species}/{name}/busco/wtdbg2/frby_consensus \
-                --INPUT {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.srt.bam \
-                --OUTPUT {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.ctg.map.srt.bam \
-                --METRICS_FILE {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.ctg.map.srt.metrics --MAX_FILE_HANDLES 15000;
+                --INPUT \
+                {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.srt.bam \
+                --OUTPUT \
+                {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.ctg.map.srt.bam \
+                --METRICS_FILE \
+                {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.ctg.map.srt.metrics \
+                --MAX_FILE_HANDLES 15000;
         rm {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.srt.bam &
         conda deactivate;
         module load samtools freebayes vcftools gcc;
@@ -172,53 +184,59 @@ rule freebayes:
                 | vcffilter -f "TYPE = snp | TYPE = ins | TYPE = del" \
                 >{wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.ctg.map.vcf;
         bgzip {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.ctg.map.vcf;
-        tabix -p vcf {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.ctg.map.vcf.gz;
+        tabix -p vcf \
+                {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.ctg.map.vcf.gz;
         cat {input} \
-                | vcf-consensus {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.ctg.map.vcf.gz \
+                | vcf-consensus \
+                {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.ctg.map.vcf.gz \
                 >{output.consensus};
     """.format(name = wildcards.name,
             fn_in = input[0],
             version=wildcards.version,
             species=wildcards.species)
-    shell(shell_pattern2)
+    shell(shell_pattern3)
 
 
 def get_freebayes_consensus_inputs(wildcards):
     sample_inf = config['assemblies_by_name'][wildcards.name]
-        if wildcards.version == "1":
-            inputs = ["{species}/{name}/wtdbg2/frby_consensus/{name}.V{version}.ctg.fa"]
-        else:
-            prev_V = int(wildcards.version)-1
-            inputs = ["{species}/{name}/wtdbg2/frby_consensus/{name}.V{version}.ctg.fa".format(species=wildcards.species,
+    if wildcards.version == "1":
+        inputs = ["{species}/{name}/wtdbg2/frby_consensus/{name}.V{version}.ctg.fa"]
+    else:
+        prev_V = int(wildcards.version)-1
+        inputs = ["{species}/{name}/wtdbg2/frby_consensus/{name}.V{version}.ctg.fa".format(species=wildcards.species,
                                                                                 name=wildcards.name,
+                                                                                version=prev_V)]
     return inputs
 
 
 rule freebayes_busco:
-  input:
-    get_freebayes_consensus_inputs
-#    fasta=lambda wildcards: glob("{species}/{name}/wtdbg2/frby_consensus/{name}.V{version}.cons.fasta".format(species=wildcards.species,name=wildcards.name))
-  output:
-    out="{species}/{name}/busco/frby_consensus/run_{name}_V{version}_cons_acti/short_summary_{name}_V{version}_cons_acti.txt",
-  params:
-    slurm_opts=lambda wildcards: "-n24 " \
+    input:
+        get_freebayes_consensus_inputs
+#       fasta=lambda wildcards: glob("{species}/{name}/wtdbg2/frby_consensus/{name}.V{version}.cons.fasta".format(species=wildcards.species,name=wildcards.name))
+    output:
+        out="{species}/{name}/busco/frby_consensus/run_{name}_V{version}_cons_acti/short_summary_{name}_V{version}_cons_acti.txt",
+    params:
+        slurm_opts=lambda wildcards: "-n24 " \
                                 "--time 0-24:00:00 " \
                                 "-A fc_genomicdata " \
                                 "-p savio2_bigmem " \
                                 "-J fr-bsc_{name} " \
                                 .format(name=wildcards.name)
-  shell: """
-        module load busco/3.1 augustus/2.5.5 hmmer blast/2.2.26 gcc;
-        AUGUSTUS_CONFIG_PATH="/global/home/users/rohitkolora/local_modules_sw/augustus/2.5.5/config/";
-        cd {wildcards.species}/{wildcards.name}/busco/frby_consensus/;
-        python ~/local_modules_sw/busco/3.1/scripts/run_BUSCO.py \
-            -i {input.fasta} \
-            -o {wildcards.name}_V{wildcards.version}_cons_acti \
-            -c 24 \
-            -m geno -sp zebrafish \
-            -l /global/scratch/rohitkolora/databases/busco/actinopterygii_odb9;
-    """.format(name = wildcards.name,
-            fn_in = input[0],
-            version=wildcards.version,
-            species=wildcards.species)
+    run:
+        shell_pattern4 = """ \
+            module load busco/3.1 augustus/2.5.5 hmmer blast/2.2.26 gcc;
+            AUGUSTUS_CONFIG_PATH="/global/home/users/rohitkolora/local_modules_sw/augustus/2.5.5/config/";
+            cd {wildcards.species}/{wildcards.name}/busco/frby_consensus/;
+            python ~/local_modules_sw/busco/3.1/scripts/run_BUSCO.py \
+                -i {input.fasta} \
+                -o {wildcards.name}_V{wildcards.version}_cons_acti \
+                -c 24 \
+                -m geno -sp zebrafish \
+                -l /global/scratch/rohitkolora/databases/busco/actinopterygii_odb9;
+            """.format(name = wildcards.name,
+                fn_in = input[0],
+                version=wildcards.version,
+                species=wildcards.species)
+        shell(shell_pattern4)
+
 
