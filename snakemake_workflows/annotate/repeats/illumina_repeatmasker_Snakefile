@@ -1,0 +1,59 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile: "config.json"
+
+#workdir: "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina"
+
+def get_inputs(wildcards):
+    inputs = []    
+    pattern = "output/{species}/{smp}/minia_{smp}_k61.contigs.fa.tbl"
+    for s in config["SAMPLES"]:
+        species, sample = s.split("/")
+        inputs.append(pattern.format(species=species,
+                                     smp=sample))
+    return inputs
+
+rule all: 
+    input: 
+          get_inputs
+
+rule repeatmasker:
+    input: 
+        asmb=lambda wildcards:"{assembly_path}"
+            "/output/{species}/{smp}/assembly/minia_{smp}_k61.contigs.fa"
+            "".format(species=wildcards.species, \
+                      smp=wildcards.smp, \
+                      assembly_path=config['assembly_path']),    
+    output:
+        tbl="output/{species}/{smp}/minia_{smp}_k61.contigs.fa.tbl",
+    params:
+        slurm_opts=lambda wildcards: "-N 1 " \
+                                    "--time 72:00:00 " \
+                                    "-A co_genomicdata " \
+                                    "--qos=savio_lowprio " \
+                                    "-p savio3_bigmem " \
+                                    "-o logs/{smp}.log " \
+                                    "-J rpm_{smp} " \
+                                    .format(smp=wildcards.smp)
+    run: 
+        rpmmasking_minia="""
+        module load repeatmasker;
+        RepeatMasker -norna -gff \
+                -dir output/{species}/{smp} \
+                -pa 32 \
+                -e rmblast \
+                -div 25 \
+                -species vertebrates \
+                {input_asmb};
+        """.format(input_asmb=input.asmb,\
+                smp=wildcards.smp, species=wildcards.species)
+        shell(rpmmasking_minia)
+                
+

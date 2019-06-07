@@ -1,0 +1,52 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import json
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile:"config.json"
+
+def get_inputs(wildcards):
+    inputs = []
+    for sinfo in config["illumina_samples"]:
+        pattern = "calls/{species}/{sample}/{identity}/config.json"
+        species, sample, identity = sinfo.split("/")
+        inputs.append(pattern.format\
+            (species=species,sample=sample,identity=identity))
+    return inputs
+
+
+rule all:
+    input:
+        get_inputs
+
+rule create_config:
+    output:
+        config="calls/{species}/{sample}/{identity}/config.json",
+                directory(calls/{species}/{sample}/{identity}/logs)
+    params:
+        slurm_opts=lambda wildcards: "-N 1 " \
+                                    "--time 0-24:00:00 " \
+                                    "-A co_genomicdata " \
+                                    "--qos=savio_lowprio " \
+                                    "-p savio2_htc " \
+                                    "-o logs/creation.log " \
+                                    "-J configging " 
+    run:
+        for sinfo in config["illumina_samples"]:
+            jout = {
+                    "reference_genome" : 'config['reference_genome']',
+                    "reference_index" : config['reference_index'],
+                    "genome_path" : config['genome_path'],
+                    "illumina_samples" : $sinfo
+                }
+            open(output[0],'w').write(json.dumps(jout, sort_keys = True, indent=2))
+            shell("ln -sf /global/home/users/rohitkolora/RGP/snakemake_workflows/variant_calling/persample_vcfcall_Snakefile \
+                    /global/scratch/rohitkolora/Rockfish/Genomes/alignments/variantcalling/calls/{species}/{sample}/{identity}/Snakefile")
+            shell("mkdir -p /global/scratch/rohitkolora/Rockfish/Genomes/alignments/variantcalling/calls/{species}/{sample}/{identity}/logs")
+
+

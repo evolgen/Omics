@@ -36,16 +36,28 @@ ln -sf $fastq2 $PWD/fastq/hic_fastq_R2.fastq.gz
 source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh
 conda activate py2.7;
 printf "\tCreating restriction sites file\n";
-##python /global/home/users/rohitkolora/local_modules_sw/juicer/1.6.2/misc/generate_site_positions.py HindIII ${name} ${name}_ref.fasta >${name}_HindIII.txt;
-##awk 'BEGIN{OFS="\t"}{print $1, $NF}' ${name}_HindIII.txt >${name}.chrom.sizes;
+if [ ! -e "${name}.chrom.sizes" ]; then
+    python /global/home/users/rohitkolora/local_modules_sw/juicer/1.6.2/misc/generate_site_positions.py HindIII ${name} ${name}_ref.fasta >${name}_HindIII.txt;
+    awk 'BEGIN{OFS="\t"}{print $1, $NF}' ${name}_HindIII.txt >${name}.chrom.sizes;
+fi
 
-##samtools faidx ${name}_ref.fasta &
-printf "\tIndexing the reference with bwa\n";
-##bwa index $PWD/${name}_ref.fasta;
+if [ ! -e "${name}_ref.fasta.fai" ]; then
+    samtools faidx ${name}_ref.fasta &
+fi
+if [ ! -e "${name}_ref.fasta.sa" ] ; then
+    printf "\tIndexing the reference with bwa\n";
+    bwa index $PWD/${name}_ref.fasta;
+fi    
 
 printf "\tRunning JUICER pipeline\n";
-##~/local_modules_sw/juicer/1.6.2/CPU/juicer.sh -z ${name}_ref.fasta -d $workdir -s HindIII -p ${name}_ref.fasta.fai -t 32 -g ${name} -y ${name}_HindIII.txt 1>LOG 2>>LOG; 
-printf "JUICER done - now for further scaffolding\n";
+if [ -e "./aligned" ]; then
+    rm -fr ./aligned/
+fi
+
+if [ ! -e "./aligned/merged_nodups.txt" ]; then
+    ~/local_modules_sw/juicer/1.6.2/CPU/juicer.sh -z ${name}_ref.fasta -d $workdir -s HindIII -p ${name}_ref.fasta.fai -t 32 -g ${name} -y ${name}_HindIII.txt 1>LOG 2>>LOG; 
+    printf "JUICER done - now for further scaffolding\n";
+fi    
 
 mkdir -p 3ddna && cd 3ddna;
 printf "\tRunning 3D-DNA\n";

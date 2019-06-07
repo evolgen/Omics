@@ -1,0 +1,11 @@
+{
+    "reference_genome" : "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/freebayes/umbrosus_wtdbg2_007.V1.ctg.fa.3.frby.fasta",
+    "reference_index" : "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/freebayes/umbrosus_wtdbg2_007.V1.ctg.fa.3.frby.fasta.fai",
+    "n_contigs" : 1151,
+    "genome_path" : "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq",
+    "illumina_samples" : [
+        "Sebastes_mystinus/S-mystinus_Seb17_S131/Seb17_S131",
+        "Sebastes_mystinus/S-mystinus_xSeb27_S119/xSeb27_S119",
+        "Sebastes_nigrocinctus/S-nigrocinctus_UW156953_S142/UW156953_S142",
+        "Sebastes_nigrocinctus/S-nigrocinctus_UW114045_S140/UW114045_S140",]
+}

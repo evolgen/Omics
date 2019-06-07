@@ -1,0 +1,5 @@
+Building DAG of jobs...
+InputFunctionException in line 20 of /global/home/users/rohitkolora/SCRIPTS/snakemake_workflows/pacbio/pacbio_denovo_assembly/Snakefile:
+KeyError: 'assemblies_by_name.values()'
+Wildcards:
+

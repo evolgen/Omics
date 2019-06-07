@@ -1,0 +1,5 @@
+Building DAG of jobs...
+InputFunctionException in line 25 of /global/home/users/rohitkolora/SCRIPTS/snakemake_workflows/pacbio/pacbio_denovo_assembly/Snakefile:
+NameError: name 'assemblies_by_name' is not defined
+Wildcards:
+

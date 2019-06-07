@@ -1,0 +1,18 @@
+{
+    "reference_genome" : "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/freebayes/umbrosus_wtdbg2_007.V1.ctg.fa.3.frby.fasta",
+    "reference_index" : "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/freebayes/umbrosus_wtdbg2_007.V1.ctg.fa.3.frby.fasta.fai",
+    "n_contigs" : 1151,
+    "genome_path" : "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq",
+    "illumina_samples" : [
+        "Sebastes_pinniger/S-pinniger_Seb72_S148/Seb72_S148",
+        "Sebastes_pinniger/S-pinniger_Seb75_S139/Seb75_S139",
+        "Sebastes_rastrelliger/S-rastrelliger_xSeb1_S113/xSeb1_S113",
+        "Sebastes_reedi/S-reedi_Seb7_HMW_S147/Seb7_HMW_S147",
+        "Sebastes_rosaceus/S-rosaceus_Seb73_S137/Seb73_S137",
+        "Sebastes_rosaceus/S-rosaceus_xSeb30_S120/xSeb30_S120",
+        "Sebastes_ruberrimus/S-ruberrimus_Seb74_S138/Seb74_S138",
+        "Sebastes_rubrivinctus/S-rubrivinctus_UW155382_S141/UW155382_S141",
+        "Sebastes_rubrivinctus/S-rubrivinctus_UW156309_S143/UW156309_S143",
+        "Sebastes_semicinctus/S-semicinctus_xSeb12_S116/xSeb12_S116",
+        "Sebastes_umbrosus/S-umbrosus_Seb10_S144/Seb10_S144"]
+}

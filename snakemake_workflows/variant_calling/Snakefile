@@ -1,0 +1,168 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile:"small_config.json"
+
+def get_inputs(wildcards):
+    inputs = []
+##    inputs2 = []
+#    for chr in range(1, 3):
+    for sinfo in config["illumina_samples"]:
+        pattern = "calls/{species}/{sample}/{identity}/variants.vcf.gz"
+#            pattern = "calls/{species}/{sample}/{identity}/by_chr/{chr}.vcf.gz"
+        species, sample, identity = sinfo.split("/")
+#            inputs.append(pattern.format\
+#                (species=species,sample=sample,identity=identity,chr=chr))
+        inputs.append(pattern.format\
+            (species=species,sample=sample,identity=identity))
+    return inputs
+
+
+rule all:
+    input:
+        get_inputs
+
+rule minimap_mapping:
+    input:
+        fwdread=lambda wildcards: "{genome_path}"
+                                    "/{species}"
+                                    "/{sample}"
+                                    "/{identity}_R1_001.fastq.gz"
+                                    "".format(species=wildcards.species, \
+                                        sample=wildcards.sample, \
+                                        identity=wildcards.identity, \
+                                        genome_path=config['genome_path']),
+        revread=lambda wildcards: "{genome_path}"
+                                    "/{species}"
+                                    "/{sample}"
+                                    "/{identity}_R2_001.fastq.gz"
+                                    "".format(species=wildcards.species, \
+                                        sample=wildcards.sample, \
+                                        identity=wildcards.identity, \
+                                        genome_path=config['genome_path'])
+    output:
+        bam="calls/{species}/{sample}/{identity}/srt.bam",
+        gatk="calls/{species}/{sample}/{identity}/dedup.bam",
+    params:
+        slurm_opts=lambda wildcards: "-n30 " \
+                                    "--time 0-24:00:00 " \
+                                    "-A co_genomicdata " \
+                                    "--qos=savio_lowprio " \
+                                    "-p savio3_bigmem " \
+                                    "-o logs/{identity}.log " \
+                                    "-J Map_{identity} " \
+                                        .format(identity=wildcards.identity)
+    run:
+        mapping1 = """\
+        source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        module load minimap2 samtools bcftools gcc; 
+        minimap2 -t 12 -ax sr {reference_genome} \
+            {inputfwdread} {inputrevread} | \
+            samtools view -h - | \
+            samtools sort -@ 20 -m 2G \
+            -T /clusterfs/genomicdata/map_{identity} \
+            -o {outputbam};
+        samtools index {outputbam};            
+        conda activate gatk;
+        mkdir -p /clusterfs/genomicdata/{sample};
+        /global/scratch/rohitkolora/Software/gatk-4.1.2/gatk \
+                --java-options "-Xmx350G" MarkDuplicates \
+                --TMP_DIR /clusterfs/genomicdata/{sample} \
+                --VERBOSITY LENIENT \
+                --INPUT {outputbam} \
+                --OUTPUT {outputgatk} \
+                --METRICS_FILE {outputbam}.metrics \
+                --MAX_FILE_HANDLES 20000;
+        rm -fr /clusterfs/genomicdata/{sample};                
+        samtools index {outputgatk};                
+        """.format(reference_genome=config['reference_genome'],
+                   inputfwdread=input.fwdread,
+                   inputrevread=input.revread,
+                   identity=wildcards.identity, sample=wildcards.sample, species=wildcards.species,
+                   outputbam=output.bam, outputgatk=output.gatk)
+        shell(mapping1)
+
+rule variant_calling:
+    input:
+        bam="calls/{species}/{sample}/{identity}/dedup.bam"
+    output:
+        vcfbychr="calls/{species}/{sample}/{identity}/by_chr/{chr}.vcf.gz"
+    params:
+        slurm_opts=lambda wildcards: "-n1 " \
+                                "--time 72:00:00 " \
+                                "-A fc_genomicdata " \
+                                "-p savio " \
+                                "-o logs/{identity}.log " \
+                                "-J Call_{identity} " \
+                                .format(identity=wildcards.identity) 
+    run:
+        vcf_callers = """\
+        source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        module load samtools bcftools freebayes;
+        freebayes -f {reference_genome} -r {chr} \
+                --min-coverage 8 \
+                --exclude-unobserved-genotypes \
+                --report-monomorphic \
+                {inputbam} \
+                -m 20 -q 10 -j -N | bgzip -c > \
+                {outputvcfbychr};
+##        samtools view -bh {inputbam} {chr} \
+##                >calls/{species}/{sample}/{identity}/by_chr/{chr}.bam;
+##        samtools index calls/{species}/{sample}/{identity}/by_chr/{chr}.bam;
+##        freebayes -f {reference_genome} -r {chr} \
+##                --min-coverage 8 --exclude-unobserved-genotypes --report-monomorphic
+##                calls/{species}/{sample}/{identity}/by_chr/{chr}.bam \
+##                -m 20 -q 10 -j -N | bgzip -c > \
+##                {outputvcfbychr};         
+        """.format(reference_genome=config['reference_genome'],
+                   chr=wildcards.chr, outputvcfbychr=output.vcfbychr, inputbam=input.bam)
+        shell(vcf_callers)
+
+
+def get_chr_vcfs(wildcards):
+    inputs = []
+    for i in range(1,config['n_contigs']+1):
+        inputs.append("calls/{species}/{sample}/{identity}/by_chr/ctg{chr}.vcf.gz".\
+                format(chr=i,species=wildcards.species,identity=wildcards.identity,sample=wildcards.sample))
+    return inputs
+
+def get_chrvcfs(wildcards):
+    inputs2 = []
+    infile=open(config['reference_index'],"r")
+    lines=infile.readlines()
+    for names in lines:
+        chroms=names.split('\t')[0]
+        inputs2.append("calls/{species}/{sample}/{identity}/by_chr/{chr}.vcf.gz".\
+                format(chr=chroms,species=wildcards.species,identity=wildcards.identity,sample=wildcards.sample))
+    infile.close()
+    return inputs2
+
+rule combine_vcfs:
+    input:
+        get_chrvcfs
+    output:
+        vcf="calls/{species}/{sample}/{identity}/variants.vcf.gz",
+    params:
+        slurm_opts=lambda wildcards: "-n32 " \
+                                "--time 72:00:00 " \
+                                "-A co_genomicdata " \
+                                "-p savio3_bigmem " \
+                                "--qos savio_lowprio " \
+                                "-o logs/{identity}.log " \
+                                "-J Call_{identity} " \
+                                .format(identity=wildcards.identity)
+    run:
+        combining_vcfs = """ \
+            module load vcftools bcftools;
+            vcf-concat {input} | \
+                bgzip -c > {outputvcf};
+            tabix -p vcf {outputvcf}; 
+        """.format(outputvcf=output.vcf, input=input)
+        shell(combining_vcfs)
+
