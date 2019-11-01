@@ -9,7 +9,7 @@ import pdb
 
 configfile: "config.json"
 
-#workdir: "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina"
+#workdir: "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina"
 
 def get_inputs(wildcards):
 	inputs = []	

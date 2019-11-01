@@ -1,0 +1,62 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile:"config.json"
+
+def get_chrvcfs(wildcards):
+    inputs2 = []
+    infile=open(config['reference_index'],"r")
+    lines=infile.readlines()
+    for names in lines:
+        chroms=names.split('\t')[0]
+        inputs2.append("by_chr/{chr}.vcf.gz".\
+                format(chr=chroms))
+    infile.close()
+    return inputs2
+
+
+rule all:
+    input:
+        get_chrvcfs
+
+
+rule variant_calling:
+    input:
+        bam="dedup.bam",
+    output:
+        vcfbychr="by_chr/{chr}.vcf.gz",
+    params:
+        slurm_opts=lambda wildcards: "-N 1 " \
+                                "--time 72:00:00 " \
+                                "-A co_genomicdata " \
+                                "-c 1 " \
+                                "--qos=savio_lowprio " \
+                                "-p savio --mem=6300M " \
+                                "-o logs/log " \
+                                "-J {chr} " \
+                                .format(chr=wildcards.chr) 
+    run:
+        vcf_callers = """\
+        source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        module load samtools bcftools freebayes gcc;
+        samtools view -bh {inputbam} {chr} \
+                >by_chr/{chr}.bam;
+        samtools index by_chr/{chr}.bam;        
+        freebayes -f {reference_genome} -r {chr} \
+                --min-coverage 8 \
+                --exclude-unobserved-genotypes \
+                --report-monomorphic \
+                by_chr/{chr}.bam \
+                -m 20 -q 10 -j -N | bgzip -c > \
+                {outputvcfbychr};
+        """.format(reference_genome=config['reference_genome'],
+                   chr=wildcards.chr, outputvcfbychr=output.vcfbychr, inputbam=input.bam)
+        shell(vcf_callers)
+
+

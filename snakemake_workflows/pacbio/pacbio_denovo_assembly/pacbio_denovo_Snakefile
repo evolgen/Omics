@@ -122,7 +122,7 @@ rule busco:
                 -o {name}_V{wildcards.version}_acti \
                 -c 24 \
                 -m geno -sp zebrafish \
-                -l /global/scratch/rohitkolora/databases/busco/actinopterygii_odb9;
+                -l /global/scratch2/rohitkolora/databases/busco/actinopterygii_odb9;
     """.format(name = wildcards.name,
             fn_in = input[0],
             version=wildcards.version,
@@ -156,9 +156,9 @@ rule freebayes:
                 -o {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.srt.bam \
                 {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.version}.map.bam;
         rm {wildcards.species}/{wildcards.name}/wtdbg2/frby_consensus/{wildcards.name}.V{wildcards.versioon}.map.bam &
-        source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
         conda activate gatk;
-        /global/scratch/rohitkolora/Software/gatk-4.1.2/gatk \
+        /global/scratch2/rohitkolora/Software/gatk-4.1.2/gatk \
                 --java-options "-Xmx100G" \
                 MarkDuplicates \
                 --TMP_DIR {species}/{name}/busco/wtdbg2/frby_consensus \
@@ -232,7 +232,7 @@ rule freebayes_busco:
                 -o {wildcards.name}_V{wildcards.version}_cons_acti \
                 -c 24 \
                 -m geno -sp zebrafish \
-                -l /global/scratch/rohitkolora/databases/busco/actinopterygii_odb9;
+                -l /global/scratch2/rohitkolora/databases/busco/actinopterygii_odb9;
             """.format(name = wildcards.name,
                 fn_in = input[0],
                 version=wildcards.version,

@@ -3,10 +3,10 @@
 set -e
 
 ###sh ~/SCRIPTS/run_salsa4hic.sh \
-###             /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/polish/hic/arima
-###             /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/hiC_Arima/SEB_10/ \
+###             /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/polish/hic/arima
+###             /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/hiC_Arima/SEB_10/ \
 ###             GATC,GANTC \                                                                                                                    #DNASE
-###             /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/wtdbg2_007.V1.ctg.fa \
+###             /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/wtdbg2_007.V1.ctg.fa \
 ###             sebumb1
 #####
 
@@ -23,7 +23,7 @@ arima_fastq_path=$2
 reference_fasta=$3
 naming=$4
 
-source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
 conda activate py2.7
 module load java samtools/1.8 minimap2 bwa bedtools kentutils bowtie2 gcc zlib boost salsa
 

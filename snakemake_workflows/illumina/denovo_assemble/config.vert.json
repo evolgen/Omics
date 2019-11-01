@@ -1,6 +1,6 @@
 {
 	"busco_libs":{
-		"vert":"/global/scratch/rohitkolora/databases/busco/vertebrata_odb9"
+		"vert":"/global/scratch2/rohitkolora/databases/busco/vertebrata_odb9"
 		},
 	"SAMPLES" : ["Sebastes_auriculatus/S-auriculatus_S-1A",
 				"Sebastes_aleutianus/S-aleutianus_SEB-111",

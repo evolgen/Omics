@@ -60,7 +60,7 @@ rule kmers_jellyfish:
 		jellyfish histo -t 32 \
 				kmer_histo/{wildcards.species}/{wildcards.sample}/{wildcards.identity}.jf >{output.histo};
 		rm kmer_histo/{wildcards.species}/{wildcards.sample}/{wildcards.identity}.jf;	
-		Rscript /global/scratch/rohitkolora/Software/genomescope/genomescope.R \
+		Rscript /global/scratch2/rohitkolora/Software/genomescope/genomescope.R \
 				{output.histo} 21 150 \
 				kmer_histo/{wildcards.species}/{wildcards.sample}
 		"""

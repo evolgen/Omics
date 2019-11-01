@@ -1,0 +1,155 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile:"pathchange_config.json"
+
+def get_inputs(wildcards):
+    inputs = []
+    for sinfo in config["illumina_samples"]:
+        pattern = "calls/{species}/{sample}/{identity}/Variants.SNP.vcf.gz.tbi"
+        species, sample, identity = sinfo.split("/")
+        inputs.append(pattern.format\
+            (species=species,sample=sample,identity=identity))
+    return inputs
+
+
+rule all:
+    input:
+        get_inputs
+
+rule minimap_mapping:
+    input:
+        fwdread=lambda wildcards: "{genome_path}"
+                                    "/{species}"
+                                    "/{sample}"
+                                    "/{identity}_R1_001.fastq.gz"
+                                    "".format(species=wildcards.species, \
+                                        sample=wildcards.sample, \
+                                        identity=wildcards.identity, \
+                                        genome_path=config['genome_path']),
+        revread=lambda wildcards: "{genome_path}"
+                                    "/{species}"
+                                    "/{sample}"
+                                    "/{identity}_R2_001.fastq.gz"
+                                    "".format(species=wildcards.species, \
+                                        sample=wildcards.sample, \
+                                        identity=wildcards.identity, \
+                                        genome_path=config['genome_path'])
+    output:
+        bam="calls/{species}/{sample}/{identity}/Srt.bam",
+        gatk="calls/{species}/{sample}/{identity}/Dedup.bam",
+    params:
+        slurm_opts=lambda wildcards: "-N1 " \
+                                    "--time 3-00:00:00 " \
+                                    "-A co_genomicdata " \
+#                                    "--qos=savio_lowprio " \
+                                    "-p savio " \
+                                    "-o logs/map_{identity}.log " \
+                                    "-J Map_{identity} " \
+                                        .format(identity=wildcards.identity)
+    run:
+        mapping1 = """\
+#        source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        module load minimap2 samtools bcftools gcc java; 
+        minimap2 -t 15 -ax sr {reference_genome} \
+            {inputfwdread} {inputrevread} | \
+            samtools view -h - | \
+            samtools sort -@ 5 -m 2G \
+            -T $PWD/logs/map_{identity} \
+            -o {outputbam};
+        samtools index {outputbam};            
+#        conda activate gatk;
+        /global/scratch2/rohitkolora/Software/gatk-4.1.2/gatk \
+                --java-options "-Xmx35G" MarkDuplicates \
+                --TMP_DIR $PWD/logs/{sample}_gatk \
+                --VERBOSITY ERROR \
+                --VALIDATION_STRINGENCY LENIENT \
+                --INPUT {outputbam} \
+                --OUTPUT {outputgatk} \
+                --METRICS_FILE {outputbam}.metrics \
+                --MAX_FILE_HANDLES 20000;
+        samtools index {outputgatk};
+        """.format(reference_genome=config['reference_genome'],
+                   inputfwdread=input.fwdread,
+                   inputrevread=input.revread,
+                   identity=wildcards.identity, sample=wildcards.sample, species=wildcards.species,
+                   outputbam=output.bam, outputgatk=output.gatk)
+        shell(mapping1)
+
+rule variant_calling:
+    input:
+        bam="calls/{species}/{sample}/{identity}/Dedup.bam"
+    output:
+        vcf="calls/{species}/{sample}/{identity}/Variants.vcf.gz",
+#        idvcf="calls/{species}/{sample}/{identity}/Variants.vcf.gz.tbi",
+    params:
+        slurm_opts=lambda wildcards: "-N1 " \
+                                "--time 72:00:00 " \
+                                "-A fc_genomicdata " \
+#                                "--qos=savio_lowprio " \
+                                "-p savio2 " \
+                                "-o logs/call_{identity}.log " \
+                                "-J Call_{identity} " \
+                                .format(identity=wildcards.identity) 
+    run:
+        vcf_callers = """\
+#        source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        module load samtools bcftools freebayes gcc;
+        samtools index {inputbam};
+        freebayes -f {reference_genome} \
+                --min-coverage 8 --exclude-unobserved-genotypes --use-mapping-quality \
+                -m 20 -q 10 \
+                {inputbam} | \
+                sed -e "0,/^#CHROM/ s/unknown$/{sample}/" | 
+                bgzip -c >{outputvcf}; 
+#        tabix -p vcf {outputvcf};         
+        """.format(reference_genome=config['reference_genome'],
+                   identity=wildcards.identity, sample=wildcards.sample,
+                   outputvcf=output.vcf, inputbam=input.bam)
+        shell(vcf_callers)
+
+
+rule filter_vcfs:
+    input:
+        vcf="calls/{species}/{sample}/{identity}/Variants.vcf.gz",
+    output:
+        other="calls/{species}/{sample}/{identity}/Variants.OTHER.vcf.gz",
+        snp="calls/{species}/{sample}/{identity}/Variants.SNP.vcf.gz",
+        snpid="calls/{species}/{sample}/{identity}/Variants.SNP.vcf.gz.tbi",
+    params:
+        slurm_opts=lambda wildcards: "-N1 " \
+                                "--time 48:00:00 " \
+                                "-A co_genomicdata " \
+                                "-p savio " \
+                                "--qos savio_lowprio " \
+                                "-o logs/filtvcf_{identity}.log " \
+                                "-J Filt_{identity} " \
+                                .format(identity=wildcards.identity)
+    run:
+        filtering_vcfs = """ \
+            module load vcftools bcftools freebayes gcc;
+            vcftools --gzvcf {inputvcf} \
+                    --min-alleles 2 --recode --recode-INFO-all \
+                    --out SNPs_only --stdout | \
+                    vcf-sort | \
+                    vcffilter -f "QUAL > 20 & AF > 0.2 & TYPE = snp & AO > 3" | \
+                    bgzip -c >{outputsnp};
+            vcftools --gzvcf {inputvcf} \
+                    --min-alleles 2 --recode --recode-INFO-all --stdout | \
+                    vcf-sort | \
+                    vcffilter -f "QUAL > 20 & AF > 0.2 & AO > 3" | \
+                    vcffilter -f "TYPE = mnp | TYPE = ins | TYPE = del | TYPE = complex" | \
+                    bgzip -c >{outputother};
+            tabix -f -p vcf {outputhomo};
+            tabix -f -p vcf {outputother};
+        """.format(inputvcf=input.vcf,  
+                outputsnp=output.snp, outputother=output.other)
+        shell(filtering_vcfs)
+
+

@@ -4,8 +4,8 @@ set -e
 
 #####
 ###sh ~/SCRIPTS/run_VGP_arrow.sh \
-###		/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/umbrosus_pacbio.fastq \
-###		/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/wtdbg2_007.V1.ctg.fa \
+###		/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/umbrosus_pacbio.fastq \
+###		/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/wtdbg2_007.V1.ctg.fa \
 ###     ~/CONFIGS/falcon/input_bam_umbrosus.fofn
 #####
 
@@ -21,7 +21,7 @@ bam_fofn=$3
 
 reference=$(echo $fastaseq | sed -e 's/.*\///' -e 's/\.fasta$//' -e 's/\.fas$//' -e 's/\.fa$//' -e 's/\.FASTA$//' -e 's/\.FAS$//' -e 's/\.FA$//')
 
-source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh
+source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh
 conda activate pb-assembly
 module load minimap2 samtools #smrtlink
 

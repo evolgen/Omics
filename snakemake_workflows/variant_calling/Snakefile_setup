@@ -8,7 +8,7 @@ from glob import glob
 from snakemake.utils import read_job_properties
 import pdb
 
-configfile:"config.json"
+configfile:"pathchange_config.json"
 
 def get_inputs(wildcards):
     inputs = []
@@ -26,8 +26,8 @@ rule all:
 
 rule create_config:
     output:
-        config="calls/{species}/{sample}/{identity}/config.json",
-                directory(calls/{species}/{sample}/{identity}/logs)
+        "calls/{species}/{sample}/{identity}/config.json",
+        directory("calls/{species}/{sample}/{identity}/logs")
     params:
         slurm_opts=lambda wildcards: "-N 1 " \
                                     "--time 0-24:00:00 " \
@@ -37,16 +37,20 @@ rule create_config:
                                     "-o logs/creation.log " \
                                     "-J configging " 
     run:
-        for sinfo in config["illumina_samples"]:
-            jout = {
-                    "reference_genome" : 'config['reference_genome']',
-                    "reference_index" : config['reference_index'],
-                    "genome_path" : config['genome_path'],
-                    "illumina_samples" : $sinfo
-                }
-            open(output[0],'w').write(json.dumps(jout, sort_keys = True, indent=2))
-            shell("ln -sf /global/home/users/rohitkolora/RGP/snakemake_workflows/variant_calling/persample_vcfcall_Snakefile \
-                    /global/scratch/rohitkolora/Rockfish/Genomes/alignments/variantcalling/calls/{species}/{sample}/{identity}/Snakefile")
-            shell("mkdir -p /global/scratch/rohitkolora/Rockfish/Genomes/alignments/variantcalling/calls/{species}/{sample}/{identity}/logs")
+        sample_string = "{species}/{sample}/{identity}"\
+                        .format(species=wildcards.species, sample=wildcards.sample, identity=wildcards.identity)
+        jout = {
+                "working_path" : config['working_path'],
+                "reference_genome" : config['reference_genome'],
+                "reference_index" : config['reference_index'],
+                "genome_path" : config['genome_path'],
+                "illumina_samples" : sample_string
+            }
+        open(output[0],'w').write(json.dumps(jout, sort_keys = False, indent=2))
+        shell("ln -sf /global/home/users/rohitkolora/RGP/snakemake_workflows/variant_calling/persample_vcfcall_Snakefile \
+                {working_path}/calls/{species}/{sample}/{identity}/Snakefile".format(\
+                working_path=config['working_path'],\
+                species=wildcards.species, sample=wildcards.sample, identity=wildcards.identity))
+        shell("mkdir -p {output[1]}")
 
 

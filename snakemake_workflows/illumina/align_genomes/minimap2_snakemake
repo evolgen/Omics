@@ -46,10 +46,10 @@ rule all:
 '''
 rule pairmap_genomes:
 	input:
-		reference=lambda wildcards: glob("/global/scratch/rohitkolora/Rockfish/Genomes/\
+		reference=lambda wildcards: glob("/global/scratch2/rohitkolora/Rockfish/Genomes/\
 									sequencing/illumina/output/{species1}/{sample2}/assembly/minia_{sample1}_k61.contigs.fa"\
 									.format(species1=wildcards.species1,sample1=wildcards.sample1)),
-		query=lambda wildcards: glob("/global/scratch/rohitkolora/Rockfish/Genomes/\
+		query=lambda wildcards: glob("/global/scratch2/rohitkolora/Rockfish/Genomes/\
 									sequencing/illumina/output/{species2}/{sample2}/assembly/minia_{sample2}_k61.contigs.fa"\
 									.format(species2=wildcards.species2),sample2=wildcards.sample2),
 	output:

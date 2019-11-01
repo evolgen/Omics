@@ -7,18 +7,13 @@ from glob import glob
 from snakemake.utils import read_job_properties
 import pdb
 
-configfile:"small_config.json"
+configfile:"pathchange_config.json"
 
 def get_inputs(wildcards):
     inputs = []
-##    inputs2 = []
-#    for chr in range(1, 3):
     for sinfo in config["illumina_samples"]:
-        pattern = "calls/{species}/{sample}/{identity}/variants.vcf.gz"
-#            pattern = "calls/{species}/{sample}/{identity}/by_chr/{chr}.vcf.gz"
+        pattern = "calls/{species}/{sample}/{identity}/variants.SNP.vcf.gz.tbi"
         species, sample, identity = sinfo.split("/")
-#            inputs.append(pattern.format\
-#                (species=species,sample=sample,identity=identity,chr=chr))
         inputs.append(pattern.format\
             (species=species,sample=sample,identity=identity))
     return inputs
@@ -60,7 +55,7 @@ rule minimap_mapping:
                                         .format(identity=wildcards.identity)
     run:
         mapping1 = """\
-        source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
         module load minimap2 samtools bcftools gcc; 
         minimap2 -t 12 -ax sr {reference_genome} \
             {inputfwdread} {inputrevread} | \
@@ -71,7 +66,7 @@ rule minimap_mapping:
         samtools index {outputbam};            
         conda activate gatk;
         mkdir -p /clusterfs/genomicdata/{sample};
-        /global/scratch/rohitkolora/Software/gatk-4.1.2/gatk \
+        /global/scratch2/rohitkolora/Software/gatk-4.1.2/gatk \
                 --java-options "-Xmx350G" MarkDuplicates \
                 --TMP_DIR /clusterfs/genomicdata/{sample} \
                 --VERBOSITY LENIENT \
@@ -92,7 +87,8 @@ rule variant_calling:
     input:
         bam="calls/{species}/{sample}/{identity}/dedup.bam"
     output:
-        vcfbychr="calls/{species}/{sample}/{identity}/by_chr/{chr}.vcf.gz"
+        vcfbychr="calls/{species}/{sample}/{identity}/by_chr/{chr}.vcf.gz",
+        idvcfbychr="calls/{species}/{sample}/{identity}/by_chr/{chr}.vcf.gz.tbi",
     params:
         slurm_opts=lambda wildcards: "-n1 " \
                                 "--time 72:00:00 " \
@@ -103,23 +99,16 @@ rule variant_calling:
                                 .format(identity=wildcards.identity) 
     run:
         vcf_callers = """\
-        source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
         module load samtools bcftools freebayes;
         freebayes -f {reference_genome} -r {chr} \
                 --min-coverage 8 \
                 --exclude-unobserved-genotypes \
                 --report-monomorphic \
                 {inputbam} \
-                -m 20 -q 10 -j -N | bgzip -c > \
+                -m 20 -q 10 -j | bgzip -c > \
                 {outputvcfbychr};
-##        samtools view -bh {inputbam} {chr} \
-##                >calls/{species}/{sample}/{identity}/by_chr/{chr}.bam;
-##        samtools index calls/{species}/{sample}/{identity}/by_chr/{chr}.bam;
-##        freebayes -f {reference_genome} -r {chr} \
-##                --min-coverage 8 --exclude-unobserved-genotypes --report-monomorphic
-##                calls/{species}/{sample}/{identity}/by_chr/{chr}.bam \
-##                -m 20 -q 10 -j -N | bgzip -c > \
-##                {outputvcfbychr};         
+        tabix -p vcf {outputvcfbychr};         
         """.format(reference_genome=config['reference_genome'],
                    chr=wildcards.chr, outputvcfbychr=output.vcfbychr, inputbam=input.bam)
         shell(vcf_callers)
@@ -148,8 +137,9 @@ rule combine_vcfs:
         get_chrvcfs
     output:
         vcf="calls/{species}/{sample}/{identity}/variants.vcf.gz",
+        vcfid="calls/{species}/{sample}/{identity}/variants.vcf.gz.tbi",
     params:
-        slurm_opts=lambda wildcards: "-n32 " \
+        slurm_opts=lambda wildcards: "-n1 " \
                                 "--time 72:00:00 " \
                                 "-A co_genomicdata " \
                                 "-p savio3_bigmem " \
@@ -159,10 +149,74 @@ rule combine_vcfs:
                                 .format(identity=wildcards.identity)
     run:
         combining_vcfs = """ \
-            module load vcftools bcftools;
+            module load vcftools bcftools freebayes;
             vcf-concat {input} | \
+                bcftools reheader -s {sample} - | \
                 bgzip -c > {outputvcf};
-            tabix -p vcf {outputvcf}; 
-        """.format(outputvcf=output.vcf, input=input)
+            tabix -f -p vcf {outputvcf};
+        """.format(outputvcf=output.vcf, input=input, sample=wildcards.sample)
         shell(combining_vcfs)
+
+
+rule filter_vcfs:
+    input:
+        vcf="calls/{species}/{sample}/{identity}/variants.vcf.gz",
+    output:
+        alt="calls/{species}/{sample}/{identity}/variants.ALT.vcf.gz",
+        homo="calls/{species}/{sample}/{identity}/variants.HOMO.vcf.gz",
+        other="calls/{species}/{sample}/{identity}/variants.OTHER.vcf.gz",
+    params:
+        slurm_opts=lambda wildcards: "-n1 " \
+                                "--time 72:00:00 " \
+                                "-A co_genomicdata " \
+                                "-p savio3_bigmem " \
+                                "--qos savio_lowprio " \
+                                "-o logs/{identity}.log " \
+                                "-J Filt_{identity} " \
+                                .format(identity=wildcards.identity)
+    run:
+        filtering_vcfs = """ \
+            module load vcftools bcftools freebayes gcc;
+            vcffilter -f "QUAL > 20 & AF > 0.2 & TYPE = snp & AO > 3" {inputvcf} | \
+                    bgzip -c >{outputalt};
+            vcffilter -g "GT = 0|0" {inputvcf} | \
+                    bgzip -c >{outputhomo};
+            vcffilter -f "QUAL > 20 & AF > 0.2 & AO > 3" {inputvcf} | \
+                    vcffilter -f "TYPE = mnp | TYPE = ins | TYPE = del | TYPE = complex" | \
+                    bgzip -c >{outputother};
+            tabix -f -p vcf {outputalt};
+            tabix -f -p vcf {outputhomo};
+            tabix -f -p vcf {outputother};
+        """.format(inputvcf=input.vcf,  
+                outputalt=output.alt, outputhomo=output.homo, outputother=output.other)
+        shell(filtering_vcfs)
+
+
+rule filter_snps:
+    input:
+        alt="calls/{species}/{sample}/{identity}/variants.ALT.vcf.gz",
+        homo="calls/{species}/{sample}/{identity}/variants.HOMO.vcf.gz" 
+    output:
+        snp="calls/{species}/{sample}/{identity}/variants.SNP.vcf.gz",
+        snpid="calls/{species}/{sample}/{identity}/variants.SNP.vcf.gz.tbi",
+    params:
+        slurm_opts=lambda wildcards: "-n1 " \
+                                "--time 72:00:00 " \
+                                "-A co_genomicdata " \
+                                "-p savio " \
+                                "--qos savio_lowprio " \
+                                "-o logs/{identity}.log " \
+                                "-J SNP_{identity} " \
+                                .format(identity=wildcards.identity)
+    run:
+        filtering_snps = """ \
+            module load vcftools bcftools freebayes gcc;
+            vcf-concat {inputhomo} {inputalt} | \
+                    vcf-sort -t calls/{species}/{sample}/{identity}/ -p 20 |
+                    bgzip -c >{outputsnp};
+            tabix -f -p vcf {outputsnp};
+        """.format(outputsnp=output.snp,
+                inputalt=input.alt, inputhomo=input.homo,
+                species=wildcards.species, sample=wildcards.sample, identity=wildcards.identity)
+        shell(filter_snps)        
 

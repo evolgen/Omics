@@ -4,9 +4,9 @@ set -e
 
 #####
 ###sh ~/SCRIPTS/run_freebayes_polish.sh \
-###		/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_entomelas/S-entomelas_SEB-8/Seb8_S126_R1_001.fastq.gz \
-###		/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_entomelas/S-entomelas_SEB-8/Seb8_S126_R2_001.fastq.gz \
-###		/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_entomelas/04.04.2019/Assembly/polish/wtdbg2_002.V2.ctg.fa
+###		/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_entomelas/S-entomelas_SEB-8/Seb8_S126_R1_001.fastq.gz \
+###		/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_entomelas/S-entomelas_SEB-8/Seb8_S126_R2_001.fastq.gz \
+###		/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_entomelas/04.04.2019/Assembly/polish/wtdbg2_002.V2.ctg.fa
 #####
 
 if [ $# -ne 3 ]; then
@@ -31,11 +31,11 @@ minimap2 -t 24 -ax sr ${fasta} ${fastq1} ${fastq2} | samtools view -bh >${refere
 printf "\tSorting mapped reads\n";
 samtools sort -@ 24 -T ./ -o ${reference}.sort.bam ${reference}.bam; rm ${reference}.bam &
 
-source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh
+source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh
 conda activate gatk
 
 printf "\tRunning GATK for duplicates\n";
-/global/scratch/rohitkolora/Software/gatk-4.1.2/gatk --java-options "-Xmx100G" MarkDuplicates --TMP_DIR $PWD --INPUT ${reference}.sort.bam --OUTPUT ${bam} --METRICS_FILE ${bam}.metrics --MAX_FILE_HANDLES 15000;
+/global/scratch2/rohitkolora/Software/gatk-4.1.2/gatk --java-options "-Xmx100G" MarkDuplicates --TMP_DIR $PWD --INPUT ${reference}.sort.bam --OUTPUT ${bam} --METRICS_FILE ${bam}.metrics --MAX_FILE_HANDLES 15000;
 rm ${reference}.sort.bam &
 conda deactivate 
 

@@ -4,10 +4,10 @@ set -e
 
 #####
 ###sh ~/SCRIPTS/run_hic_juicer-3ddna.sh \
-###             /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/polish/hic/	
-###             /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/polish/Seb10_S144_R1.fastq \	
-###             /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/polish/Seb10_S144_R2.fastq \
-###             /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/wtdbg2_007.V1.ctg.fa \
+###             /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/polish/hic/	
+###             /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/polish/Seb10_S144_R1.fastq \	
+###             /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/polish/Seb10_S144_R2.fastq \
+###             /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/wtdbg2_007.V1.ctg.fa \
 ###             sebumb1
 #####
 
@@ -33,7 +33,7 @@ ln -sf $reference $PWD/${name}_ref.fasta;
 ln -sf $fastq1 $PWD/fastq/hic_fastq_R1.fastq.gz  
 ln -sf $fastq2 $PWD/fastq/hic_fastq_R2.fastq.gz 
 
-source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh
+source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh
 conda activate py2.7;
 printf "\tCreating restriction sites file\n";
 ##python /global/home/users/rohitkolora/local_modules_sw/juicer/1.6.2/misc/generate_site_positions.py HindIII ${name} ${name}_ref.fasta >${name}_HindIII.txt;

@@ -9,11 +9,11 @@ import pdb
 
 configfile: "config.json"
 
-#workdir: "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina"
+#workdir: "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina"
 
 def get_inputs(wildcards):
     inputs = []    
-    pattern = "output/{species}/{smp}/minia_{smp}_k61.contigs.fa.tbl"
+    pattern = "infernal/{species}/{smp}/rfam.cmscan"
     for s in config["SAMPLES"]:
         species, sample = s.split("/")
         inputs.append(pattern.format(species=species,
@@ -32,28 +32,52 @@ rule repeatmasker:
                       smp=wildcards.smp, \
                       assembly_path=config['assembly_path']),    
     output:
-        tbl="output/{species}/{smp}/minia_{smp}_k61.contigs.fa.tbl",
+        rpmtbl="repeatmasker/{species}/{smp}/minia_{smp}_k61.contigs.fa.tbl",
+        trnatbl="trnascan/{species}/{smp}/all_trna.tbl",
+        trnastructure="trnascan/{species}/{smp}/all_trna.secstruc.txt",
+        trnasummary="trnascan/{species}/{smp}/all_trna.summary",
+        infernaltbl="infernal/{species}/{smp}/rfam.cmscan",
     params:
-        slurm_opts=lambda wildcards: "-N 1 " \
+        slurm_opts=lambda wildcards: "-N 1 -c 20 " \
                                     "--time 72:00:00 " \
                                     "-A co_genomicdata " \
                                     "--qos=savio_lowprio " \
-                                    "-p savio3_bigmem " \
+                                    "-p savio_bigmem " \
                                     "-o logs/{smp}.log " \
-                                    "-J rpm_{smp} " \
+                                    "-J rna_{smp} " \
                                     .format(smp=wildcards.smp)
     run: 
-        rpmmasking_minia="""
-        module load repeatmasker;
-        RepeatMasker -norna -gff \
-                -dir output/{species}/{smp} \
-                -pa 32 \
-                -e rmblast \
-                -div 25 \
-                -species vertebrates \
-                {input_asmb};
+        annot_minia="""
+#        source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        module load repeatmasker trnascan infernal;
+#        RepeatMasker -norna -gff \
+#                -dir repeatmasker/{species}/{smp} \
+#                -pa 20 \
+#                -e rmblast \
+#                -div 25 \
+#                -species vertebrates \
+#                {input_asmb};
+#        conda activate trnascan;
+        tRNAscan-SE --thread 20 \
+                -c /global/scratch2/rohitkolora/Software/trnascan/tRNAscan-SE.conf \
+                -f {trnastructure} \
+                -m {trnasummary} \
+                -o {trnatbl} \
+                {input_asmb};       
+#        conda deactivate;        
+        cmscan --cut_ga --rfam \
+                --nohmmonly \
+                --tblout infernal/{species}/{smp}/rfam.tbl \
+                --fmt 2 --cpu 20 \
+                --clanin /global/scratch2/rohitkolora/databases/rfam/14.1/Rfam.clanin \
+                /global/scratch2/rohitkolora/databases/rfam/14.1/Rfam.cm \
+                {input_asmb} >{infernaltbl};
         """.format(input_asmb=input.asmb,\
-                smp=wildcards.smp, species=wildcards.species)
-        shell(rpmmasking_minia)
+                smp=wildcards.smp, species=wildcards.species,\
+                trnatbl=output.trnatbl, \
+                trnastructure=output.trnastructure, \
+                trnasummary=output.trnasummary, \
+                infernaltbl=output.infernaltbl)
+        shell(annot_minia)
                 
 

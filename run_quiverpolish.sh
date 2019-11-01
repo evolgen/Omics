@@ -4,8 +4,8 @@ set -e
 
 #####
 ###sh ~/SCRIPTS/run_quiverpolish.sh \
-###		/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/umbrosus_pacbio.fastq \
-###		/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/wtdbg2_007.V1.ctg.fa
+###		/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/umbrosus_pacbio.fastq \
+###		/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/wtdbg2_007.V1.ctg.fa
 #####
 
 if [ $# -ne 2 ]; then
@@ -17,7 +17,7 @@ fi
 xml=$1
 reference=$2
 
-source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh
+source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh
 conda activate py2.7 && conda activate pb-assembly
 module load minimap2 samtools #smrtlink
 

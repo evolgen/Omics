@@ -1,0 +1,16 @@
+{
+	"busco_libs":{
+                "vert":"/global/scratch2/rohitkolora/databases/busco/vertebrata_odb9",
+                "acti":"/global/scratch2/rohitkolora/databases/busco/actinopterygii_odb9",
+                "cvg":"/global/scratch2/rohitkolora/databases/busco/CVG"
+                },
+    "pipeline_path":"/global/scratch2/rohitkolora/Rockfish/Genomes/assembly/contigs/output",
+	"SAMPLES" : [
+            "alascanus",
+            "aleutianus",
+            "entomelas",
+            "pinniger",
+            "ruberrimus",
+            "umbrosus"
+            ]
+}

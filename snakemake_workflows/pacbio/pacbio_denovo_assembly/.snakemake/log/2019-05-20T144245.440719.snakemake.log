@@ -1,2 +1,0 @@
-SyntaxError in line 121 of /global/home/users/rohitkolora/SCRIPTS/snakemake_workflows/pacbio/pacbio_denovo_assembly/Snakefile:
-No rule keywords allowed after run/shell/script/wrapper/cwl in rule busco. (Snakefile, line 121)

@@ -1,0 +1,10 @@
+{
+    "genome_path":"/global/scratch2/rohitkolora/Rockfish/Genomes/assembly/contigs",
+    "genomes_by_species" : {
+        "alascanus",
+        "aleutianus",
+        "entomelas",
+        "pinniger",
+        "ruberrimus",
+        "umbrosus"}
+}

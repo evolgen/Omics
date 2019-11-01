@@ -1,0 +1,11 @@
+{
+    "assembly_path"  :   "/global/scratch2/rohitkolora/Rockfish/Genomes/assembly/contigs",
+    "SAMPLES" : [                        
+                    "alascanus",
+                    "aleutianus",
+                    "entomelas",
+                    "pinniger",
+                    "ruberrimus",
+                    "umbrosus"
+            ]
+}    

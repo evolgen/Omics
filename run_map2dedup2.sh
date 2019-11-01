@@ -2,12 +2,12 @@
 
 set -e
 
-reference_genome="/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/freebayes/umbrosus_wtdbg2_007.V1.ctg.fa.3.frby.fasta"
-workdir="/global/scratch/rohitkolora/Rockfish/Genomes/alignments/variantcalling/"
+reference_genome="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/freebayes/umbrosus_wtdbg2_007.V1.ctg.fa.3.frby.fasta"
+workdir="/global/scratch2/rohitkolora/Rockfish/Genomes/alignments/variantcalling/"
 
-#for file1 in /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_[a-m]*/*/*_R1_001.fastq.gz; do
-#for file1 in /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebast*_[an]*/*/*_R1_001.fastq.gz; do
-for file1 in /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_[an]*/S-nigrocinctus_UW156953/*_R1_001.fastq.gz /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_[an]*/S-nigrocinctus_UW114045/*_R1_001.fastq.gz; do
+#for file1 in /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_[a-m]*/*/*_R1_001.fastq.gz; do
+#for file1 in /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebast*_[an]*/*/*_R1_001.fastq.gz; do
+for file1 in /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_[an]*/S-nigrocinctus_UW156953/*_R1_001.fastq.gz /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq/Sebastes_[an]*/S-nigrocinctus_UW114045/*_R1_001.fastq.gz; do
     file2=$(echo $file1 | sed -e 's/_R1_001.fastq.gz/_R2_001.fastq.gz/');
     identity=$(echo $file1 | sed -e 's/.*\///' -e 's/_R1_001.fastq.gz//');# -e 's/_.*//');
     echo $identity
@@ -38,10 +38,10 @@ for file1 in /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fa
         samtools index sort.bam;
     fi
     if [ ! -r "dedup.bam" ]; then
-        source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
         conda activate gatk;
         printf "\tDeduplicating for ${species} - ${identity}\n";
-        /global/scratch/rohitkolora/Software/gatk-4.1.2/gatk \
+        /global/scratch2/rohitkolora/Software/gatk-4.1.2/gatk \
             --java-options "-Xmx350G" MarkDuplicates \
             --TMP_DIR /clusterfs/genomicdata/ \
             --VALIDATION_STRINGENCY LENIENT \

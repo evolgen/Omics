@@ -4,8 +4,8 @@ set -e
 
 #####
 ###sh ~/SCRIPTS/run_raconpolish_illumina.sh \
-###		/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/polish/Seb10_S144.fastq \
-###		/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/wtdbg2_007.V1.ctg.fa
+###		/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbroosus/01.25.2019/Assembly/polish/Seb10_S144.fastq \
+###		/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/wtdbg2_007.V1.ctg.fa
 #####
 
 if [ $# -ne 2 ]; then
@@ -18,7 +18,7 @@ fastq=$1
 reference=$2
 named_reference=$(echo $reference | sed -e 's/.*\///')
 
-module load racon minimap2 samtools
+module load racon minimap2 samtools gcc/8.3.0
 
 count=0
 ln -sf $reference ${named_reference}.${count}.fasta

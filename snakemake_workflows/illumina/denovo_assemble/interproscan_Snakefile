@@ -1,0 +1,64 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile: "config.json"
+
+#workdir: "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina"
+
+def get_inputs(wildcards):
+    inputs = []    
+    pattern = "output/{species}/{smp}/assembly/masurca/INTERPRO/interproscan.tsv"
+    for s in config["SAMPLES"]:
+        species, sample = s.split("/")
+        inputs.append(pattern.format(species=species,
+                                     smp=sample))
+    return inputs
+
+rule all: 
+    input: 
+          get_inputs
+
+rule interproscan:
+    input: 
+        peps=lambda wildcards:
+            "output/{species}/{smp}/assembly/masurca/braker/augustus.ab_initio.aa"
+            "".format(species=wildcards.species, \
+                      smp=wildcards.smp) #, \
+    output:
+        peps_edit="output/{species}/{smp}/assembly/masurca/INTERPRO/augustus.ab_initio.edit.aa",
+        interprotbl="output/{species}/{smp}/assembly/masurca/INTERPRO/interproscan.tsv",
+    params:
+        slurm_opts=lambda wildcards: "-N 1 " \
+                                    "--time 72:00:00 " \
+                                    "-A co_genomicdata " \
+#                                    "--qos=savio_lowprio " \
+                                    "-p savio " \
+                                    "-o logs/ipro_{smp}.log " \
+                                    "-J ipr_{smp} " \
+                                    .format(smp=wildcards.smp)
+    run: 
+        shell("""
+        module load interproscan java gcc;        
+        perl -pe '$. > 1 and /^>/ ? print "\n" : chomp' {input_peps} | \
+            sed -e 's/\*$//' -e 's/\*/X/g' \
+            >{output_peps};
+        interproscan.sh -hm -i {output_peps} \
+            -b output/{species}/{smp}/assembly/masurca/INTERPRO/interproscan -f tsv \
+            -T output/{species}/{smp}/assembly/masurca/INTERPRO \
+            -dp -m standalone --cpu 20 \
+            --iprlookup -pa -goterms;      
+#        cd output/{species}/{smp}/assembly/masurca/INTERPRO/;     
+#        interproscan.sh -hm -i augustus.ab_initio.edit.aa \
+#            -b interproscan -f tsv -T ./ \
+#            -dp -m standalone --cpu 32 \
+#            --iprlookup -pa -goterms;
+        """.format(input_peps=input.peps, output_peps=output.peps_edit,\
+                smp=wildcards.smp, species=wildcards.species,\
+                interprotbl=output.interprotbl))
+                

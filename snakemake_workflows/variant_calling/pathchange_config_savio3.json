@@ -1,8 +1,8 @@
 {
-    "reference_genome" : "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/freebayes/umbrosus_wtdbg2_007.V1.ctg.fa.3.frby.fasta",
-    "reference_index" : "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/freebayes/umbrosus_wtdbg2_007.V1.ctg.fa.3.frby.fasta.fai",
+    "reference_genome" : "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/freebayes/umbrosus_wtdbg2_007.V1.ctg.fa.3.frby.fasta",
+    "reference_index" : "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/pacbio/S_umbrosus/01.25.2019/Assembly/polish/freebayes/umbrosus_wtdbg2_007.V1.ctg.fa.3.frby.fasta.fai",
     "n_contigs" : 1151,
-    "genome_path" : "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq",
+    "genome_path" : "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq",
     "illumina_samples" : [
         "Sebastes_aleutianus/S-aleutianus_Seb111_S129/Seb111_S129",
         "Sebastes_atrovirens/S-atrovirens_xSeb24_2_S118/xSeb24_2_S118",

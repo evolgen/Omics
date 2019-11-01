@@ -1,0 +1,43 @@
+{
+    "busco_libs":{
+        "vert":"/global/scratch2/rohitkolora/databases/busco/vertebrata_odb9",
+        "acti":"/global/scratch2/rohitkolora/databases/busco/actinopterygii_odb9",
+        "cvg":"/global/scratch2/rohitkolora/databases/busco/CVG"
+        },
+    "SAMPLES1" : ["Sebastes_auriculatus/S-auriculatus_S-1A",
+                 "Sebastes_crameri/S-crameri_SEB-6",
+                 "Sebastes_rastrelliger/S-rastrelliger_xSEB-1"],
+    "SAMPLES2" : ["Helicolenus_hilgendorfii/H-hilgendorfii_KUI10868"],             
+    "SAMPLES" : [
+                "Sebastes_wilsoni/S-wilsoni_KUI3199",
+                "Helicolenus_avius/H-avius_MM3",
+                "Sebastes_saxicola/S-saxicola_KUI2167",
+                "Sebastes_variabilis/S-variabilis_KUI2038",
+                "Sebastes_fasciatus/S-fasciatus_KUI2796",
+                "Sebastes_aurora/S-aurora_KUI448",
+                "Sebastes_helvomaculatus/S-helvomaculatus_KUI479",
+                "Sebastes_levis/S-levis_KUI567",
+                "Helicolenus_hilgendorfii/H-hilgendorfii_KUI10868",
+                "Sebastes_zacentrus/S-zacentrus_KUI3201",
+                "Sebastes_jordani/S-jordani_KUI517",
+                "Sebastes_mentella/S-mentella_KUI3097",
+                "Sebastes_diploproa/S-diploproa_KUI2154",
+                "Sebastes_ciliatus/S-ciliatus_KUI2032",
+                "Sebastes_melanostomus/S-melanostomus_HO-5",
+                "Sebastes_paucispinis/S-paucispinis_SEB-180",
+                "Sebastes_oculatus/S-oculatus_PAR11",
+                "Sebastes_borealis/S-borealis_KUI2095",
+                "Sebastes_exsul/S-exsul_SEB-BAJA-1",
+                "Sebastes_maliger/S-maliger_KUI3233",
+                "Sebastes_ensifer/S-ensifer_SEB-163",
+                "Sebastes_babcocki/S-babcocki_HO-4",
+                "Sebastes_polyspinis/S-polyspinis_KUI2030",
+                "Sebastes_rosenblatti/S-rosenblatti_SEB-147",
+                "Sebastes_elongatus/S-elongatus_SEB-146",
+                "Sebastes_alutus/S-alutus_KUI2069",
+                "Sebastes_variegatus/S-variegatus_KUI3213",
+                "Sebastes_caurinus/S-caurinus_SEB-191",
+                "Sebastes_proriger/S-proriger_KUI3229",
+                "Sebastes_goodei/S-goodei_SEB-148"
+                ]
+}    

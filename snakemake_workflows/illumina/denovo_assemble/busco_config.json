@@ -1,5 +1,5 @@
 {
-	"pipeline_path":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/output",
+	"pipeline_path":"/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output",
 	"SAMPLES" : ["Sebastes_auriculatus/S-auriculatus_S-1A",
 			"Sebastes_crameri/S-crameri_SEB-4",
 			"Sebastes_crameri/S-crameri_SEB-6",

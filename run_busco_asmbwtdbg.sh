@@ -29,7 +29,7 @@ fi
 
 for file in $FASTA_PATHING; do
     out=$(echo $file | sed -e 's/.*\///' -e 's/\.V/_V/' -e 's/\.fa.*/_acti/' -e 's/ctg//' -e 's/\.//g'); 
-    python /global/home/users/rohitkolora/local_modules_sw/busco/3.1//scripts/run_BUSCO.py -i $file -c 32 -o ${OUTPATTERN}_${out} -m geno -sp zebrafish -l /global/scratch/rohitkolora/databases/busco/actinopterygii_odb9 ; 
+    python /global/home/users/rohitkolora/local_modules_sw/busco/3.1//scripts/run_BUSCO.py -i $file -c 32 -o ${OUTPATTERN}_${out} -m geno -sp zebrafish -l /global/scratch2/rohitkolora/databases/busco/actinopterygii_odb9 ; 
 done
 
 

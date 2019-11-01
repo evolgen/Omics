@@ -1,5 +1,5 @@
 {
-	"genome_path" : "/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq",
+	"genome_path" : "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/fastq",
     "illumina_samples" : ["Sebastes_aleutianus/S-aleutianus_SEB-111/Seb111_S129",
 "Sebastes_atrovirens/S-atrovirens_xSEB-24/xSeb24_2_S118",
 "Sebastes_auriculatus/S-auriculatus_S-1A/S1A_B_S123",

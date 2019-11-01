@@ -41,7 +41,7 @@ rule variant_calling:
                                 .format(identity=wildcards.identity,chr=wildcards.chr) 
     run:
         vcf_callers = """\
-        source /global/scratch/rohitkolora/miniconda3/etc/profile.d/conda.sh;
+        source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
         module load samtools bcftools freebayes gcc;
         samtools view -bh {inputbam} {chr} \
                 >../calls/{species}/{sample}/{identity}/by_chr/{chr}.bam;

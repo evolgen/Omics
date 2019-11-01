@@ -14,8 +14,8 @@ def get_inputs(wildcards):
 	for lineage, path in config["busco_libs"].items():
 		for s in config["SAMPLES"]:
 			species, smp = s.split("/")
-			inputs.append("output/{species}/{smp}/"
-						  "assembly/busco/"
+			inputs.append("/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/"
+						  "assembly/masurca/BUSCO/"
 						  "run_busco_{smp}_{lineage}/"
 						  "short_summary_busco_{smp}_{lineage}.txt"
 						  "".format(species=species,
@@ -29,21 +29,21 @@ rule all:
 
 rule busco_4m_minia:
 	input:
-		asmb="output/{species}/{smp}/assembly/minia_{smp}_k61.contigs.fa",
-		direc="output/{species}/{smp}/assembly/"
+		asmb="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/final.genome.scf.FAS",
+		direc="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/BUSCO"
 	output:
-		fn_out="output/{species}/{smp}/assembly/busco/run_busco_{smp}_{lineage}/short_summary_busco_{smp}_{lineage}.txt",
+		fn_out="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/BUSCO/run_busco_{smp}_{lineage}/short_summary_busco_{smp}_{lineage}.txt",
 	params:
-		slurm_opts=lambda wildcards: "-n24 " \
+		slurm_opts=lambda wildcards: "-n32 " \
 									"--time 0-24:00:00 " \
 									"-A co_genomicdata " \
-									"-p savio2_bigmem " \
-#									"-e log/busco_{smp}_{lineage}.log " \
+									"-p savio3_bigmem " \
+									"-o logs/busco_{smp}_{lineage}.log " \
 									"-J {smp}_{lineage}_busco " \
 									.format(smp=wildcards.smp, 
 											lineage=wildcards.lineage)
 	threads:
-		24
+		32
 	run:
 		busco_path=config["busco_libs"][wildcards.lineage]	
 		shell("""
@@ -54,8 +54,8 @@ rule busco_4m_minia:
 			AUGUSTUS_CONFIG_PATH="/global/home/users/rohitkolora/local_modules_sw/augustus/2.5.5/config/";
 			python ~/local_modules_sw/busco/3.1/scripts/run_BUSCO.py \
 				-i {asmb} \
-				-o busco_{smp}_{lineage} \
-				-t {input_dir}/busco/tmp_{lineage} \
+				-o {input_dir}/BUSCO/ \
+				-t {input_dir}/BUSCO/tmp_{lineage} \
 				-c {threads} \
 				-m geno -sp zebrafish \
 				-l {busco_path};

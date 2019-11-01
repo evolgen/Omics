@@ -1,0 +1,57 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile:"masurca_wga_config.json"
+
+def get_inputs(wildcards):
+    inputs = []
+    for sp1, sample1 in config["genomes_by_species"].items():
+        for sp2, sample2 in config["genomes_by_species"].items():
+            if sp1==sp2:
+                continue
+            inputs.append("wga/masurca/{sp1}/align.{sp1}.{sp2}.paf".format(sp1=sp1,sp2=sp2))
+    return inputs
+
+rule all:
+    input:
+        get_inputs
+
+rule pairmap_genomes:
+    input:
+        reference=lambda wildcards: "{genome_path}"
+                                    "/{sp1}"
+                                    "/{g}"
+                                    "/assembly/masurca/final.genome.scf.FAS"
+                                    "".format(sp1=wildcards.sp1,
+                                              g=config['genomes_by_species'][wildcards.sp1],
+                                              genome_path=config['genome_path']),
+        query=lambda wildcards: "{genome_path}"
+                                "/{sp2}"
+                                "/{g}"
+                                "/assembly/masurca/final.genome.scf.FAS"
+                                "".format(sp2=wildcards.sp2,
+                                          g=config['genomes_by_species'][wildcards.sp2],
+                                          genome_path=config['genome_path'])
+    output:
+        paf="wga/masurca/{sp1}/align.{sp1}.{sp2}.paf",
+    params:
+        slurm_opts=lambda wildcards: "-N1 " \
+                                     "--time 0-8:00:00 " \
+									 "-A co_genomicdata " \
+									 "--qos=savio_lowprio " \
+									 "-p savio3_bigmem " \
+									 "-o wga/logs/{sp1}-{sp2}.log " \
+									 "-J {sp1}-{sp2} " \
+									 .format(sp1=wildcards.sp1, sp2=wildcards.sp2)
+    shell:"""
+        module load minimap2; 
+		minimap2 -t 32 -x asm20 --cs=long -Lc \
+				{input.reference} {input.query} >{output.paf};
+		"""
+

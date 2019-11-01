@@ -2,7 +2,7 @@
 
 set -e
 
-for file1 in /global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/*minia*; do
+for file1 in /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/*minia*; do
 
   if [[ "$file1" =~ "nigrocinctus" ]]; then
     continue;

@@ -1,8 +1,8 @@
 {
 	"busco_libs":{
-		"vert":"/global/scratch/rohitkolora/databases/busco/vertebrata_odb9",
-		"acti":"/global/scratch/rohitkolora/databases/busco/actinopterygii_odb9",
-		"cvg":"/global/scratch/rohitkolora/databases/busco/CVG"
+		"vert":"/global/scratch2/rohitkolora/databases/busco/vertebrata_odb9",
+		"acti":"/global/scratch2/rohitkolora/databases/busco/actinopterygii_odb9",
+		"cvg":"/global/scratch2/rohitkolora/databases/busco/CVG"
 		},
 	"SAMPLES" : ["Sebastes_auriculatus/S-auriculatus_S-1A",
 				"Sebastes_aleutianus/S-aleutianus_SEB-111",

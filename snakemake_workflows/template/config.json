@@ -1,5 +1,5 @@
 {
-    "genome_path":"/global/scratch/rohitkolora/Rockfish/Genomes/sequencing/illumina/output",
+    "genome_path":"/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output",
     "genomes_by_species" : {
         "Sebastolobus_alascanus" : "B-alascanus_SEB-32",
         "Sebastolobus_altivelis" : "B-altivelis_xSEB-32",

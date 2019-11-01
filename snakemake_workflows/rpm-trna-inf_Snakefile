@@ -1,0 +1,75 @@
+#!python
+
+#!/usr/bin/env python3
+import os
+import sys
+from glob import glob
+from snakemake.utils import read_job_properties
+import pdb
+
+configfile: "config.json"
+
+def get_inputs(wildcards):
+    inputs = []    
+    pattern = "infernal/{species}/rfam.cmscan"
+    for s in config["SAMPLES"]:
+        species = s
+        inputs.append(pattern.format(species=species))
+    return inputs
+
+rule all: 
+    input: 
+          get_inputs
+
+rule repeatmasker:
+    input: 
+        asmb=lambda wildcards:"{assembly_path}"
+            "/{species}_purged.t1.fasta"
+            "".format(species=wildcards.species, \
+                      assembly_path=config['assembly_path']),    
+    output:
+        rpmtbl="repeatmasker/{species}/{species}_purged.t1.fasta",
+        trnatbl="trnascan/{species}/all_trna.tbl",
+        trnastructure="trnascan/{species}/all_trna.secstruc.txt",
+        trnasummary="trnascan/{species}/all_trna.summary",
+        infernaltbl="infernal/{species}/rfam.cmscan",
+    params:
+        slurm_opts=lambda wildcards: "-N 1 -c 20 " \
+                                    "--time 72:00:00 " \
+                                    "-A co_genomicdata " \
+                                    "-p savio2 " \
+                                    "-o logs/{species}.log " \
+                                    "-J RN{species} " \
+                                    .format(species=wildcards.species)
+    run: 
+        annot_PBcontigs="""
+        module load repeatmasker trnascan infernal;
+        RepeatMasker -norna -gff \
+                -dir repeatmasker/{species} \
+                -pa 20 \
+                -e rmblast \
+                -div 25 \
+                -species vertebrates \
+                {input_asmb};
+        tRNAscan-SE --thread 20 \
+                -c /global/scratch2/rohitkolora/Software/trnascan/tRNAscan-SE.conf \
+                -f {trnastructure} \
+                -m {trnasummary} \
+                -o {trnatbl} \
+                {input_asmb};       
+        cmscan --cut_ga --rfam \
+                --nohmmonly \
+                --tblout infernal/{species}/rfam.tbl \
+                --fmt 2 --cpu 20 \
+                --clanin /global/scratch2/rohitkolora/databases/rfam/14.1/Rfam.clanin \
+                /global/scratch2/rohitkolora/databases/rfam/14.1/Rfam.cm \
+                >{infernaltbl};
+        """.format(input_asmb=input.asmb,\
+                species=wildcards.species,\
+                trnatbl=output.trnatbl, \
+                trnastructure=output.trnastructure, \
+                trnasummary=output.trnasummary, \
+                infernaltbl=output.infernaltbl)
+        shell(annot_PBcontigs)
+                
+
