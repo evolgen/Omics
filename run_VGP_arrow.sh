@@ -42,8 +42,8 @@ samtools faidx ${reference}.${count}.fasta
 uniqID=$(echo $BASHPID)
 
 for iter in 1; do
-    if [ -e "${reference}.t1.fasta" ]; then
-        printf "\t${reference}.t1.fasta EXISTS, hence skipping arrow polishing\n";
+    if [ -e "${reference}.t1.fasta.fai" ]; then
+        printf "\t${reference}.t1.fasta.fai EXISTS, hence skipping arrow polishing\n";
         exit 0;
     fi    
 	if [ ! -e "pbmap_${reference}.${count}.bam" ]; then
@@ -63,8 +63,8 @@ for iter in 1; do
         printf "\t pbmap_${reference}.pbsort.bam INDEXED\n";
 	fi	
 	printf "\tVariant calling pbmap_${reference}.pbsort.bam\n";
-    module load smrtlink;
-    variantCaller pbmap_${reference}.pbsort.bam --algorithm=arrow -j 32 -r ${reference}.${count}.fasta -o ${reference}.t1.fasta;
+#    module load smrtlink/v600;
+    /global/scratch2/rohitkolora/Software/smrtlink/v600/smrtlink/smrtcmds/bin/variantCaller pbmap_${reference}.pbsort.bam --algorithm=arrow -j 32 -r ${reference}.${count}.fasta -o ${reference}.t1.fasta;
 	samtools faidx ${reference}.t1.fasta;
 	count=$((count+1));
 done

@@ -7,13 +7,12 @@ from glob import glob
 from snakemake.utils import read_job_properties
 import pdb
 
-configfile: "config.json"
+configfile: "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/config.all.json"
 
 def get_inputs(wildcards):
     inputs = []   
-#    pattern = "output/{species}/{smp}/assembly/masurca/braker/augustus.ab_initio.gtf"
-    pattern = "output/{species}/{smp}/assembly/masurca/crossprots_{species}.gff"
-#    pattern = "output/{species}/{smp}/assembly/masurca/BUSCO/run_busco_{smp}_{wildcards.lineage}/short_summary_busco_{smp}_{wildcards.lineage}.txt"
+    pattern = "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/crossprots_{species}.gff"
+#    pattern = "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/BUSCO/run_busco_{smp}_{wildcards.lineage}/short_summary_busco_{smp}_{wildcards.lineage}.txt"
     for s in config["SAMPLES"]:
         species, sample = s.split("/")
         inputs.append(pattern.format(species=species,  
@@ -32,86 +31,84 @@ rule creator:
                         format(species=wildcards.species,smp=wildcards.smp)),
   output: 
 #    config="output/{species}/{smp}/assembly/masurca/config.txt",
-    runner="output/{species}/{smp}/assembly/masurca/assemble.sh",
+    runner="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/assemble.sh",
   params:
         slurm_opts=lambda wildcards: "-n 1 " \
                                      "--time 5:00 " \
                                      "-A co_genomicdata " \
                                      "-p savio2_htc " \
-                                     "-e logs/{smp}.log " \
+                                     "-e /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/logs/{smp}.log " \
                                      "-J start_{smp} " \
                                      .format(smp=wildcards.smp)    
   shell: """
     printf "\n\nDATA\n" \
-            >output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "PE= pe 450 150  {input.fwd} {input.rev}\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "END\n\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
 
     printf "PARAMETERS\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt; 
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt; 
     printf "GRAPH_KMER_SIZE = auto\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "USE_LINKING_MATES = 1\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "USE_GRID = 0\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "GRID_ENGINE = SLURM\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "GRID_QUEUE = savio3_bigmem\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "GRID_BATCH_SIZE = 500000000\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "LHE_COVERAGE = 25\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "MEGA_READS_ONE_PASS = 0\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "LIMIT_JUMP_COVERAGE = 300\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "CA_PARAMETERS =  cgwErrorRate=0.15\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "CLOSE_GAPS = 1\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "NUM_THREADS = 32\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "JF_SIZE = 17000000000\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "SOAP_ASSEMBLY = 0\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "#FLYE_ASSEMBLY = 0\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
     printf "END\n\n\n" \
-            >>output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
-#    source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
-#    conda init bash;            
+            >>/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/config.txt;
 #    /global/scratch2/rohitkolora/miniconda3/bin/conda activate masurca;
-    cd output/{wildcards.species}/{wildcards.smp}/assembly/masurca/;
+    cd /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/;
     masurca config.txt;
   """
 
 rule masurca_assembly:
     input:
 #        configger="output/{species}/{smp}/assembly/masurca/config.txt",
-        runner="output/{species}/{smp}/assembly/masurca/assemble.sh",
+        runner="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/assemble.sh",
     output: 
-        asmb="output/{species}/{smp}/assembly/masurca/CA/final.genome.scf.fasta",
-        asmb_edit="output/{species}/{smp}/assembly/masurca/final.genome.scf.FAS",
-        logger="output/{species}/{smp}/assembly/masurca/run.Log",
-        gaperr="output/{species}/{smp}/assembly/masurca/gapClose.err",
+        asmb="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/CA/final.genome.scf.fasta",
+        asmb_edit="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/final.genome.scf.FAS",
+        logger="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/run.Log",
+        gaperr="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/gapClose.err",
     params:
         slurm_opts=lambda wildcards: "-N1 " \
-                                     "--time 3-00:00:00 " \
-                                     "-A co_genomicdata " \
-                                     "-p savio3_bigmem --qos savio_lowprio " \
-                                     "-o logs/masurca_{smp}.log " \
+                                     "--time 5-00:00:00 " \
+                                     "-A co_genomicdata -p savio3_bigmem " \
+                                     #"-p savio3_bigmem --qos savio_lowprio " \
+                                     "-o /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/logs/masurca_{smp}.log " \
                                      "-J {smp} " \
                                      .format(smp=wildcards.smp)
     shell:""" 
 #        module load masurca gcc jellyfish2;
 #        source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
 #        conda activate masurca;
-        cd output/{wildcards.species}/{wildcards.smp}/assembly/masurca/;
+        cd /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{wildcards.species}/{wildcards.smp}/assembly/masurca/;
 #        masurca config.txt; ./{input.runner} &>{output.logger};
         ./assemble.sh &>run.Log;
 #        conda deactivate;
@@ -122,10 +119,10 @@ rule masurca_assembly:
 
 rule braker:
     input:
-        asmb_edit="output/{species}/{smp}/assembly/masurca/final.genome.scf.FAS",
+        asmb_edit="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/final.genome.scf.FAS",
     output:
-        genemark="output/{species}/{smp}/assembly/masurca/braker/GeneMark-ES/genemark.d.gtf",
-        augustus="output/{species}/{smp}/assembly/masurca/braker/augustus.ab_initio.gtf",
+        genemark="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/braker/GeneMark-ES/genemark.d.gtf",
+        augustus="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/braker/augustus.ab_initio.gtf",
     params:
         slurm_opts=lambda wildcards: "-N 1 " \
                                     "--time 3-00:00:00 " \
@@ -143,44 +140,40 @@ rule braker:
             echo "Directory /global/home/users/rohitkolora/local_modules_sw/augustus/2.5.5/config/species/{species} exists." && \
             rm -fr /global/home/users/rohitkolora/local_modules_sw/augustus/2.5.5/config/species/{species};
 
-            braker.pl --cores=1 --workingdir=output/{species}/{smp}/assembly/masurca/braker --genome={asmb_edit} --useexisting \
-                --esmode --softmasking -species={species};
+            braker.pl --cores=1 --workingdir=/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/braker --genome={asmb_edit} --useexisting \
+                --esmode --softmasking -species={species}__{smp};
             """.format(asmb_edit = input.asmb_edit,
                        species=wildcards.species,
                        smp=wildcards.smp))
-#                                                        -p output/{species}/{smp}/assembly/masurca/braker/;       
-#           source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;        
 
 rule crossmap:
     input:
-        braker="output/{species}/{smp}/assembly/masurca/braker/augustus.ab_initio.gtf",
-#        fn_out="output/{species}/{smp}/assembly/masurca/BUSCO/run_busco_{smp}_{lineage}/short_summary_busco_{smp}_{lineage}.txt",
-        asmb_edit="output/{species}/{smp}/assembly/masurca/final.genome.scf.FAS",
+###        braker="output/{species}/{smp}/assembly/masurca/braker/augustus.ab_initio.gtf",
+        asmb_edit="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/final.genome.scf.FAS",
     output:
-        asmb_link="output/{species}/{smp}/assembly/masurca/{species}gnm.mfa",
-        map_gff="output/{species}/{smp}/assembly/masurca/crossprots_{species}.gff",
-        map_log="output/{species}/{smp}/assembly/masurca/crossprots_{species}.LOG",
+#        asmb_link="output/{species}/{smp}/assembly/masurca/{species}gnm.mfa",
+        map_gff="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/crossprots_{species}.gff",
+        map_log="/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/crossprots_{species}.LOG",
     params:
         slurm_opts=lambda wildcards: "-N 1 " \
                                     "--time 3-00:00:00 " \
                                     "-A co_genomicdata " \
-                                    "-p savio --qos savio_lowprio " \
-                                    "-o logs/spaln_{smp}.log " \
+                                    "-p savio2_bigmem --qos savio_lowprio " \
+                                    "-o /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/logs/spaln_{smp}.log " \
                                     "-J spln_{smp} " \
                                     .format(smp=wildcards.smp)            
     run:
         shell("""
-#            source /global/scratch2/rohitkolora/miniconda3/etc/profile.d/conda.sh;
             module load spaln gcc;
-            cd output/{species}/{smp}/assembly/masurca/;
+            cd /global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/output/{species}/{smp}/assembly/masurca/;
             ln -sf {asmb_edit} genomegnm.mfa;
             makeidx.pl -inp genomegnm.mfa;
-            spaln -TTetrapod -KP -N -O0 -Q7 -pa -yL20 -yX -xG800k -Dgenomegnm -t20 \
+            spaln -TTetrapod -KP -N -O0 -Q7 -pa -yL20 -yX -xG800k -Dgenomegnm -t24 \
                     /global/scratch2/rohitkolora/Rockfish/Public/Transcriptome/Others.transdecoder.pep \
                     1>crossprots_{species}.gff 2>crossprots_{species}.LOG;
             awk -F'\t' '$3=="gene"' crossprots_{species}.gff >crossprots_{species}.Genes.gff;
             """.format(asmb_edit = input.asmb_edit,
-                       asmb_link = output.asmb_link,
+#                       asmb_link = output.asmb_link,
                        smp=wildcards.smp,
                        species=wildcards.species))
 

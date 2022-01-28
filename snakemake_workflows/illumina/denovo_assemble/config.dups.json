@@ -1,0 +1,26 @@
+{
+    "busco_libs":{
+        "vert":"/global/scratch2/rohitkolora/databases/busco/vertebrata_odb9",
+        "acti":"/global/scratch2/rohitkolora/databases/busco/actinopterygii_odb9",
+        "cvg":"/global/scratch2/rohitkolora/databases/busco/CVG"
+        },
+    "SAMPLES1" : ["Sebastes_auriculatus/S-auriculatus_S-1A",
+                 "Sebastes_crameri/S-crameri_SEB-6",
+                 "Sebastes_rastrelliger/S-rastrelliger_xSEB-1"],
+    "SAMPLES2" : ["Helicolenus_hilgendorfii/H-hilgendorfii_KUI10868"],
+    "SAMPLES" : [
+            "Sebastes_hopkinsi/S-hopkinsi_xSEB-7",
+            "Sebastes_crameri/S-crameri_SEB-4",
+            "Sebastes_entomelas/S-entomelas_SEB-16",
+            "Sebastes_maliger/S_maliger_SEB-721",
+            "Sebastes_miniatus/S-miniatus_SEB-153",
+            "Sebastes_moseri/S-moseri_SEB-5",
+            "Sebastes_mystinus/S-mystinus_xSEB-27",
+            "Sebastes_oculatus/S-oculatus_ER03",
+            "Sebastes_oculatus/S-oculatus_IQ03",
+            "Sebastes_pinniger/S-pinniger_SEB-75",
+            "Sebastes_rosaceus/S-rosaceus_xSEB-30",
+            "Sebastes_rubrivinctus/S-rubrivinctus_UW155382",
+            "Sebastolobus_alascanus/B-alascanus_SEB-31"
+            ]                
+}

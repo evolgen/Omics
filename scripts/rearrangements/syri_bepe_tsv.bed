@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+filt_in=$1
+
+# cat ~/RGP/scripts/rearrangements/list_syri_tsv.txt | parallel -j 1 bash ~/RGP/scripts/rearrangements/syri_bepe_tsv.bed
+
+
+work_dir=$(dirname "$filt_in")
+reference=$(echo $work_dir | sed -e 's/\/Pairwise\/SYRI.*//' -e 's/.*\///')
+query=$(echo $work_dir | sed -e 's/.*\/SYRI//' -e 's/\/WTDBG_//' -e 's/\/FALCON_//' -e 's/.*\///')
+file_name=$(basename "$filt_in")
+
+mkdir -p ${work_dir}/BEDPE
+
+printf "  Processing : Reference-$reference\t\tQuery-$query\n";
+
+awk -F'\t' '$(NF-1) !~ /AL/' ${filt_in} |
+    awk -F'\t' -v reference="$reference" -v query="$query" 'OFS="\t" { if($1 !~ /^Sebast/) {$1=reference"."$1} if($6 !~ /^Sebast/) {$6=query"."$6} print $1, $2-1, $3, "SYRI", $(NF-1)"_"NR, "+", $6, $7-1,$8,$(NF-3)"_"$(NF-2), reference, query }' >${work_dir}/BEDPE/Final.${reference}.${query}.syri.bedpe
+
+

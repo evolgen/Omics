@@ -1,0 +1,44 @@
+#!/usr/bin/env Rscript
+
+list.of.packages <- c("optparse", "rmutil", "ape", "geiger")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+
+library(optparse)
+library(rmutil)
+library(ape)
+library(geiger)
+
+#if (length(args)!=2) {
+#      stop("TWO arguments must be supplied (input file).n", call.=FALSE)
+#} 
+
+option_list = list(
+  make_option(c("-f", "--file"), type="character", default=NULL, 
+              help="dataset file name", metavar="character"),
+#  make_option(c("-f", "--list"), type="character", default=NULL,
+#              help="dataset file list", metavar="character"),
+  make_option(c("-o", "--out"), type="character", default="out.txt", 
+              help="output file name [default= %default]", metavar="character")
+); 
+ 
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
+
+if (is.null(opt$file)){
+  print_help(opt_parser)
+  stop("At two arguments must be supplied (input file).n", call.=FALSE)
+}
+
+seb_tree <- read.tree("/global/scratch2/rohitkolora/Rockfish/Genomes/Selection/species_tree.newick")
+
+#tablespecies = read.list(opt$file, skip=0,  nlines=1, order=NULL)
+tablespecies <- scan(opt$file, ,what="")
+
+sebastes_remove <- seb_tree$tip.label[!(seb_tree$tip.label %in% tablespecies)]
+pruned_tree_seb <-
+   drop.tip(seb_tree,seb_tree$tip.label[match(sebastes_remove, seb_tree$tip.label)])
+
+write.tree(pruned_tree_seb, file=opt$out, append = FALSE, digits = 10, tree.names = FALSE)
+

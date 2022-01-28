@@ -34,7 +34,7 @@ for file1 in $SUBREADS_PATHING; do
   fi
 
   printf "  Running:\t Bam2Fastq for $file1\n\n";
-  conversion=" /global/home/users/rohitkolora/local_modules_sw/smrtlink/v600/smrtlink/smrtcmds/bin/bam2fastq -o $file2 $file1"
+  conversion=" /global/scratch2/rohitkolora/Software/smrtlink/v600/smrtlink/smrtcmds/bin/bam2fastq -o $file2 $file1"
   printf " $conversion \n";
   eval $conversion
 

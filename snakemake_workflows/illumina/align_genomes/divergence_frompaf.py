@@ -41,6 +41,8 @@ for l in open(sys.argv[1],'r').readlines():
     heng_ID = (matches / (block_len - gap_len+n_gap))  #Heng Li's gap compressed divergence
     heng_Div = 1-heng_ID
 
+    if (aligned == 0):
+        continue
     print(str(sl[0]) + "\t" + str(sl[2]) + "\t" + str(sl[3]) + "\t" + str(sl[5]) + "\t" + str(sl[7]) + "\t" + str(sl[8]) + "\t" + "\t" + str(aligned) + "\t" + str(matches) + "\t" + str(mismatches) + "\t" + str(heng_Div) + "\t" + str(mismatches / aligned))
 
 #pdb.set_trace()

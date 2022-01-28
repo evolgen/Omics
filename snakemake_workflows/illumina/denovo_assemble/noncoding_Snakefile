@@ -45,7 +45,7 @@ rule repeatmasker:
     run: 
         shell("""
         module load repeatmasker trnascan infernal;
-        RepeatMasker -norna -gff \
+        RepeatMasker -norna -gff -xsmall \
                 -dir output/{species}/{smp}/assembly/masurca/REPEAT/ \
                 -pa 24 -div 50 -species vertebrates \
                 {input_asmb};

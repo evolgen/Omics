@@ -1,0 +1,7 @@
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_aleutianus/INTERPROSCAN_Fun/interproscan.tsv
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_miniatus/INTERPROSCAN_Fun/interproscan.tsv
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_pinniger/INTERPROSCAN_Fun/interproscan.tsv
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_rosaceus/INTERPROSCAN_Fun/interproscan.tsv
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_umbrosus/INTERPROSCAN_Fun/interproscan.tsv
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/WTDBG/Sebastes_entomelas/INTERPROSCAN_Fun/interproscan.tsv
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/WTDBG/Sebastolobus_alascanus/INTERPROSCAN_Fun/interproscan.tsv

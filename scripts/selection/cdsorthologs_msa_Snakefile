@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+
+work_dir = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/nooutgroup"
+
+SAMPLES, = glob_wildcards("{workdir}/{sample}.CDS")
+
+rule all:
+    input:
+        expand("/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/hyphy2.done", sample=SAMPLES)
+
+rule align:
+    input:
+        cds = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/nooutgroup/{sample}.FAS",
+        species_tree = "/global/home/users/rohitkolora/RGP/scripts/selection/species_tree.alascanus.newick",
+    output:
+        extract = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/seq.fasta",
+        align_nt = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/cds.seq.msa",
+        align_aa = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/pep.seq.msa",
+        out_tree = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/cds.seq.tree",
+        logger = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/aln.done",
+    params:
+        slurm_opts=lambda wildcards: "-N1 " \
+                                     "--time 3-00:00:00 " \
+                                    "-A co_genomicdata " \
+                                     "--qos=savio_lowprio " \
+                                     "-p savio,savio2 " \
+                                     "-o /global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/logs/nt_{sample}.log " \
+                                     "-J nt_{sample} " \
+                                     .format(sample=wildcards.sample)
+    run:
+        shell("""
+            module load samtools trimal gcc java macse muscle emboss ;
+            cd $(dirname "{cds}" ) ;
+            printf "  Creating sequences\n";
+            bash ~/RGP/scripts/selection/premsa_munger.20200624.sh \
+                    {cds} {extract} Universal ;
+            printf "  Running premsa\n";
+            hyphy /global/scratch2/rohitkolora/Software/hyphy-develop/hyphy-analyses-master/codon-msa/pre-msa.bf \
+                    --input {extract}.orf --code Universal --E 0.6 ;
+            muscle -in {extract}.orf_protein.fas -out {align_nt} ;
+            printf "  Final postmsa\n";
+            hyphy /global/scratch2/rohitkolora/Software/hyphy-develop/hyphy-analyses-master/codon-msa/post-msa.bf \
+                    --protein-msa {cds}_protein.msa \
+                    --nucleotide-sequences {cds}_nuc.fas \
+                    --code Universal \
+                    --output {align_nt}.out ;
+            sed -e '/^>/ s/_[0-9]*$//' {align_nt}.tmp >{align_nt} ;
+            sed -e '/^>/ s/_[0-9].*//' {align_aa}.out >{align_aa} ;
+            samtools faidx {align_nt} ;
+            printf "\tCreating species trees\n";
+            Rscript ~/RGP/scripts/selection/speciestree_convert.R \
+                    {species_tree} {align_nt}.fai {out_tree} ;
+            echo "" > {logger} ;
+            """.format(cds=input.cds, logger=output.logger, sample=wildcards.sample, #work_dir=work_dir,
+                       extract=output.extract, align_nt=output.align_nt, align_aa=output.align_aa,
+                       species_tree=input.species_tree, out_tree=output.out_tree))            
+
+
+rule hyphy1:
+    input:
+        cds = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/nooutgroup/{sample}.FAS",
+        species_tree = "/global/home/users/rohitkolora/RGP/scripts/selection/species_tree.alascanus.newick",
+        extract = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/seq.fasta",
+        align_nt = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/cds.seq.msa",
+        align_aa = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/pep.seq.msa",
+        out_tree = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/cds.seq.tree",
+    output:
+        logger = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/hyphy1.done",
+    params:
+        slurm_opts=lambda wildcards: "-N1 " \
+                                     "--time 3-00:00:00 " \
+                                    "-A co_genomicdata " \
+                                     "--qos=savio_lowprio " \
+                                     "-p savio,savio2 " \
+                                     "-o /global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/logs/nt_{sample}.log " \
+                                     "-J nt_{sample} " \
+                                     .format(sample=wildcards.sample)
+    run:
+        shell("""
+            module load samtools trimal gcc java macse muscle emboss ;
+            cd $(dirname "{cds}" ) ;
+            printf "\tRunning dNdS trees\n";        
+            bash ~/RGP/scripts/selection/hyphy_dnds.run.sh \
+                    Universal {align_nt} {out_tree} {sample} ;        
+            echo "" > {logger} ;
+            """.format(cds=input.cds, logger=output.logger, sample=wildcards.sample, #work_dir=work_dir,
+                       extract=input.extract, align_nt=input.align_nt, align_aa=input.align_aa,
+                       species_tree=input.species_tree, out_tree=input.out_tree))            
+
+
+rule hyphy2:
+    input:
+        cds = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/nooutgroup/{sample}.FAS",
+        species_tree = "/global/home/users/rohitkolora/RGP/scripts/selection/species_tree.alascanus.newick",
+        extract = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/seq.fasta",
+        align_nt = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/cds.seq.msa",
+        align_aa = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/pep.seq.msa",
+        out_tree = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/cds.seq.tree",
+        inlogger = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/hyphy1.done",
+    output:    
+        logger = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/hyphy2.done",
+    params:
+        slurm_opts=lambda wildcards: "-N1 " \
+                                     "--time 3-00:00:00 " \
+                                    "-A co_genomicdata " \
+                                     "--qos=savio_lowprio " \
+                                     "-p savio,savio2 " \
+                                     "-o /global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/logs/nt_{sample}.log " \
+                                     "-J nt_{sample} " \
+                                     .format(sample=wildcards.sample)
+    run:
+        shell("""
+            module load samtools trimal gcc java macse muscle emboss ;
+            cd $(dirname "{cds}" ) ;
+            mkdir -p absrel busted fel meme gard relax ;
+            cd absrel ;
+            printf "\tRunning aBSREL\n";
+            hyphy aBSREL --code Universal --alignment {align_nt} --tree {out_tree} --branches All \
+                --output output.json --save-fit output.fit ; cd ../ ;
+            cd busted ;
+            printf "\tRunning BUSTED\n";
+            hyphy busted --code Universal --alignment {align_nt} --tree {out_tree} --branches All \
+                --output output.json --save-fit output.fit ; cd ../ ;
+            cd fel ;    
+            printf "\tRunning FEL\n";
+            hyphy fel --code Universal --alignment {align_nt} --tree {out_tree} --branches All \
+                --output output.json --save-fit output.fit ; cd ../ ;
+            cd meme ;    
+            printf "\tRunning MEME\n";
+            hyphy meme --code Universal --alignment {align_nt} --tree {out_tree} --branches All \
+                --output output.json --save-fit output.fit ; cd ../ ;
+            #cd gard ;
+            #hyphy GARD --code Universal --type Codon --alignment {align_nt} --output gard.json --output-lf gard.out \
+            #    --rate-classes 3 ; cd ../ ;
+            echo "" > {logger} ;
+            """.format(cds=input.cds, logger=output.logger, sample=wildcards.sample, #work_dir=work_dir,
+                       extract=input.extract, align_nt=input.align_nt, align_aa=input.align_aa,
+                       species_tree=input.species_tree, out_tree=input.out_tree))            
+
+

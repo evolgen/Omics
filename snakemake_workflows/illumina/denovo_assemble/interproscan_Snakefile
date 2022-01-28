@@ -7,17 +7,16 @@ from glob import glob
 from snakemake.utils import read_job_properties
 import pdb
 
-configfile: "config.json"
-
-#workdir: "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina"
+configfile: "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/config.all.json"
+work_dir = "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina"
 
 def get_inputs(wildcards):
     inputs = []    
-    pattern = "output/{species}/{smp}/assembly/masurca/INTERPRO/interproscan.tsv"
+    pattern = "{work_dir}/output/{species}/{smp}/assembly/masurca/INTERPROSCAN_Fun/DONE.ipro"
     for s in config["SAMPLES"]:
         species, sample = s.split("/")
         inputs.append(pattern.format(species=species,
-                                     smp=sample))
+                                     smp=sample, work_dir=work_dir))
     return inputs
 
 rule all: 
@@ -25,40 +24,35 @@ rule all:
           get_inputs
 
 rule interproscan:
-    input: 
-        peps=lambda wildcards:
-            "output/{species}/{smp}/assembly/masurca/braker/augustus.ab_initio.aa"
-            "".format(species=wildcards.species, \
-                      smp=wildcards.smp) #, \
+    input:
+        peps="{work_dir}/output/{species}/{smp}/assembly/masurca/Funannotate/predict_results/Filt_BRK_{species}.proteins.faa",
     output:
-        peps_edit="output/{species}/{smp}/assembly/masurca/INTERPRO/augustus.ab_initio.edit.aa",
-        interprotbl="output/{species}/{smp}/assembly/masurca/INTERPRO/interproscan.tsv",
+        peps_edit="{work_dir}/output/{species}/{smp}/assembly/masurca/Funannotate/predict_results/Filt_BRK_{species}.proteins.edit.aa",
+        interprotbl="{work_dir}/output/{species}/{smp}/assembly/masurca/INTERPROSCAN_Fun/interproscan.tsv",
+        done_ipro="{work_dir}/output/{species}/{smp}/assembly/masurca/INTERPROSCAN_Fun/DONE.ipro",
     params:
         slurm_opts=lambda wildcards: "-N 1 " \
                                     "--time 72:00:00 " \
                                     "-A co_genomicdata " \
-#                                    "--qos=savio_lowprio " \
-                                    "-p savio " \
-                                    "-o logs/ipro_{smp}.log " \
-                                    "-J ipr_{smp} " \
-                                    .format(smp=wildcards.smp)
+                                    "--qos=savio_lowprio " \
+                                    "-p savio,savio2_bigmem,savio2,savio3_bigmem,savio,savio_bigmem,savio2_bigmem " \
+                                    "-o {work_dir}/logs/iproscan_{smp}.log " \
+                                    "-J Ipr_{smp} " \
+                                    .format(smp=wildcards.smp, work_dir=work_dir)
     run: 
         shell("""
-        module load interproscan java gcc;        
+        cd {work_dir}/output/{species}/{smp}/assembly/masurca/INTERPROSCAN_Fun/ ;
+        module load interproscan java gcc ;
         perl -pe '$. > 1 and /^>/ ? print "\n" : chomp' {input_peps} | \
             sed -e 's/\*$//' -e 's/\*/X/g' \
-            >{output_peps};
+                >{output_peps};
         interproscan.sh -hm -i {output_peps} \
-            -b output/{species}/{smp}/assembly/masurca/INTERPRO/interproscan -f tsv \
-            -T output/{species}/{smp}/assembly/masurca/INTERPRO \
-            -dp -m standalone --cpu 20 \
-            --iprlookup -pa -goterms;      
-#        cd output/{species}/{smp}/assembly/masurca/INTERPRO/;     
-#        interproscan.sh -hm -i augustus.ab_initio.edit.aa \
-#            -b interproscan -f tsv -T ./ \
-#            -dp -m standalone --cpu 32 \
-#            --iprlookup -pa -goterms;
-        """.format(input_peps=input.peps, output_peps=output.peps_edit,\
-                smp=wildcards.smp, species=wildcards.species,\
+            -b {work_dir}/output/{species}/{smp}/assembly/masurca/INTERPROSCAN_Fun/interproscan -f tsv \
+            -T {work_dir}/output/{species}/{smp}/assembly/masurca/INTERPROSCAN_Fun \
+            -dp -m standalone --cpu $(eval nproc) \
+            --iprlookup -pa -goterms ;      
+        echo "" >{done_ipro} ;
+        """.format(input_peps=input.peps, output_peps=output.peps_edit, done_ipro=output.done_ipro, \
+                smp=wildcards.smp, species=wildcards.species, work_dir=work_dir, \
                 interprotbl=output.interprotbl))
                 

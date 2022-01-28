@@ -1,0 +1,13 @@
+atp6.FAS
+atp8.FAS
+cob.FAS
+cox1.FAS
+cox2.FAS
+cox3.FAS
+nad1.FAS
+nad2.FAS
+nad3.FAS
+nad4.FAS
+nad4l.FAS
+nad5.FAS
+nad6.FAS

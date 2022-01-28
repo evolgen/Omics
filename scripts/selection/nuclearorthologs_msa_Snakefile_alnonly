@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+
+work_dir = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/nooutgroup"
+
+SAMPLES, = glob_wildcards("{workdir}/{sample}.CDS")
+
+rule all:
+    input:
+        expand("/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/aln.done", sample=SAMPLES)
+
+rule align:
+    input:
+        cds = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/nooutgroup/{sample}.FAS",
+    output:
+        extract = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/seq.fasta",
+        align_nt = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/cds.seq.msa",
+        align_aa = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/pep.seq.msa",
+        logger = "/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/sequence_files/{sample}/aln.done",
+    params:
+        slurm_opts=lambda wildcards: "-N1 " \
+                                     "--time 3-00:00:00 " \
+                                    "-A co_genomicdata " \
+                                     "--qos=savio_lowprio " \
+                                     "-p savio,savio2 " \
+                                     "-o /global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/SCOs_76/logs/aln_{sample}.log " \
+                                     "-J aln_{sample} " \
+                                     .format(sample=wildcards.sample)
+    run:
+        shell("""
+            module load samtools trimal gcc java macse muscle emboss ;
+            cd $(dirname "{cds}" ) ;
+            printf "  Creating sequences\n";
+            bash ~/RGP/scripts/selection/premsa_munger.20200624.sh \
+                    {cds} {extract} Universal ;
+            printf "  Running premsa\n";
+            hyphy /global/scratch2/rohitkolora/Software/hyphy-develop/hyphy-analyses-master/codon-msa/pre-msa.bf \
+                    --input {extract}.orf --code Universal --E 0.6 ;
+            muscle -in {extract}.orf_protein.fas -out {align_nt} ;
+            printf "  Final postmsa\n";
+            hyphy /global/scratch2/rohitkolora/Software/hyphy-develop/hyphy-analyses-master/codon-msa/post-msa.bf \
+                    --protein-msa {align_nt} \
+                    --nucleotide-sequences {extract}.orf_nuc.fas \
+                    --code Universal \
+                    --output {align_nt}.out ;
+            sed -e '/^>/ s/_[0-9]*$//' {align_nt}.out >{align_nt} ;
+            sed -e '/^>/ s/_[0-9].*//' {align_aa}.out >{align_aa} ;
+            samtools faidx {align_nt} ;
+            echo "" > {logger} ;
+            """.format(cds=input.cds, logger=output.logger, sample=wildcards.sample, #work_dir=work_dir,
+                       extract=output.extract, align_nt=output.align_nt, align_aa=output.align_aa))
+
+

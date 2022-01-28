@@ -1,0 +1,58 @@
+LoadFunctionLibrary ("BranchSiteTemplate");
+// this loads the extractBranchLengthsFromBSREL (treeID) function
+
+LoadFunctionLibrary ("chooseGeneticCode");
+// this is necessary because the fit file does not directly include
+// genetic code information, and reverse-engineering it from the rate
+// matrix is way too painful
+
+LoadFunctionLibrary ("dSdNTreeTools");
+// this loads various functions to define dS and dN
+
+LoadFunctionLibrary ("CodonTools");
+// this defines the function _computeSNSSites (_filterName, _genCode, _codonFreqs, callCount)
+// which computes the expected number of synonymous and non-synonymous sites
+// as defined in the Muse 1996 paper
+
+SetDialogPrompt ("Please load the .aBSREL.fit");
+ExecuteAFile (PROMPT_FOR_FILE);
+
+site_counts = _computeSNSSites ("dsf", _Genetic_Code, codon3x4, 0);
+s_sites = site_counts ["SSites"];
+ns_sites = site_counts ["NSSites"];
+
+ds_scaler = (site_counts ["SSites"] + site_counts ["NSSites"]) / s_sites;
+dn_scaler = (site_counts ["SSites"] + site_counts ["NSSites"]) / ns_sites;
+
+scaling_stencils = ComputeScalingStencils (None);
+// this returns a "mask" for synonymous and non-synonymous
+// entries in the rate matrix, which can then be used to
+// control how branch lengths are computed
+
+BRANCH_LENGTH_STENCIL = scaling_stencils["Syn"];
+// set the environment variable controlling how branch lengths
+// are evaluated
+
+syn_length = extractBranchLengthsFromBSREL("mixtureTree");
+// dictionary mapping branch name to branch length in expected
+// synonymous subs / codon
+
+BRANCH_LENGTH_STENCIL = scaling_stencils["NonSyn"];
+// set the environment variable controlling how branch lengths
+// are evaluated
+
+
+non_syn_length = extractBranchLengthsFromBSREL("mixtureTree");
+// dictionary mapping branch name to branch length in expected
+// non-synonymous subs / codon
+
+fprintf (stdout, "Branch, dS, dN\n");
+
+branch_names = Rows (syn_length); // Rows (dict) returns a vector of dictionary keys
+
+for (id = 0; id < Abs (syn_length); id += 1) {
+    this_branch = branch_names[id];
+    fprintf (stdout, this_branch, ", ", syn_length[this_branch] * ds_scaler, ", ", non_syn_length[this_branch] * dn_scaler, "\n");
+}
+
+

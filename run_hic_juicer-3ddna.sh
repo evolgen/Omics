@@ -63,7 +63,7 @@ fi
 mkdir -p 3ddna && cd 3ddna;
 printf "\tRunning 3D-DNA\n";
 run-asm-pipeline.sh -q 20 --editor-coarse-resolution 2500000 --editor-coarse-region 12500000 -r 8 --editor-fine-resolution 100000 -i 1000 ${reference} ../aligned/merged_nodups.txt 1>>../LOG 2>>../LOG;
-rm ../aligned/merged_nodups.txt &
+##rm ../aligned/merged_nodups.txt &
 printf "3D-DNA done - Now for the stats\n";
 
 #final_assembly=$(echo "${name}_ref.fasta" | sed -e 's/\.fasta$/.FINAL.fasta/')

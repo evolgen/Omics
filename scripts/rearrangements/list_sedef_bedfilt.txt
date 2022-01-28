@@ -1,0 +1,8 @@
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_aleutianus/SEDEF/Filt.final.bed
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_miniatus/SEDEF/Filt.final.bed
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_pinniger/SEDEF/Filt.final.bed
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_rosaceus/SEDEF/Filt.final.bed
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_ruberrimus/SEDEF/Filt.final.bed
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/FALCON/Sebastes_umbrosus/SEDEF/Filt.final.bed
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/WTDBG/Sebastes_entomelas/SEDEF/Filt.final.bed
+/global/scratch2/rohitkolora/Rockfish/Genomes/FREEZE/WTDBG/Sebastolobus_alascanus/SEDEF/Filt.final.bed

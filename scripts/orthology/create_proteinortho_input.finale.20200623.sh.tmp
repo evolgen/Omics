@@ -1,0 +1,24 @@
+#!/usr/bin/bash
+
+set -e -o pipefail
+
+if [ ! -e "/global/home/users/rohitkolora/RGP/scripts/orthology/files_finale.list.txt" ]; then
+    echo "    Create input file files_finale.list.txt"
+    exit 1
+fi
+
+mkdir -p /global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/input_data;
+
+cat /global/home/users/rohitkolora/RGP/scripts/orthology/files_finale.list.txt | grep -e FREEZE | while read file1; do
+    file2=$(echo $file1 | sed -e 's/.gff3$/.proteins.faa/');
+    file3=$(echo $file1 | sed -e 's/.gff3$/.cds-transcripts.fa/');
+    species=$(echo $file1 | sed -e 's/.*\/output\///' -e 's/.*\/WTDBG\///' -e 's/.*\/FALCON\///' -e 's/\/.*//');
+    printf "Creation of \t ${species}\n";
+    echo $file1;
+#    awk -F'\t' -v species="${species}" 'BEGIN{OFS="\t"} {gsub(".cds;.*",";",$9); gsub("ID=","ID="species".",$9); print $0}' $file1 | fgrep -w CDS >/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/input_data/${species}.gff;
+#    sed -e "/^>/ s/^>/>${species}./" $file2 >/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/input_data/${species}.faa;
+    sed -e "/^>/ s/^>/>${species}./" $file3 >/global/scratch2/rohitkolora/Rockfish/Genomes/orthologs/proteinortho_finale/input_data/${species}.fna;
+done
+
+
+

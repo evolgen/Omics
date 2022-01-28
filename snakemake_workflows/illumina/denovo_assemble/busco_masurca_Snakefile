@@ -7,7 +7,7 @@ from glob import glob
 from snakemake.utils import read_job_properties
 import pdb
 
-configfile: "config.json"
+configfile: "/global/scratch2/rohitkolora/Rockfish/Genomes/sequencing/illumina/config.dups.json"
 
 def get_inputs(wildcards):
    inputs = []   
@@ -36,13 +36,13 @@ rule busco_4_masurca:
       slurm_opts=lambda wildcards: "-N 1 " \
                            "--time 0-24:00:00 " \
                            "-A co_genomicdata " \
-                           "-p savio2 " \
+                           "-p savio2,savio " \
                            "-o logs/busco_{smp}_{lineage}.log " \
                            "-J {smp}_{lineage}_busco " \
                            .format(smp=wildcards.smp, 
                                  lineage=wildcards.lineage)
    threads:
-      24
+      32
    run:
       busco_path=config["busco_libs"][wildcards.lineage]   
       shell("""
@@ -53,11 +53,11 @@ rule busco_4_masurca:
                blast/2.2.26 gcc;
          AUGUSTUS_CONFIG_PATH="/global/home/users/rohitkolora/local_modules_sw/augustus/2.5.5/config/";
          cd {input_dir}/BUSCO/;
-         python ~/local_modules_sw/busco/3.1/scripts/run_BUSCO.py \
+         python3 ~/local_modules_sw/busco/3.1/scripts/run_BUSCO.py \
             -i {asmb} \
             -o busco_{lineage} \
             -t {input_dir}/BUSCO/tmp_{lineage} \
-            -c {threads} \
+            -c 30 \
             -m geno -sp zebrafish -f \
             -l {busco_path};
  #        mv run_busco_{smp}_{lineage} output/{species}/{smp}/assembly/masurca/BUSCO/

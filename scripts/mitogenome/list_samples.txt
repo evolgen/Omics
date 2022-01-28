@@ -24,7 +24,7 @@ S-diploproa_KUI2154
 S-elongatus_SEB-146
 S-ensifer_SEB-163
 S-entomelas_SEB-16
-S-exsul_SEB-54
+S-exsul_SEB-BAJA-1
 S-fasciatus_KUI2796
 S-flavidus_SEB-19
 S_glaucus_134638
@@ -42,10 +42,10 @@ S_koreanus_134992
 S-levis_KUI567
 S-maliger_KUI3233
 S_matsubarae_146680
-S_melanopus_134856
+S_melanops_134856
 S-melanostomus_HO-5
 S-mentella_KUI3097
-S-miniatus_SEB-11
+S-miniatus_SEB-153
 S_minor_135284
 S-moseri_SEB-5
 S-mystinus_SEB-17
@@ -64,7 +64,7 @@ S-rastrelliger_xSEB-1
 S-reedi_SEB-7
 S-rosaceus_SEB-73
 S-rosenblatti_SEB-147
-S-ruberrimus_SEB-74
+S-ruberrimus_582396486
 S-rubrivinctus_UW155382
 S-saxicola_KUI2167
 S_schlegelii_139475
