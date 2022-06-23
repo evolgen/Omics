@@ -1,0 +1,77 @@
+<tool id="interproscan" name="Interproscan functional predictions of ORFs"  version="1.0.1">
+    <description>Interproscan functional predictions of ORFs</description>
+    <command interpreter="python">
+      interproscan.py 
+           '$__app__.config.new_file_path'
+       '$input'
+           '$format'
+       '$output'
+    </command>
+    <inputs>
+        <param name="input" type="data" format="fasta" label="ORFs in protein FASTA format"/>
+        <param name="format" type="boolean" format="gff" label="GFF format?" truevalue="gff" falsevalue="raw"/> 
+    </inputs>
+    <outputs>
+        <data format="tabular" name="output" label="Interproscan output"/>        
+    </outputs>
+    <requirements>
+    </requirements>
+    <help>
+
+**Interproscan**
+
+Interproscan is a batch tool to query the Interpro database. It provides annotations based on multiple searches of profile and other functional databases. These include SCOP, CATH, PFAM and SUPERFAMILY. Currently due to resource limitations, only the PFAM database is searched however.
+
+**Input**
+A FASTA file containing ORF predictions is required. This file must NOT contain any spaces in the FASTA headers - any spaces will be convereted to underscores by this tool before submission to Interproscan.
+
+**Output**
+
+The output will consist of a file in Interproscan raw format, a tabular file in galaxy with 14 columns.
+This can be use to upload the data into a relational database or concatenation of different runs. 
+
+====== ============================================================================================================================= ===========================================
+Column Example                                                                                                                       Description
+------ ----------------------------------------------------------------------------------------------------------------------------- -------------------------------------------
+    c1 NF00181542                                                                                                                    Identifier of the input sequence
+    c2 0A5FDCE74AB7C3AD                                                                                                              crc64 checksum of the protein sequence
+    c3 272                                                                                                                           Length of sequence (in amino acids)
+    c4 HMMPIR                                                                                                                        Analysis metho launched
+    c5 PIRSF001424                                                                                                                   Database members entry for match  
+    c6 Prephenate dehydratase                                                                                                        Description from the database
+    c7 1                                                                                                                             Start of the domain match
+    c8 270                                                                                                                           End of the domain match
+    c9 6.5e-141                                                                                                                      e-value (reported by the database method)
+   c10 T                                                                                                                             Status of match (Tfor true, ? forunknown)
+   c11 06-Aug-2005                                                                                                                   Date of the run
+   c12 IPR008237                                                                                                                     InterPro entry (if iprlookup requested)
+   c13 Prephenate dehydratase with ACT region                                                                                        Description of the InterPro entry
+   c14 Molecular Function:prephenate dehydratase activity (GO:0004664), Biological Process:L-phenylalanine biosynthesis (GO:0009094) GO (gene ontology) description
+====== ============================================================================================================================= ===========================================
+
+**Database updates**
+
+Typically these take place 2-3 times a year.
+
+**References** 
+
+Zdobnov EM, Apweiler R (2001)
+InterProScan an integration platform for the signature-recognition methods in InterPro.
+Bioinformatics 17, 847-848.
+http://dx.doi.org/10.1093/bioinformatics/17.9.847
+
+Quevillon E, Silventoinen V, Pillai S, Harte N, Mulder N, Apweiler R, Lopez R (2005)
+InterProScan: protein domains identifier.
+Nucleic Acids Research 33 (Web Server issue), W116-W120.
+http://dx.doi.org/10.1093/nar/gki442
+
+Hunter S, Apweiler R, Attwood TK, Bairoch A, Bateman A, Binns D, Bork P, Das U, Daugherty L, Duquenne L, Finn RD, Gough J, Haft D, Hulo N, Kahn D, Kelly E, Laugraud A, Letunic I, Lonsdale D, Lopez R, Madera M, Maslen J, McAnulla C, McDowall J, Mistry J, Mitchell A, Mulder N, Natale D, Orengo C, Quinn AF, Selengut JD, Sigrist CJ, Thimma M, Thomas PD, Valentin F, Wilson D, Wu CH, Yeats C. (2009)
+InterPro: the integrative protein signature database.
+Nucleic Acids Research 37 (Database Issue), D224-228.
+http://dx.doi.org/10.1093/nar/gkn785
+
+This wrapper is available to install into other Galaxy Instances via the Galaxy Tool Shed at
+http://toolshed.g2.bx.psu.edu/view/konradpaszkiewicz/interproscan
+
+    </help>
+</tool>

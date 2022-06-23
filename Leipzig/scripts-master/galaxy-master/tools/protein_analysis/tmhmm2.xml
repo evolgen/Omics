@@ -1,0 +1,119 @@
+<tool id="tmhmm2" name="TMHMM 2.0" version="0.0.12">
+    <description>Find transmembrane domains in protein sequences</description>
+    <!-- If job splitting is enabled, break up the query file into parts -->
+    <!-- Using 2000 chunks meaning 4 threads doing 500 each is ideal -->
+    <parallelism method="basic" split_inputs="fasta_file" split_mode="to_size" split_size="2000" merge_outputs="tabular_file"></parallelism>
+    <command interpreter="python">
+      tmhmm2.py "\$GALAXY_SLOTS" $fasta_file $tabular_file
+      ##If the environment variable isn't set, get "", and the python wrapper
+      ##defaults to four threads.
+    </command>
+    <stdio>
+        <!-- Anything other than zero is an error -->
+        <exit_code range="1:" />
+        <exit_code range=":-1" />
+    </stdio>
+    <inputs>
+        <param name="fasta_file" type="data" format="fasta" label="FASTA file of protein sequences"/> 
+        <!--
+        <param name="version" type="select" display="radio" label="Model version">
+            <option value="">Version 1 (old)</option>
+            <option value="" selected="True">Version 2 (default)</option>
+        </param>
+        -->
+    </inputs>
+    <outputs>
+        <data name="tabular_file" format="tabular" label="TMHMM results" />
+    </outputs>
+    <requirements>
+        <requirement type="binary">tmhmm</requirement>
+    </requirements>
+    <tests>
+        <test>
+            <param name="fasta_file" value="four_human_proteins.fasta" ftype="fasta"/>
+            <output name="tabular_file" file="four_human_proteins.tmhmm2.tabular" ftype="tabular"/>
+        </test>
+        <test>
+            <param name="fasta_file" value="empty.fasta" ftype="fasta"/>
+            <output name="tabular_file" file="empty_tmhmm2.tabular" ftype="tabular"/>
+        </test>
+    </tests>
+    <help>
+    
+**What it does**
+
+This calls the TMHMM v2.0 tool for prediction of transmembrane (TM)  helices in proteins using a hidden Markov model (HMM).
+
+The input is a FASTA file of protein sequences, and the output is tabular with six columns (one row per protein):
+
+====== =====================================================================================
+Column Description
+------ -------------------------------------------------------------------------------------
+     1 Sequence identifier
+     2 Sequence length
+     3 Expected number of amino acids in TM helices (ExpAA). If this number is larger than
+       18 it is very likely to be a transmembrane protein (OR have a signal peptide).
+     4 Expected number of amino acids in TM helices in the first 60 amino acids of the
+       protein (Exp60). If this number more than a few, be aware that a predicted
+       transmembrane helix in the N-term could be a signal peptide.
+     5 Number of transmembrane helices predicted by N-best.
+     6 Topology predicted by N-best (encoded as a strip using o for output and i for inside)
+====== =====================================================================================
+
+Predicted TM segments in the n-terminal region sometimes turn out to be signal peptides.
+
+One of the most common mistakes by the program is to reverse the direction of proteins with one TM segment (i.e. mixing up which end of the protein is outside and inside the membrane).
+
+Do not use the program to predict whether a non-membrane protein is cytoplasmic or not. 
+
+
+**Notes**
+
+The short format output from TMHMM v2.0 looks like this (six columns tab separated, shown here as a table):
+
+=================================== ======= =========== ============= ========= =============================
+gi|2781234|pdb|1JLY|B               len=304 ExpAA=0.01  First60=0.00  PredHel=0 Topology=o
+gi|4959044|gb|AAD34209.1|AF069992_1 len=600 ExpAA=0.00  First60=0.00  PredHel=0 Topology=o
+gi|671626|emb|CAA85685.1|           len=473 ExpAA=0.19  First60=0.00  PredHel=0 Topology=o
+gi|3298468|dbj|BAA31520.1|          len=107 ExpAA=59.37 First60=31.17 PredHel=3 Topology=o23-45i52-74o89-106i
+=================================== ======= =========== ============= ========= =============================
+
+In order to make it easier to use in Galaxy, the wrapper script simplifies this to remove the redundant tags, and instead adds a comment line at the top with the column names:
+
+=================================== === ===== ======= ======= ====================
+#ID                                 len	ExpAA First60 PredHel Topology 
+gi|2781234|pdb|1JLY|B               304  0.01    0.00       0 o
+gi|4959044|gb|AAD34209.1|AF069992_1 600  0.00    0.00       0 o
+gi|671626|emb|CAA85685.1|           473  0.19    0.00       0 o
+gi|3298468|dbj|BAA31520.1|          107 59.37   31.17       3 o23-45i52-74o89-106i
+=================================== === ===== ======= ======= ====================
+
+
+-----
+
+**References**
+
+If you use this Galaxy tool in work leading to a scientific publication please
+cite the following papers:
+
+Peter J.A. Cock, Björn A. Grüning, Konrad Paszkiewicz and Leighton Pritchard (2013).
+Galaxy tools and workflows for sequence analysis with applications
+in molecular plant pathology. PeerJ 1:e167
+http://dx.doi.org/10.7717/peerj.167
+
+Krogh, Larsson, von Heijne, and Sonnhammer (2001).
+Predicting Transmembrane Protein Topology with a Hidden Markov Model: Application to Complete Genomes.
+J. Mol. Biol. 305:567-580.
+http://dx.doi.org/10.1006/jmbi.2000.4315
+
+Sonnhammer, von Heijne, and Krogh (1998).
+A hidden Markov model for predicting transmembrane helices in protein sequences.
+In J. Glasgow et al., eds.: Proc. Sixth Int. Conf. on Intelligent Systems for Molecular Biology, pages 175-182. AAAI Press.
+http://www.ncbi.nlm.nih.gov/pubmed/9783223
+
+See also http://www.cbs.dtu.dk/services/TMHMM/
+
+This wrapper is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/tmhmm_and_signalp
+    </help>
+</tool>

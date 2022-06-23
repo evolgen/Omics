@@ -1,0 +1,50 @@
+==================================================
+file name: bil_filt_var_1_checked_final.fasta
+sequences:          7510
+total length: 1418148937 bp  (1418148937 bp excl N/X-runs)
+GC level:         43.64 %
+bases masked:   71559518 bp ( 5.05 %)
+==================================================
+               number of      length   percentage
+               elements*    occupied  of sequence
+--------------------------------------------------
+SINEs:            98179      9659395 bp    0.68 %
+      ALUs            2          138 bp    0.00 %
+      MIRs        87892      8924852 bp    0.63 %
+
+LINEs:           279395     52410912 bp    3.70 %
+      LINE1        6054      2452071 bp    0.17 %
+      LINE2       50575      8059304 bp    0.57 %
+      L3/CR1     209790     38070906 bp    2.68 %
+
+LTR elements:      5053      1931670 bp    0.14 %
+      ERVL          475        96622 bp    0.01 %
+      ERVL-MaLRs     44         2806 bp    0.00 %
+      ERV_classI   2856       463436 bp    0.03 %
+      ERV_classII   364       147004 bp    0.01 %
+
+DNA elements:     30992      3395131 bp    0.24 %
+     hAT-Charlie  12269       903961 bp    0.06 %
+     TcMar-Tigger  1859       200418 bp    0.01 %
+
+Unclassified:      2336       299103 bp    0.02 %
+
+Total interspersed repeats: 67696211 bp    4.77 %
+
+
+Small RNA:        60934      4040637 bp    0.28 %
+
+Satellites:          40         2109 bp    0.00 %
+Simple repeats:       0            0 bp    0.00 %
+Low complexity:       0            0 bp    0.00 %
+==================================================
+
+* most repeats fragmented by insertions or deletions
+  have been counted as one element
+                                                      
+
+The query species was assumed to be homo sapiens  
+RepeatMasker version open-4.0.5 , default mode
+                                   
+run with rmblastn version 2.2.27+
+RepBase Update 20140131, RM database version 20140131

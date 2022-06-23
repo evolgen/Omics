@@ -1,0 +1,14 @@
+###### all this is for query specific analysis: input is query based, u can change it to target based too
+
+1) to get the gaps:
+# to make a fake bed file and sort it since bedtools merge takes in sorted file:
+m_chintalapati@bio57:/mnt/scratch/Manju/trial/rohit$ awk '{print $10"\t"$12"\t"$13"\t"$11"\t*\t"$9"\t"$14"\t"$16"\t"$17"\t"$15}' lastz_hits.psl | sort -k 1b,1 -k 2b,2n > query_lastz.bed
+m_chintalapati@bio57:/mnt/scratch/Manju/trial/rohit$ bedtools merge -s -i query_lastz.bed > query_merge.bed
+# to collect gaps input is the merg file, u get a output of <file>.gap
+m_chintalapati@bio57:/mnt/scratch/Manju/trial/rohit$ ./gaps.pl query_merge.bed
+
+
+2) to get the split hits
+awk '{print $10"\t"$12"\t"$13"\t"$11"\t*\t"$9"\t"$14"\t"$16"\t"$17"\t"$15}' lastz_hits.psl | sort -k 1b,1 -k 2b,2n > query_lastz.bed
+awk '{print $14"\t"$16"\t"$17"\t"$15"\t*\t"$9"\t"$10"\t"$12"\t"$13"\t"$11}' lastz_hits.psl | sort -k 1b,1 -k 2b,2n > target_lastz.bed
+

@@ -1,0 +1,269 @@
+
+[rohit@k61 Indels]$ /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/mafSplit -byTarget -useFullSequenceName ../lacvir1.bed ../mod_mafs/ ../Lacerta_multiple_lacvir1_roast.MAF 
+
+
+[rohit@k61 Indels]$ /scr/bloodymary/rohit/phast/bin/maf_parse -o MAF -O lacvir1,lacbil1,anoCar2,allMis1,galGal3,hg19,xenTro3 Lacerta_multiple_lacvir1_roast.maf >Lacerta_multiple_lacvir1_roast.maf2
+[rohit@k61 Indels]$ /scr/bloodymary/rohit/last-828/bin/maf-sort Lacerta_multiple_lacvir1_roast.maf2 >Lacerta_multiple_lacvir1_roast.maf
+[rohit@k61 Indels]$ /scr/bloodymary/rohit/phast/bin/msa_view -i MAF -o SS --unordered-ss ../Lacerta_multiple_lacvir1_roast.maf >Lacerta_multiple_lacvir1_roast.SS
+
+[rohit@k61 Indels]$ /scr/bloodymary/rohit/phast/bin/msa_view --out-format SS --unordered-ss Lacerta_multiple_lacvir1_roast.maf >Lacerta_multiple_lacvir1_roast.SS
+
+# [rohit@k61 test]$ /scr/bloodymary/rohit/phast/bin/phyloFit --tree "((((((lacvir1,lacbil1),anoCar2),galGal3),allMis1),hg19),xenTro3)" --msa-format MAF Lacerta_multiple_lacvir1_roast.maf
+Reading alignment from Lacerta_multiple_lacvir1_roast.maf ...
+Compacting sufficient statistics ...
+Fitting tree model to Lacerta_multiple_lacvir1_roast.maf using REV ...
+numpar = 17
+Done.  log(likelihood) = -2507630002.617187 numeval=1728
+Writing model to phyloFit.mod ...
+Done.
+
+[rohit@k61 test]$ /scr/bloodymary/rohit/phast/bin/phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format MAF Lacerta_multiple_lacvir1_roast.maf; mv phyloFit.mod Lacerta_phyloFit.mod
+
+
+#/scr/bloodymary/rohit/phast/bin/indelHistory --msa-format MAF ../Lacerta_multiple_lacvir1_roast.maf phyloFit.mod >Lacerta_indelhistory.ih
+#/scr/bloodymary/rohit/phast/bin/indelFit Lacerta_indelhistory.ih Lacerta_tree.nh >Lacerta_indelfit.out
+
+
+[rohit@k61 Indels]$ for file1 in ../new_Chunks/Lvir_*.ss; do file2=$(echo $file1 | sed 's/\.1-[0-9]*.ss/.model/' ); phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format SS $file1; mv phyloFit.mod $file2; done; mv ../new_Chunks/*model ./models
+
+
+[rohit@k48 Indels]$ ls ../new_Chunks/Lvir_*.ss | parallel -j 24 sh run_indelhistory.sh; ls ../mod_mafs/Lvir_[0-9]*_[0-9].maf | parallel -j 10 sh run_dles.sh
+
+
+#[rohit@k61 Indels]$ for file1 in ./histories/Lvir_*.ih; do file2=$(echo $file1 | sed -e 's/\.ih/.ifit/' -e 's/histories/indelfit/'); /scr/bloodymary/rohit/phast/bin/indelFit $file1 Lacerta_tree.nh >${file2}; done
+
+
+#[rohit@k48 Indels]$ for file in ../new_Chunks/Lvir_*.ss; do file2=$(echo $file | sed -e 's/.ss/.ih/' -e 's/.*Lvir_/Lvir_/' -e 's/\.1-[0-9]*\././'); file3=$(echo $file2 | sed 's/\.ih$/.model/'); file4=$(echo $file2 | sed 's/\.ih$/.tree/'); cat ./models/$file3 | grep TREE | sed 's/TREE: //' >./trees/$file4; indelHistory --msa-format SS $file ./trees/$file4 >./histories/${file2}; done; ls ../mod_mafs/Lvir_[0-9]*_[0-9].maf | parallel -j 10 sh run_dles.sh
+
+
+
+
+#[rohit@k61 Indels]$ for file1 in ../new_Chunks/Lvir_*.ss; do file2=$(echo $file1 | sed 's/\.SS/.ih/'); file2=$(echo $file1 | sed 's/\.SS/.ifit/'); indelHistory -i SS $file phyloFit.mod >./histories/${file2}; indelFit ./histories/${file2} Lacerta_tree.nh >./indelfit/${file3}; done
+
+# [rohit@k61 Indels]$ for file1 in ../new_Chunks/Lvir_*.ss; do file2=$(echo $file1 | sed 's/\.1-[0-9]*.ss/model/' ); /scr/bloodymary/rohit/phast/bin/phyloFit --tree "((((((lacvir1,lacbil1),anoCar2),allMis1),galGal3),hg19),xenTro3)" --msa-format SS $file1; mv phyloFit.mod $file2; done
+
+
+
+# [rohit@k61 Indels]$ for file1 in ../new_Chunks/Lvir_*.ss; do name=$(echo $file1 | sed -e 's/\.1-[0-9]*.ss/.gff/' -e 's/.*Lvir_/Lvir_/'); file2=$(echo $file1 | sed -e 's/\.\.\/new_Chunks/.\/histories/' -e 's/\.1-[0-9]*.ss/.ih/'); file3=$(echo $file1 | sed 's/\.\.\/new_Chunks\//.\/models\//' | sed 's/\.1-[0-9]*.ss/model/'); echo "/scr/bloodymary/rohit/phast/bin/dless --msa-format SS -H $file2 $file1 $file3 >./dless/$name"; /scr/bloodymary/rohit/phast/bin/dless --msa-format SS -H $file2 $file1 $file3 >./dless/$name; done
+# [rohit@k61 Indels]$ for file1 in ../mod_mafs/Lvir_*.maf; do name=$(echo $file1 | sed -e 's/\.maf/.gff/' -e 's/.*Lvir_/Lvir_/'); file2=$(echo $file1 | sed -e 's/\.\.\/mod_mafs/.\/histories/' -e 's/\.maf/.ih/'); file3=$(echo $file1 | sed 's/\.\.\/mod_mafs\//.\/models\//' | sed 's/.maf/model/'); echo "dless -H $file2 --msa-format MAF $file1 $file3 >./dless/$name"; dless -H $file2 --msa-format MAF $file1 $file3 >./dless/$name; done
+# [rohit@k52 /scr/k61san/nowicklab/Lacerta/Multiz/Indels $ for file1 in ../mod_mafs/Lvir_[5-9][0-9][0-9].maf; do name=$(echo $file1 | sed -e 's/\.maf/.gff/' -e 's/.*Lvir_/Lvir_/'); file2=$(echo $file1 | sed -e 's/\.\.\/mod_mafs/.\/histories/' -e 's/\.maf/.ih/'); file3=$(echo $file1 | sed 's/\.\.\/mod_mafs\//.\/models\//' | sed 's/.maf/model/'); echo "dless -H $file2 --msa-format MAF $file1 $file3 >./dless/$name"; dless -H $file2 --msa-format MAF $file1 $file3 >./dless/$name; done
+
+
+[rohit@bloodymary Indels]$ find /scr/k61san/nowicklab/Lacerta/Multiz/Indels/dless/* -mtime +7 -exec rm {} \;
+
+
+
+[rohit@k61 Indels]$ for file1 in ../mod_mafs/Lvir_[1-4][0-9].maf; do name=$(echo $file1 | sed -e 's/\.maf/.gff/' -e 's/.*Lvir_/Lvir_/'); file2=$(echo $file1 | sed -e 's/\.\.\/mod_mafs/.\/histories/' -e 's/\.maf/.ih/'); file3=$(echo $file1 | sed 's/\.\.\/mod_mafs\//.\/models\//' | sed 's/.maf/model/'); echo "dless -H $file2 --msa-format MAF $file1 $file3 >./dless/$name"; dless -H $file2 --msa-format MAF $file1 $file3 >./dless/$name; done
+for file1 in ../mod_mafs/Lvir_[5-9][0-9].maf; do name=$(echo $file1 | sed -e 's/\.maf/.gff/' -e 's/.*Lvir_/Lvir_/'); file2=$(echo $file1 | sed -e 's/\.\.\/mod_mafs/.\/histories/' -e 's/\.maf/.ih/'); file3=$(echo $file1 | sed 's/\.\.\/mod_mafs\//.\/models\//' | sed 's/.maf/model/'); echo "dless -H $file2 --msa-format MAF $file1 $file3 >./dless/$name"; dless -H $file2 --msa-format MAF $file1 $file3 >./dless/$name; done
+
+[rohit@k50 Indels]$ export PATH=/usr/local/bin:$PATH
+[rohit@k50 Indels]$ ls ../mod_mafs/Lvir_[0-4][0-9][0-9].maf | parallel -j 10 sh run_dles.sh
+[rohit@k52 /scr/k61san/nowicklab/Lacerta/Multiz/Indels $ ls ../mod_mafs/Lvir_[5-9][0-9][0-9].maf | parallel -j 7 sh run_dles.sh
+[rohit@K53 Indels]$ ls ../mod_mafs/Lvir_[1][0-2][0-9][0-9].maf | parallel -j 4 sh run_dles.sh
+[rohit@K50 Indels]$ ls ../mod_mafs/Lvir_[1][3-5][0-9][0-9].maf | parallel -j 4 sh run_dles.sh
+[rohit@K50 Indels]$ ls ../mod_mafs/Lvir_[1][6-9][0-9][0-9].maf | parallel -j 24 sh run_dles.sh; 
+[rohit@K50 Indels]$ ls ../mod_mafs/Lvir_[2-3][6-9][0-9][0-9].maf | parallel -j 24 sh run_dles.sh
+[rohit@k50 Indels]$ ls ../mod_mafs/Lvir_[4][0-1][0-9][0-9].maf | parallel -j 4 sh run_dles.sh
+[rohit@k52 Indels]$ ls ../mod_mafs/Lvir_[4][2-4][0-9][0-9].maf | parallel -j 7 sh run_dles.sh
+
+
+[rohit@k61 Indels]$ for file1 in ../mod_mafs/Lvir_*.maf; do name=$(echo $file1 | sed -e 's/\.maf/.gff/' -e 's/.*Lvir_/Lvir_/'); file2=$(echo $file1 | sed -e 's/\.\.\/mod_mafs/.\/histories/' -e 's/\.maf/.ih/'); file3=$(echo $file1 | sed 's/\.\.\/mod_mafs\//.\/models\//' | sed 's/.maf/model/'); if [ ! -f ./dless/$name ]; then echo $name; fi; done
+
+
+[rohit@k52 /scr/k61san/nowicklab/Lacerta/Multiz/Indels $ echo " "; for file1 in ../mod_mafs/Lvir_*.maf; do name=$(echo $file1 | sed -e 's/\.maf/.gff/' -e 's/.*Lvir_/Lvir_/'); file2=$(echo $file1 | sed -e 's/\.\.\/mod_mafs/.\/histories/' -e 's/\.maf/.ih/'); file3=$(echo $file1 | sed 's/\.\.\/mod_mafs\//.\/models\//' | sed 's/.maf/model/'); if [ ! -f $file3 ]; then printf $file1" "; fi; done | sed -e 's/new_mods/new_Chunks/g' -e 's/\.maf/.1-*.ss/g'
+
+
+[rohit@k48 Indels]$ ls ../mod_mafs/Lvir_[0-9]*.maf | parallel -j 24 sh run_dles.sh
+[rohit@k48 Indels]$ cat ./dless/Lvir_*.gff >Lacerta_dless.gff
+
+
+
+##### MISSING
+new_mod_mafs/Lvir_1076.maf new_mod_mafs/Lvir_1101.maf new_mod_mafs/Lvir_1161.maf new_mod_mafs/Lvir_1185.maf new_mod_mafs/Lvir_1217.maf new_mod_mafs/Lvir_1228.maf new_mod_mafs/Lvir_1233.maf new_mod_mafs/Lvir_1344.maf new_mod_mafs/Lvir_163.maf new_mod_mafs/Lvir_1732.maf new_mod_mafs/Lvir_1752.maf new_mod_mafs/Lvir_1788.maf new_mod_mafs/Lvir_1791.maf new_mod_mafs/Lvir_181.maf new_mod_mafs/Lvir_1963.maf new_mod_mafs/Lvir_1976.maf new_mod_mafs/Lvir_2097.maf new_mod_mafs/Lvir_2215.maf new_mod_mafs/Lvir_2302.maf new_mod_mafs/Lvir_2353.maf new_mod_mafs/Lvir_2671.maf new_mod_mafs/Lvir_2791.maf new_mod_mafs/Lvir_2829.maf new_mod_mafs/Lvir_2948.maf new_mod_mafs/Lvir_2952.maf new_mod_mafs/Lvir_2979.maf new_mod_mafs/Lvir_3012.maf new_mod_mafs/Lvir_3180.maf new_mod_mafs/Lvir_3184.maf new_mod_mafs/Lvir_3299.maf new_mod_mafs/Lvir_3356.maf new_mod_mafs/Lvir_3429.maf new_mod_mafs/Lvir_3512.maf new_mod_mafs/Lvir_3552.maf new_mod_mafs/Lvir_3577.maf new_mod_mafs/Lvir_3658.maf new_mod_mafs/Lvir_3800.maf new_mod_mafs/Lvir_3824.maf new_mod_mafs/Lvir_3839.maf new_mod_mafs/Lvir_3854.maf new_mod_mafs/Lvir_3872.maf new_mod_mafs/Lvir_3898.maf new_mod_mafs/Lvir_3921.maf new_mod_mafs/Lvir_3933.maf new_mod_mafs/Lvir_3949.maf new_mod_mafs/Lvir_3962.maf new_mod_mafs/Lvir_3972.maf new_mod_mafs/Lvir_3985.maf new_mod_mafs/Lvir_3986.maf new_mod_mafs/Lvir_4000.maf new_mod_mafs/Lvir_4001.maf new_mod_mafs/Lvir_4012.maf new_mod_mafs/Lvir_4099.maf new_mod_mafs/Lvir_4116.maf new_mod_mafs/Lvir_411.maf new_mod_mafs/Lvir_4146.maf new_mod_mafs/Lvir_4211.maf new_mod_mafs/Lvir_4283.maf new_mod_mafs/Lvir_4312.maf new_mod_mafs/Lvir_4339.maf new_mod_mafs/Lvir_4341.maf new_mod_mafs/Lvir_4399.maf new_mod_mafs/Lvir_4431.maf new_mod_mafs/Lvir_4503.maf new_mod_mafs/Lvir_4507.maf new_mod_mafs/Lvir_4510.maf new_mod_mafs/Lvir_4519.maf new_mod_mafs/Lvir_4545.maf new_mod_mafs/Lvir_4556.maf new_mod_mafs/Lvir_4582.maf new_mod_mafs/Lvir_4589.maf new_mod_mafs/Lvir_4703.maf new_mod_mafs/Lvir_4731.maf new_mod_mafs/Lvir_494.maf new_mod_mafs/Lvir_532.maf new_mod_mafs/Lvir_534.maf new_mod_mafs/Lvir_554.maf new_mod_mafs/Lvir_869.maf new_mod_mafs/Lvir_912.maf 
+
+
+[rohit@k50 Indels]$ cat ../mod_mafs/Lvir_1076.maf ../mod_mafs/Lvir_1101.maf ../mod_mafs/Lvir_1161.maf ../mod_mafs/Lvir_1185.maf ../mod_mafs/Lvir_1217.maf ../mod_mafs/Lvir_1228.maf ../mod_mafs/Lvir_1233.maf ../mod_mafs/Lvir_1344.maf ../mod_mafs/Lvir_163.maf ../mod_mafs/Lvir_1732.maf ../mod_mafs/Lvir_1752.maf ../mod_mafs/Lvir_1788.maf ../mod_mafs/Lvir_1791.maf ../mod_mafs/Lvir_181.maf ../mod_mafs/Lvir_1963.maf ../mod_mafs/Lvir_1976.maf ../mod_mafs/Lvir_2097.maf ../mod_mafs/Lvir_2215.maf ../mod_mafs/Lvir_2302.maf ../mod_mafs/Lvir_2353.maf ../mod_mafs/Lvir_2671.maf ../mod_mafs/Lvir_2791.maf ../mod_mafs/Lvir_2829.maf ../mod_mafs/Lvir_2948.maf ../mod_mafs/Lvir_2952.maf ../mod_mafs/Lvir_2979.maf ../mod_mafs/Lvir_3012.maf ../mod_mafs/Lvir_3180.maf ../mod_mafs/Lvir_3184.maf ../mod_mafs/Lvir_3299.maf ../mod_mafs/Lvir_3356.maf ../mod_mafs/Lvir_3429.maf ../mod_mafs/Lvir_3512.maf ../mod_mafs/Lvir_3552.maf ../mod_mafs/Lvir_3577.maf ../mod_mafs/Lvir_3658.maf ../mod_mafs/Lvir_3800.maf ../mod_mafs/Lvir_3824.maf ../mod_mafs/Lvir_3839.maf ../mod_mafs/Lvir_3854.maf ../mod_mafs/Lvir_3872.maf ../mod_mafs/Lvir_3898.maf ../mod_mafs/Lvir_3921.maf ../mod_mafs/Lvir_3933.maf ../mod_mafs/Lvir_3949.maf ../mod_mafs/Lvir_3962.maf ../mod_mafs/Lvir_3972.maf ../mod_mafs/Lvir_3985.maf ../mod_mafs/Lvir_3986.maf ../mod_mafs/Lvir_4000.maf ../mod_mafs/Lvir_4001.maf ../mod_mafs/Lvir_4012.maf ../mod_mafs/Lvir_4099.maf ../mod_mafs/Lvir_4116.maf ../mod_mafs/Lvir_411.maf ../mod_mafs/Lvir_4146.maf ../mod_mafs/Lvir_4211.maf ../mod_mafs/Lvir_4283.maf ../mod_mafs/Lvir_4312.maf ../mod_mafs/Lvir_4339.maf ../mod_mafs/Lvir_4341.maf ../mod_mafs/Lvir_4399.maf ../mod_mafs/Lvir_4431.maf ../mod_mafs/Lvir_4503.maf ../mod_mafs/Lvir_4507.maf ../mod_mafs/Lvir_4510.maf ../mod_mafs/Lvir_4519.maf ../mod_mafs/Lvir_4545.maf ../mod_mafs/Lvir_4556.maf ../mod_mafs/Lvir_4582.maf ../mod_mafs/Lvir_4589.maf ../mod_mafs/Lvir_4703.maf ../mod_mafs/Lvir_4731.maf ../mod_mafs/Lvir_494.maf ../mod_mafs/Lvir_532.maf ../mod_mafs/Lvir_534.maf ../mod_mafs/Lvir_554.maf ../mod_mafs/Lvir_869.maf ../mod_mafs/Lvir_912.maf | fgrep -A 1 's lacvir1.' | cut -f2-3 -d' ' | less
+
+
+#####
+
+#[rohit@k61 Indels]$ cat dless/Lvir_1.gff | grep '^#' >1; cat dless/*.gff | grep -v '^#' | sort -k1,1 -k4,4n >2; cat 1 2 >Lacerta_dless.gff; rm 1 2
+
+
+[rohit@k48 Indels]$ cat dless/Lvir_*.gff | grep -v '^##' | sort -t$'\t' -k1,1V -k4,4n >Lacerta_dless.gff
+
+
+[rohit@k48 Indels]$ cat Lacerta_dless.gff | fgrep -w -e 'lacbil1-birth' -e 'lacbil1-death' | grep -v lacvir1 | wc -l
+1303
+[rohit@k48 Indels]$ cat Lacerta_dless.gff | fgrep -w -e 'lacvir1-birth' -e 'lacvir1-death' | grep -v lacbil1 | wc -l
+3886
+[rohit@k48 Indels]$ cat Lacerta_dless.gff | grep -w -e 'lacvir1-.*[1-9]-birth' -e 'lacvir1-.*[1-9]-death' | grep lacbil1 | wc -l
+207
+[rohit@k48 Indels]$ cat Lacerta_dless.gff | grep -w -e 'lacvir1-.*-birth' -e 'lacvir1-.*-death' | grep -v lacbil1 | wc -l
+0
+[rohit@k48 Indels]$ cat Lacerta_dless.gff | grep -w -e conserved | wc -l
+126210
+[rohit@k48 Indels]$ cat /scr/k61san/nowicklab/Lacerta/Multiz/Indels/Lacerta_dless.gff | grep -w -e conserved | bedtools intersect -a - -b <(cat /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.*.gff) -u | wc -l
+991
+[rohit@k48 Indels]$ cat /scr/k61san/nowicklab/Lacerta/Multiz/Indels/Lacerta_dless.gff | grep -w -e conserved | bedtools intersect -a - -b /scr/bloodymary/rohit/Lacerta_viridis/annotation/new_CDS_viridis.gff -u | bedtools intersect -u -b - -a /scr/bloodymary/rohit/Lacerta_viridis/annotation/vir_abinitio_genes.bed_names | wc -l
+4698
+[rohit@k48 Indels]$ cat /scr/k61san/nowicklab/Lacerta/Multiz/Indels/Lacerta_dless.gff | grep -w -e conserved | bedtools intersect -a - -b /scr/bloodymary/rohit/Lacerta_viridis/annotation/new_CDS_viridis.gff -u -F 0.9 | bedtools intersect -u -b - -a /scr/bloodymary/rohit/Lacerta_viridis/annotation/vir_abinitio_genes.bed_names | wc -l
+3685
+[rohit@k48 Indels]$ cat /scr/k61san/nowicklab/Lacerta/Multiz/Indels/Lacerta_dless.gff | grep -w -e conserved | bedtools intersect -a - -b /scr/bloodymary/rohit/Lacerta_viridis/annotation/new_CDS_viridis.gff -u | bedtools intersect -u -b - -a /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_transcriptbasedannotation.bed | wc -l
+7677
+[rohit@k48 Indels]$ cat /scr/k61san/nowicklab/Lacerta/Multiz/Indels/Lacerta_dless.gff | grep -w -e conserved | bedtools intersect -a - -b /scr/bloodymary/rohit/Lacerta_viridis/annotation/new_CDS_viridis.gff -u -F 0.9 | bedtools intersect -u -b - -a /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_transcriptbasedannotation.bed | wc -l
+4841
+
+
+[rohit@k48 Indels]$ for file in /scr/bloodymary/rohit/Lacerta_viridis/Potion/strict/*/bs_step_3_results; do fgrep -w -f <(fgrep -w -f <(awk -F'\t' '$11>$10 && $11>1 && $1==$16 && $2!="" && 11!=999 && $11>1 && $10<=1 && $12<=1 && $15>0 && $17<=0.05 && $18<=0.05' $file | cut -f1) <(sed 's/(/\t/' /scr/bloodymary/rohit/Lacerta_viridis/Potion/strict/../cluster_file_2) | grep vir_ | grep bil_ | grep ENSACAT | grep -e ENSLOC -e ENSXET -e ENSGAL -e ENST | sed 's/.*\tvir_/vir_/' | sed 's/(vir_.*//') /scr/bloodymary/rohit/Lacerta_viridis/Potion/strict/../../divergence/viridis_ALL_whole_annotation | cut -f6 | sort -u ; done | fgrep -w -f - /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_cdsbasedannotation.bed | bedtools intersect -b - -a Lacerta_dless.gff -wb | grep -v conserved | cut -f14 | sort -u | fgrep -w -f - /scr/bloodymary/rohit/Lacerta_viridis/Potion/strict/../../divergence/viridis_ALL_whole_annotation | cut -f4 | sed 's/\^.*//' | wc -l
+19
+
+
+
+[rohit@k61 Indels]$ for file in /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/*vi*.gff; do printf $file"\t"; grep -w -e 'lacvir1-lacbil1-birth' -e 'lacvir1-lacbil1-death' dless/*.gff | sed 's/.*:Lvir_/Lvir_/' | bedtools intersect -a $file -b - -u | wc -l; done
+
+[rohit@k61 Indels]$ for file in /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/*vi*.gff; do printf $file"\n\n"; grep -w -e 'lacvir1-lacbil1-birth' -e 'lacvir1-lacbil1-death' dless/*.gff | sed 's/.*:Lvir_/Lvir_/' | bedtools intersect -b $file -a - -u ; done
+
+[rohit@bloodymary Indels]$ fgrep -w -e 'lacvir1-lacbil1-birth' -e 'lacvir1-lacbil1-death' dless/*.gff | sed 's/.*:Lvir_/Lvir_/' | bedtools intersect -a /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_cdsbasedannotation.bed -b - -u | sort -k5,5 | join -1 5 -2 6 - <(cat /scr/bloodymary/rohit/Lacerta_viridis/divergence/viridis_ALL_whole_annotation | sort -t$'\t' -k6,6) -t$'\t' -o 1.1,1.2,1.3,1.4,1.5,1.6,2.4,2.10 | wc -l
+
+
+[rohit@k61 Indels]$ for file in /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_cdsbasedannotation.*bed; do printf $file"\n"; cat dless/*.gff | grep -e 'lacvir1-lacbil1-birth' | bedtools intersect -a $file -b - -u | cut -f5 | fgrep -w -f - /scr/k70san/rohit/transcript/Fixed_Finale_Mutation_rate.txt_names | awk -F'\t' '$6!=0 && $5!=0 && ($7>=1 || $8>=1)'; done
+
+
+# Event only in Lacertids
+[rohit@k61 Indels]$ awk -F'\t' '$3=="anoCar2-birth" || $3=="anoCar2-death"' Lacerta_dless.gff | cut -f1,4,5 | sort -k1,1 -k2,2n | bedtools closest -a - -b <(grep -w 'lacvir1' Lacerta_dless.gff | sort -k1,1 -k4,4n | awk -F'\t' 'BEGIN {OFS="\t"} {print $1,$4,$5,$3,$9,$7}')  -d | grep birth | grep -e 'lacvir1-death' -e 'lacvir1-birth' | awk -F'\t' '$NF<=1000' | cut -f4-9 | bedtools intersect -b - -a <(cat /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_transcriptbasedannotation.bed_names /scr/bloodymary/rohit/Lacerta_viridis/annotation/vir_abinitio_genes.bed_names) -wo | wc -l
+3
+[rohit@k61 Indels]$ awk -F'\t' '$3=="anoCar2-birth" || $3=="anoCar2-death"' Lacerta_dless.gff | cut -f1,4,5 | sort -k1,1 -k2,2n | bedtools closest -a - -b <(grep -w 'lacvir1' Lacerta_dless.gff | sort -k1,1 -k4,4n | awk -F'\t' 'BEGIN {OFS="\t"} {print $1,$4,$5,$3,$9,$7}')  -d | grep birth | grep -e 'lacvir1-death' -e 'lacvir1-birth' | awk -F'\t' '$NF<=1000' | cut -f4-9 | bedtools intersect -b - -a <(cat /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.*.gff) -wo | wc -l
+2
+
+
+### HAL for indels
+[rohit@k61 Indels]$ maf2hal ../Lacerta_multiple_lacvir1_roast.MAF ../Lacerta_multiple_lacvir1_roast.HAL
+allMis1:  8762632 segments, 1677846 set entries, 0 dupe rows, 8611 sequences
+anoCar2:  13988157 segments, 2489274 set entries, 0 dupe rows, 4713 sequences
+galGal3:  5832582 segments, 1185072 set entries, 0 dupe rows, 55 sequences
+hg19:  3478476 segments, 826111 set entries, 0 dupe rows, 48 sequences
+lacbil1:  23461795 segments, 3590704 set entries, 0 dupe rows, 7480 sequences
+lacvir1:  24167244 segments, 3884117 set entries, 0 dupe rows, 4725 sequences
+xenTro3:  1895272 segments, 625485 set entries, 0 dupe rows, 4632 sequences
+Total Number of blocks in maf: 3669769
+
+
+[rohit@k61 Indels]$ halSummarizeMutations ../Lacerta_multiple_lacvir1_roast.HAL
+GenomeName, ParentName, BranchLength, GenomeLength, ParentLength, Subtitutions, Transitions, Transversions, Matches, GapInsertions, GapInsertedBases, GapDeletions, GapDeletedBases, Insertions, InsertionBases, Deletions, DeletionBases, Inversions, InvertedBases, Duplications, DuplicatedBases, Transpositions, TranspositionBases, Other
+allMis1, lacvir1, 1, 2129967066, 1439717927, 33971061, 19097694, 14772026, 89297461, 1396749, 6260831, 6464357, 205210359, 48373, 224550597, 22070, 1105339, 4, 171, 0, 0, 11, 494, 758285
+anoCar2, lacvir1, 1, 1691127102, 1439717927, 61312922, 34638989, 26360334, 161685394, 2508186, 11079719, 5874112, 144437936, 107762, 55489212, 90866, 4723724, 3, 112, 0, 0, 65, 9616, 1276578
+galGal3, lacvir1, 1, 1100472353, 1439717927, 23081940, 13014456, 9917139, 59756280, 861179, 4319217, 7619671, 242395347, 21855, 11132199, 12322, 616704, 4, 211, 0, 0, 19, 1497, 606290
+hg19, lacvir1, 1, 3040229751, 1439717927, 14860527, 8079917, 6777422, 38815911, 510278, 3442808, 8682738, 270930492, 12340, 137103940, 6177, 477621, 1, 136, 0, 0, 10, 704, 424365
+lacbil1, lacvir1, 1, 1417827852, 1439717927, 20272355, 12818169, 7453881, 1241316630, 1913745, 7374370, 2198181, 25583352, 226213, 106384609, 199481, 51264430, 40, 30792, 0, 0, 899, 1989981, 0
+xenTro3, lacvir1, 1, 1265975720, 1439717927, 10508420, 5244084, 4844688, 24199209, 257019, 2289786, 9594670, 286134881, 18712, 140107096, 3984, 213884, 0, 0, 0, 0, 11, 485, 399069
+Total, ,6, 10645599844, 8638307562, 164007225, 92893309, 70125490, 1615070885, 7447156, 34766731, 40433729, 1174692367, 435255, 674767653, 334900, 58401702, 52, 31422, 0, 0, 1015, 2002777, 3382621
+Average, ,1, 1774266640, 1439717927, 27334537, 15482218, 11687581, 269178480, 1241192, 5794455, 6738954, 195782061, 72542, 112461275, 55816, 9733617, 8, 5237, 0, 0, 169, 333796, 563772
+
+
+# Differences between lacertids
+20272355+7374370+25583352+106384609+51264430+30792+1989981 = 212899889
+212899889÷1417827852 = 0.150159195
+[rohit@k61 Indels]$ halBranchMutations ../Lacerta_multiple_lacvir1_roast.HAL lacbil1 --refFile ins_lacbil1.bed --parentFile del_lacbil1.bed
+
+
+
+
+
+
+
+### Fragments in conserved long blocks
+[rohit@bloodymary Indels]$ awk -F'\t' '$3=="conserved" {a[$1]+=$5-$4} END {for(i in a) print i"\t"a[i] }' Lacerta_dless.gff | sort -k2,2nr | head -3
+Lvir_958        225965
+Lvir_2386       199337
+Lvir_2413       164509
+[rohit@bloodymary Indels]$ fgrep -A 8 -w Lvir_958 ../Lacerta_multiple_lacvir1_roast.maf >check
+[rohit@bloodymary Indels]$ grep lacbil check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - check | awk '{print $2"\t"$4}'| awk -F'\t' '{a[$1]+=$2} END {for(i in a) print i"\t"a[i] }' | sort -k2,2nr | head -3
+lacbil1.Lbil_7452       587806
+lacbil1.Lbil_7248       568402
+lacbil1.Lbil_1715       448977
+
+
+[rohit@bloodymary Indels]$ fgrep -B 1 -w 'lacbil1.Lbil_7452' ../Lacerta_multiple_lacvir1_roast.maf | grep lacvir | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - check | awk '{print $2"\t"$4}'| awk -F'\t' '{a[$1]+=$2} END {for(i in a) print i"\t"a[i] }' | sort -k2,2nr | head -3
+lacvir1.Lvir_958        2567384
+ 
+
+[rohit@bloodymary Indels]$ for type in lacbil hg19 galGal anoCar xenTro allMis; do printf $type"\t"; fgrep "$type" check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - check | awk '{print $2"\t"$4}'| awk -F'\t' '{a[$1]+=$2} END {for(i in a) print i"\t"a[i] }' | sort -k2,2nr | head -1; done
+lacbil  lacbil1.Lbil_7452       587806
+hg19    hg19.chr10      169253
+galGal  galGal3.chr6    234885
+anoCar  anoCar2.chr3    345037
+xenTro  xenTro3.GL172874        39642
+allMis  allMis1.JH739006        91079
+
+
+[rohit@bloodymary Indels]$ mkdir -p large_Lvir_958
+[rohit@bloodymary Indels]$ samtools faidx ~/Lacertidae/vir_filt_var_1_checked_final.fasta Lvir_958 >./large_Lvir_958/lacvir1.fa
+[rohit@bloodymary Indels]$ samtools faidx ~/Lacertidae/bil_filt_var_1_checked_final.fasta Lbil_7452 >./large_Lvir_958/lacbil1.fa
+
+
+[rohit@bloodymary large_Lvir_958]$ #for type in lacbil hg19 galGal anoCar xenTro allMis; do printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3+$4}'| fgrep -e chr10 -e Lbil_7452 -e chr6 -e chr3 -e GL172874 -e JH739006 | sort -k2,2n | head -1; done
+[rohit@bloodymary large_Lvir_958]$ for type in lacbil; do printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3-$4}'| fgrep -w Lbil_7452 | sort -k2,2n | head -1; printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3+$4}'| fgrep -w Lbil_7452 | sort -k2,2nr | head -1; done
+lacbil  lacbil1.Lbil_7452       -332
+lacbil  lacbil1.Lbil_7452       590638
+[rohit@bloodymary large_Lvir_958]$ for type in hg19; do printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3-$4}'| fgrep -w chr10 | sort -k2,2n | head -1; printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3+$4}'| fgrep -w chr10 | sort -k2,2nr | head -1; done
+hg19    hg19.chr10      31624850
+hg19    hg19.chr10      100640019
+[rohit@bloodymary large_Lvir_958]$ for type in anoCar2; do printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3-$4}'| fgrep -w chr3 | sort -k2,2n | head -1; printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3+$4}'| fgrep -w chr3 | sort -k2,2nr | head -1; done
+anoCar2 anoCar2.chr3    23639201
+anoCar2 anoCar2.chr3    203050232
+[rohit@bloodymary large_Lvir_958]$ for type in galGal3; do printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3-$4}'| fgrep -w chr6 | sort -k2,2n | head -1; printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3+$4}'| fgrep -w chr6 | sort -k2,2nr | head -1; done
+galGal3 galGal3.chr6    4323751
+galGal3 galGal3.chr6    24562230
+[rohit@bloodymary large_Lvir_958]$ for type in xenTro; do printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3-$4}'| fgrep -w GL172874 | sort -k2,2n | head -1; printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3+$4}'| fgrep -w GL172874 | sort -k2,2nr | head -1; done
+xenTro  xenTro3.GL172874        321148
+xenTro  xenTro3.GL172874        1619823
+[rohit@bloodymary large_Lvir_958]$ for type in allMis; do printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3-$4}'| fgrep -w JH739006 | sort -k2,2n | head -1; printf $type"\t"; fgrep "$type" ../check | sed -e 's/^s //' -e 's/  .*//' | sed 's/ .*//' | sort -u | fgrep -w -f - ../check | awk '{print $2"\t"$3+$4}'| fgrep -w JH739006 | sort -k2,2nr | head -1; done
+allMis  allMis1.JH739006        -166
+allMis  allMis1.JH739006        724057
+
+
+
+[rohit@bloodymary large_Lvir_958]$ samtools faidx hg19.fa "chr10:31624850-100640019" >hg19.fa2
+[rohit@bloodymary large_Lvir_958]$ samtools faidx anoCar2.fa "chr3:23639201-203050232" >anoCar2.fa2
+[rohit@bloodymary large_Lvir_958]$ samtools faidx galGal3.fa "chr6:4323751-24562230" >galGal3.fa2
+
+
+[rohit@k61 ~]$ awk -F'\t' '$4=="D" || $4=="I" || $4=="P" || $4=="U" || $4=="V"' /scr/k61san/nowicklab/Lacerta/Multiz/Indels/del_lacbil1.bed | awk -F'\t' 'BEGIN{OFS="\t"} {gsub("D","DEL",$4); gsub("I","INS",$4); gsub("V","INV",$4); gsub("U","DUP",$4); gsub("P","TRA",$4); print}' >/scr/k61san/nowicklab/Lacerta/Multiz/Indels/HAL_SVs.bed
+
+
+[rohit@k61 Indels]$ halBranchMutations ../Lacerta_multiple_lacvir1_roast.HAL lacvir1 --refFile ins_lacvir1.bed --parentFile del_lacvir1.bed; awk -F'\t' '$4=="D" || $4=="I" || $4=="P" || $4=="U" || $4=="V"' /scr/k61san/nowicklab/Lacerta/Multiz/Indels/ins_lacvir1.bed | awk -F'\t' 'BEGIN{OFS="\t"} {gsub("D","DEL",$4); gsub("I","INS",$4); gsub("V","INV",$4); gsub("U","DUP",$4); gsub("P","TRA",$4); print}' >/scr/k61san/nowicklab/Lacerta/Multiz/Indels/HAL_SVs.bed
+
+
+[rohit@k61 Indels]$ tail -n +3 /scr/k61san/nowicklab/Lacerta/Multiz/Indels/ins_lacbil1.bed | sort -k1,1V -k2,2n -k3,3nr | awk -F'\t' 'BEGIN{OFS="\t"} {$5=$3-$2; $6="+"; print }' >sort_ins_lacbil1.bed
+[rohit@k61 Indels]$ halLiftover --inMemory --keepExtra /scr/k61san/nowicklab/Lacerta/Multiz/BIL_ref/Lacerta_bilineata_multiple.roast.HAL lacbil1 sort_ins_lacbil1.bed lacvir1 ins_lacbil1_2lacvir1.bed
+
+
+[rohit@bloodymary Indels]$ tail -n +3 del_lacvir1.bed | sort -k1,1V -k2,2n -k3,3nr | awk -F'\t' 'BEGIN{OFS="\t"} {$5=$3-$2; $6="+"; print }' | sed -e 's/\tGD\t/\tGINS\t/' -e 's/\tGI\t/\tGDEL\t/' -e 's/\tD\t/\tINS\t/' -e 's/\tI\t/\tDEL\t/' | sed -e 's/INS\t/I\t/' -e 's/DEL\t/D\t/' >sort_del_lacvir1.bed 
+[rohit@k61 Indels]$ halLiftover --inMemory --keepExtra /scr/k61san/nowicklab/Lacerta/Multiz/Lacerta_multiple_lacvir1_roast.HAL lacbil1 sort_del_lacvir1.bed lacvir1 del_lacvir1_2lacvir1.bed
+
+
+[rohit@bloodymary Indels]$ tail -n +3 ins_lacvir1.bed | sort -k1,1V -k2,2n -k3,3nr | awk -F'\t' 'BEGIN{OFS="\t"} {$5=$3-$2; $6="+"; print }' | sed -e 's/\tGD\t/\tGINS\t/' -e 's/\tGI\t/\tGDEL\t/' -e 's/\tD\t/\tINS\t/' -e 's/\tI\t/\tDEL\t/' | sed -e 's/INS\t/I\t/' -e 's/DEL\t/D\t/' >ins_lacvir1_2lacvir1.bed 
+
+
+[rohit@k61 Indels]$ cat del_lacvir1_2lacvir1.bed ins_lacvir1_2lacvir1.bed | grep -v '^#' | sort -k1,1V -k2,2n -k3,3nr >REF_lacbil.HAL.bed
+[rohit@k61 Indels]$ cat <(cat del_lacbil1.bed | awk -F'\t' 'BEGIN{OFS="\t"} {$5=$3-$2; $6="+"; print }') ins_lacbil1_2lacvir1.bed | grep -v '^#' | sort -k1,1V -k2,2n -k3,3nr >REF_lacvir1.HAL.bed
+
+
+[rohit@bloodymary Indels]$ sh run_merge_hal.sh
+
+# [rohit@k61 Indels]$ fgrep -w -e I -e D -e V -e U -e P finish_HAL_SVs.bed | sed -e 's/\tI\t/\tINS\t/' -e 's/\tD\t/\tDEL\t/' | awk -F'\t' 'BEGIN{OFS="\t"} {if($4=="INS") {$3=$2+1; print $0} else print $0}' >FIN_HAL_SVs.bed
+
+[rohit@k61 Indels]$ fgrep -w -e I -e D -e V -e U -e P finish_HAL_SVs.bed | sed -e 's/\tI\t/\tINS\t/' -e 's/\tD\t/\tDEL\t/' -e 's/\tV\t/\tINV\t/' -e 's/\tP\t/\tTRA\t/' -e 's/\tU\t/\tDUP\t/' >FIN_HAL_SVs.bed
+
+
+[rohit@k61 Lacerta_viridis]$ sh /scr/bloodymary/rohit/Lacerta_viridis/SVs/HIGH/change_snifflesvcf_to_bed.sh /scr/k61san/nowicklab/Lacerta/SV-detection/Pacbio/sniffles_self_bil2bil.vcf /scr/k61san/nowicklab/Lacerta/Multiz/Indels/sniffles_self_bil2bil.bed_orig
+
+
+# [rohit@bloodymary Indels]$ halLiftover --inMemory --keepExtra /scr/k61san/nowicklab/Lacerta/Multiz/Lacerta_multiple_lacvir1_roast.HAL lacbil1 /scr/k61san/nowicklab/Lacerta/SV-detection/Pacbio/sniffles_self_bil2bil.BED lacvir1 sniffles_self_bil2bil_2lacvir1.bed
+
+[rohit@k61 Indels]$ cp ../../SV-detection/Pacbio/sniffles_self_bil2bil.BED .
+[rohit@k61 Indels]$ sort -k1,1V -k2,2n -k3,3n sniffles_self_bil2bil.BED | cut -f1-3 >sniffles_self_bil2bil.BED2
+[rohit@bloodymary Indels]$ halLiftover --inMemory --keepExtra /scr/k61san/nowicklab/Lacerta/Multiz/BIL_ref/Lacerta_bilineata_multiple.roast.HAL lacbil1 sniffles_self_bil2bil.BED2 lacvir1 sniffles_self_bil2bil_2lacvir1.bed
+
+

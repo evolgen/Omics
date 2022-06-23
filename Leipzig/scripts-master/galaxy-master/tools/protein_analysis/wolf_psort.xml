@@ -1,0 +1,150 @@
+<tool id="wolf_psort" name="WoLF PSORT" version="0.0.7">
+    <description>Eukaryote protein subcellular localization prediction</description>
+    <command interpreter="python">
+      wolf_psort.py $organism "\$GALAXY_SLOTS" "$fasta_file" "$tabular_file"
+      ##If the environment variable isn't set, get "", and python wrapper
+      ##defaults to four threads.
+    </command>
+    <stdio>
+        <!-- Anything other than zero is an error -->
+        <exit_code range="1:" />
+        <exit_code range=":-1" />
+    </stdio>
+    <inputs>
+        <param name="fasta_file" type="data" format="fasta" label="FASTA file of protein sequences"/> 
+        <param name="organism" type="select" display="radio" label="Organism">
+            <option value="animal">Animal</option>
+            <option value="plant">Plant</option>
+            <option value="fungi">Fungi</option>
+        </param>
+    </inputs>
+    <outputs>
+        <data name="tabular_file" format="tabular" label="WoLF PSORT $organism results" />
+    </outputs>
+    <requirements>
+        <requirement type="binary">runWolfPsortSummary</requirement>
+    </requirements>
+    <tests>
+        <test>
+            <param name="fasta_file" value="four_human_proteins.fasta" ftype="fasta"/>
+            <param name="organism" value="animal"/>
+            <output name="tabular_file" file="four_human_proteins.wolf_psort.tabular" ftype="tabular"/>
+        </test>
+        <test>
+            <param name="fasta_file" value="empty.fasta" ftype="fasta"/>
+            <param name="organism" value="animal"/>
+            <output name="tabular_file" file="empty_wolf_psort.tabular" ftype="tabular"/>
+        </test>
+        <test>
+            <param name="fasta_file" value="empty.fasta" ftype="fasta"/>
+            <param name="organism" value="plant"/>
+            <output name="tabular_file" file="empty_wolf_psort.tabular" ftype="tabular"/>
+        </test>
+        <test>
+            <param name="fasta_file" value="empty.fasta" ftype="fasta"/>
+            <param name="organism" value="fungi"/>
+            <output name="tabular_file" file="empty_wolf_psort.tabular" ftype="tabular"/>
+        </test>
+    </tests>
+    <help>
+    
+**What it does**
+
+This calls the WoLF PSORT tool for prediction of eukaryote protein subcellular localization.
+
+The input is a FASTA file of protein sequences, and the output is tabular with four columns (multiple rows per protein):
+
+====== ===================
+Column Description
+------ -------------------
+     1 Sequence identifier
+     2 Compartment
+     3 Score
+     4 Prediction rank
+====== ===================
+
+
+**Localization Compartments**
+
+The table below gives the WoLF PSORT localization site definitions, and the corresponding Gene Ontology (GO) term.
+
+====== ===================== =====================
+Abbrev Localization Site     GO Cellular Component
+------ --------------------- ---------------------
+chlo   chloroplast           0009507, 0009543
+cyto   cytosol               0005829
+cysk   cytoskeleton          0005856(2)
+E.R.   endoplasmic reticulum 0005783
+extr   extracellular         0005576, 0005618
+golg   Golgi apparatus       0005794(1)
+lyso   lysosome		     0005764
+mito   mitochondria	     0005739
+nucl   nuclear		     0005634
+pero   peroxisome	     0005777(2)
+plas   plasma membrane	     0005886
+vacu   vacuolar membrane     0005774(2)
+====== ===================== =====================
+
+Numbers in parentheses, such as "0005856(2)" indicate that descendant "part_of"
+cellular components were also included, up to the specified depth (2 in this case).
+For example, all of the children and grandchildren of "GO:0005856" were
+included as "cysk". 
+
+Additionally compound predictions like mito_nucl are also given.
+
+
+**Notes**
+
+The raw output from WoLF PSORT looks like this (space separated), showing two proteins:
+
+================================ ============================================
+gi|301087619|ref|XP_002894699.1| extr 12, mito 4, E.R. 3, golg 3, mito_nucl 3
+gi|301087623|ref|XP_002894700.1| extr 21, mito 2, cyto 2, cyto_mito 2
+================================ ============================================
+
+This is reformatted into a tabular file as follows for use in Galaxy:
+
+================================ =========== ===== ====
+#ID                              Compartment Score Rank
+-------------------------------- ----------- ----- ----
+gi|301087619|ref|XP_002894699.1| extr           12    1
+gi|301087619|ref|XP_002894699.1| mito            4    2
+gi|301087619|ref|XP_002894699.1| E.R.            3    3
+gi|301087619|ref|XP_002894699.1| golg            3    4
+gi|301087619|ref|XP_002894699.1| mito_nucl       3    5
+gi|301087623|ref|XP_002894700.1| extr           21    1
+gi|301087623|ref|XP_002894700.1| mito            2    2
+gi|301087623|ref|XP_002894700.1| cyto            2    3
+gi|301087623|ref|XP_002894700.1| cyto_mito       2    4
+================================ =========== ===== ====
+
+This way you can easily filter for things like having a top prediction for
+mitochondria (c2=='mito' and c4==1), or extracellular with a score of at
+least 10 (c2=='extr' and 10&lt;=c3), and so on.
+
+
+**References**
+
+If you use this Galaxy tool in work leading to a scientific publication please
+cite the following papers:
+
+Peter J.A. Cock, Björn A. Grüning, Konrad Paszkiewicz and Leighton Pritchard (2013).
+Galaxy tools and workflows for sequence analysis with applications
+in molecular plant pathology. PeerJ 1:e167
+http://dx.doi.org/10.7717/peerj.167
+
+Paul Horton, Keun-Joon Park, Takeshi Obayashi, Naoya Fujita, Hajime Harada, C.J. Adams-Collier, and Kenta Nakai (2007).
+WoLF PSORT: Protein Localization Predictor.
+Nucleic Acids Research, 35(S2), W585-W587.
+http://dx.doi.org/10.1093/nar/gkm259
+
+Paul Horton, Keun-Joon Park, Takeshi Obayashi and Kenta Nakai (2006).
+Protein Subcellular Localization Prediction with WoLF PSORT.
+Proceedings of the 4th Annual Asia Pacific Bioinformatics Conference APBC06, Taipei, Taiwan. pp. 39-48.
+
+See also http://wolfpsort.org
+
+This wrapper is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/tmhmm_and_signalp
+    </help>
+</tool>

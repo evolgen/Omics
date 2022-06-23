@@ -1,0 +1,5 @@
+
+[rohit@bloodymary paper]$ paste <(grep 'SINEs' /scr/k61san/nowicklab/Lacerta/RepeatMasker/data_repeatmasker_Tetrapoda.txt_filt_2 | cut -f1,5 | sort -k1,1) <(grep 'LINEs' /scr/k61san/nowicklab/Lacerta/RepeatMasker/data_repeatmasker_Tetrapoda.txt_filt_2 | cut -f1,5 | sort -k1,1) <(grep 'DNA' /scr/k61san/nowicklab/Lacerta/RepeatMasker/data_repeatmasker_Tetrapoda.txt_filt_2 | cut -f1,5 | sort -k1,1) | cut -f1,2,4,6 | sed -e 's/lepOcu1/Lepisosteus oculatus/' -e 's/xenTro3/Xenopus tropicalis/' -e 's/cheMyd/Chelonia mydas/' -e 's/allMis1/Alligator mississippiensis/' -e 's/pytBit5/Python bivittatus/' -e 's/anoCar2/Anolis carolinensis/' -e 's/lacVir1/Lacerta viridis/' -e 's/lacBil1/Lacerta bilineata/' -e 's/gekJap1/Gekko japonicus/' -e 's/taeGut1/Taeniopygia guttata/' -e 's/galGal4/Gallus gallus/' -e 's/ornAna5/Ornithorhynchus anatinus/' -e 's/mm9/Mus musculus/' -e 's/hg38/Homo sapiens/' | sed  '1i Species(Genome-version)\tSINEs(% in genome)\tLINEs(% in genome)\tDNA transposons(% in genome)' >Repeatmasker_species.txt
+
+
+

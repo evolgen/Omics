@@ -1,0 +1,102 @@
+Name
+    Copyright (c) 2009-2011 BENM(Binxiao) Feng All Rights Reserved Send all
+    comments to BENM - BinxiaoFeng@gmail.com
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation, either version 3 of the License, or (at your
+    option) any later version. This program is distributed in the hope that
+    it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details. You should have received a
+    copy of the GNU General Public License along with this program. If not,
+    see <http://www.gnu.org/licenses/>.
+
+    simulateSeq.pl -- PERL script for simulating NGS's sequence with
+    variation & paired-end reads (single-end reads supported); it can output
+    Solexa, SOLiD, 454, 3730, std(sanger) all types format seqencing reads &
+    quality data.
+
+Description
+    This are three main functions in this program:
+
+    (1) This program will be used to make random diversity dna sequence with
+    a set happening frequecy It can make an offspring(testing) sequence with
+    mutation according to a ancestor(reference) sequence, which could either
+    be given by the input file, or randomly generated;
+
+    (2)Simulate sequence with some structure vairation cases The structure
+    vairation(SV) can be comprised of Deletion, Insertion, Inversion,
+    Duplication, Translocation, each of these 5 main SV elements, or their
+    combination. And it can be simulate sequence with SNPs, Indel, base bias
+    too;
+
+    (3)Simulate singled-end and paired-end (mate pairs) reads Meanwhile it
+    can output the SE or PE reads according to the simulated testing
+    sequence, and it can output with fasta or fastq format by modified the
+    option of "--type"
+
+    More detail and options you can look for below Usage and Exmple.
+
+Version
+Author: BENM <binxiaofeng@gmail.com>
+Birthday: 2007-12-26
+Update: May,26th,2011
+Version: 0.2.2
+Usage
+            perl simulateSeq.pl [options] [ seq.fa | STDIN ] [>SV.log]
+
+      ***** Sequence parameters *****
+            --Ref <outfile>    make the reference(ancestor) sequence:[chrS.fasta]
+            --Seq <outfile>    make the testing(offspring) diploid sequence:[Seq.fasta]
+            --num <int>        set number of testing sequences [1]
+            --SeqName <str>    set simulated testing sequence name: [chrS]
+            --Reverse          simulate the testing reversed sequence compared to reference
+            --Complement       simulate the testing complement sequence compared to reference
+            --RC               simulate the reversed and complmented sequence compared to reference
+            --len <int>        set length of the sequence, default: whole sequence
+            --BAC <num1-num2-num3>       make a number of BAC, num1 is BAC's number, num2 is BAC's length, num3 is sd of BAC's lenth
+            --vector <str>     add vector sequence to BAC clone sequencing
+            --enzyme <str>     restriction digestive enzyme site sequence [File or STDIN, example EcoRI: AATT]
+            --qual_th <num1-num2-num3-num4>    set higher quality scores theshold of 5' end bases: <3' reads split position-5'endquality_theshold-3'end quality theshold-quality variance>, default: 5-30-20-2
+
+      ***** Mutation parameters *****
+            --div <float>      set divergency rate of the offspring sequences, it is used for SNPs and Indels [0]
+            --changeb <str> only change the base by setting, Case-sensitive, it is used for methylation
+            --Del <int[-start:int-end:int-size:int]>    set Deletion vairation number 
+            --Ins <int[-start:int-end:int-size:int]>    set Insertion vairation number 
+            --Inv <int[-start:int-end:int-size:int]>    set Inversion vairation number 
+            --Dup <int[-start:int-end:int-size:int]>    set Duplication vairation number
+            --Tran <int[-start:int-end:int-size:int]>   set Translocation vairation number
+            --size <num>        if  the above vairation seting hasn't  defined the size, it can use the common
+                                vairation size setting here.
+                                For example: ~1000, "~" means around 1000, has 20 deviation, which set by the "ISSD"
+                                option, if no this symbol, it will be precise size.
+            --mutation          Output muation report
+
+      ***** Read parameters *****
+            --PE <int|numX>     make a number of pair-end reads for each sequence [1 pairs = 2 reads]
+            --ISPE <int>        set insert size (outer coordinate) of the pair-end reads [135]
+            --ISSD <float>      set insert size standard deviation [10]
+            --RL <int-int>      set reads' length of each end of pairs,(if "null" or "0" means SE, both of num
+                                can't be 0) [35-35]
+            --ReadsSD <float>   set reads length standard deviation, it used to long reads[0]
+            --name <str>        set the pair-end reads name, (In fa format, it will give the general name),
+                                default: BENM_2010_0719_021
+            --type < solexa[fa|fq|stdfq] || solid[fa|fq|stdfq] || 454[fa|fq|stdfq] || 3730[fa|fq|stdfq] || stdfq>
+                                output the sequence with simulate fasta or fastq format [stdfq]
+            --header <str>      Solid header base [G]
+            --adapter <infile>  Adapter sequence file, sequence name should use 5' and 3' to mark different adapter 
+            --normal_strand     set the normal strands of two reads of PE [FR],SOLiD type:[RF], 454 type[RF];
+            --circle            it set for circle chromosome(Chloroplast Mitochondrion and BAC) generate PE data
+
+      ***** Display parameters *****
+            --outdir <str>      set the output directory for storing  result [Simulated-result]
+            --display <int>     set the fasta file displayed how many bases in each lines [50]
+            --Example           output Example to screen
+            --verbose           output verbose information to screen
+            --help              output help information to screen
+
+Exmple
+            check out "perl simulateSeq.pl --Example"
+ 

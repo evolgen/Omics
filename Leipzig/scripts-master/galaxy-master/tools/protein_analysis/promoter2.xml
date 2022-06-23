@@ -1,0 +1,85 @@
+<tool id="promoter2" name="Promoter 2.0" version="0.0.7">
+    <description>Find eukaryotic PolII promoters in DNA sequences</description>
+    <!-- If job splitting is enabled, break up the query file into parts -->
+    <!-- Using 2000 per chunk so 4 threads each doing 500 is ideal -->
+    <parallelism method="basic" split_inputs="fasta_file" split_mode="to_size" split_size="2000" merge_outputs="tabular_file"></parallelism>
+    <command interpreter="python">
+        promoter2.py "\$GALAXY_SLOTS" "$fasta_file" "$tabular_file"
+        ##If the environment variable isn't set, get "", and the python wrapper
+        ##defaults to four threads.
+    </command>
+    <stdio>
+        <!-- Anything other than zero is an error -->
+        <exit_code range="1:" />
+        <exit_code range=":-1" />
+    </stdio>
+    <inputs>
+        <param name="fasta_file" type="data" format="fasta" label="FASTA file of DNA sequences"/> 
+    </inputs>
+    <outputs>
+        <data name="tabular_file" format="tabular" label="Promoter2 on ${fasta_file.name}" />
+    </outputs>
+    <requirements>
+        <requirement type="binary">promoter</requirement>
+    </requirements>
+    <tests>
+        <test>
+            <param name="fasta_file" value="Adenovirus.fasta" ftype="fasta"/>
+            <output name="tabular_file" file="Adenovirus.promoter2.tabular" ftype="tabular"/>
+        </test>
+        <test>
+            <param name="fasta_file" value="empty.fasta" ftype="fasta"/>
+            <output name="tabular_file" file="empty_promoter2.tabular" ftype="tabular"/>
+        </test>
+    </tests>
+    <help>
+    
+**What it does**
+
+This calls the Promoter 2.0 tool for prediction of eukaryotic PolII promoter sequences using a Neural Network (NN) model.
+
+The input is a FASTA file of nucleotide sequences (e.g. upstream regions of your genes), and the output is tabular with five columns (one row per promoter):
+
+====== ==================================================
+Column Description
+------ --------------------------------------------------
+     1 Sequence identifier (first word of FASTA header)
+     2 Promoter position, e.g. 600
+     3 Promoter score, e.g. 1.063
+     4 Promoter likelihood, e.g. Highly likely prediction
+====== ==================================================
+
+The scores are classified very simply as follows:
+
+========= ========================
+Score     Description
+--------- ------------------------
+below 0.5 ignored
+0.5 - 0.8 Marginal prediction
+0.8 - 1.0 Medium likely prediction
+above 1.0 Highly likely prediction 
+========= ========================
+
+Internally the input FASTA file is divided into parts (to allow multiple processors to be used), and the raw output is reformatted into this tabular layout suitable for downstream analysis within Galaxy.
+
+**References**
+
+If you use this Galaxy tool in work leading to a scientific publication please
+cite the following papers:
+
+Peter J.A. Cock, Björn A. Grüning, Konrad Paszkiewicz and Leighton Pritchard (2013).
+Galaxy tools and workflows for sequence analysis with applications
+in molecular plant pathology. PeerJ 1:e167
+http://dx.doi.org/10.7717/peerj.167
+
+Steen Knudsen (1999).
+Promoter2.0: for the recognition of PolII promoter sequences.
+Bioinformatics, 15:356-61.
+http://dx.doi.org/10.1093/bioinformatics/15.5.356
+
+See also http://www.cbs.dtu.dk/services/Promoter/output.php
+
+This wrapper is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/tmhmm_and_signalp
+    </help>
+</tool>

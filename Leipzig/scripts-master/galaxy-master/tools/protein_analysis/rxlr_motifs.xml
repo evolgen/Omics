@@ -1,0 +1,178 @@
+<tool id="rxlr_motifs" name="RXLR Motifs" version="0.0.8">
+    <description>Find RXLR Effectors of Plant Pathogenic Oomycetes</description>
+    <command interpreter="python">
+      rxlr_motifs.py "$fasta_file" "\$GALAXY_SLOTS" $model "$tabular_file"
+    </command>
+    <stdio>
+        <!-- Anything other than zero is an error -->
+        <exit_code range="1:" />
+        <exit_code range=":-1" />
+    </stdio>
+    <inputs>
+        <param name="fasta_file" type="data" format="fasta" label="FASTA file of protein sequences" /> 
+        <param name="model" type="select" label="Which RXLR model?">
+            <option value="Bhattacharjee2006">Bhattacharjee et al. (2006) RXLR</option>
+            <option value="Win2007">Win et al. (2007) RXLR</option>
+            <option value="Whisson2007" selected="True">Whisson et al. (2007) RXLR-EER with HMM</option>
+        </param>
+    </inputs>
+    <outputs>
+        <data name="tabular_file" format="tabular" label="$model.value_label" />
+    </outputs>
+    <requirements>
+        <!-- Need SignalP for all the models -->
+        <requirement type="binary">signalp</requirement>
+        <!-- Need HMMER for Whisson et al. (2007) -->
+        <requirement type="binary">hmmsearch</requirement>
+    </requirements>
+    <tests>
+        <test>
+            <param name="fasta_file" value="rxlr_win_et_al_2007.fasta" ftype="fasta" />
+            <param name="model" value="Win2007" />
+            <output name="tabular_file" file="rxlr_win_et_al_2007.tabular" ftype="tabular" />
+        </test>
+        <test>
+            <param name="fasta_file" value="empty.fasta" ftype="fasta"/>
+            <param name="model" value="Bhattacharjee2006"/>
+            <output name="tabular_file" file="empty_rxlr.Bhattacharjee2006.tabular" ftype="tabular"/>
+        </test>
+        <test>
+            <param name="fasta_file" value="empty.fasta" ftype="fasta"/>
+            <param name="model" value="Win2007"/>
+            <output name="tabular_file" file="empty_rxlr.Win2007.tabular" ftype="tabular"/>
+        </test>
+        <test>
+            <param name="fasta_file" value="empty.fasta" ftype="fasta"/>
+            <param name="model" value="Whisson2007"/>
+            <output name="tabular_file" file="empty_rxlr.Whisson2007.tabular" ftype="tabular"/>
+        </test>
+    </tests>
+    <help>
+    
+**Background**
+
+Many effector proteins from oomycete plant pathogens for manipulating the host
+have been found to contain a signal peptide followed by a conserved RXLR motif
+(Arg, any amino acid, Leu, Arg), and then sometimes EER (Glu, Glu, Arg). There
+are striking parallels with the malarial host-targeting signal (Plasmodium
+export element, or "Pexel" for short).
+
+-----
+
+**What it does**
+
+Takes a protein sequence FASTA file as input, and produces a simple tabular
+file as output with one line per protein, and two columns giving the sequence
+ID and the predicted class. This is typically just whether or not it had the
+selected RXLR motif (Y or N).
+
+-----
+
+**Bhattacharjee et al. (2006) RXLR Model**
+
+Looks for the oomycete motif RXLR as described in Bhattacharjee et al. (2006).
+
+Matches must have a SignalP Hidden Markov Model (HMM) score of at least 0.9,
+a SignalP Neural Network (NN) predicted cleavage site giving a signal peptide
+length between 10 and 40 amino acids inclusive, and the RXLR pattern must be
+after but within 100 amino acids of the cleavage site.
+SignalP is run truncating the sequences to the first 70 amino acids, which was
+the default on the SignalP webservice used in Bhattacharjee et al. (2006).
+
+
+**Win et al. (2007) RXLR Model**
+
+Looks for the protein motif RXLR as described in Win et al. (2007).
+
+Matches must have a SignalP Hidden Markov Model (HMM) score of at least 0.9,
+a SignalP Neural Network (NN) predicted cleavage site giving a signal peptide
+length between 10 and 40 amino acids inclusive, and the RXLR pattern must be
+after the cleavage site and start between amino acids 30 and 60.
+SignalP is run truncating the sequences to the first 70 amino acids, to match
+the methodology of Torto et al. (2003) followed in Win et al. (2007).
+
+
+**Whisson et al. (2007) RXLR-EER with HMM**
+
+Looks for the protein motif RXLR-EER using the heuristic regular expression
+methodolgy, which was an extension of the Bhattacharjee et al. (2006) model,
+and a HMM as described in Whisson et al. (2007).
+
+All the requirements described above for Bhattacharjee et al. (2006) apply,
+but rather than just looking for RXLR with the regular expression R.LR the
+more complicated regular expression R.LR.{,40}[ED][ED][KR] is used. This means
+RXLR (Arg, any amino acid, Leu, Arg), then a stretch of up to forty amino
+acids before Glu/Asp, Glu/Asp, Lys/Arg. The EER part of the name is perhaps
+misleading as it also allows for DDR, EEK, and so on.
+
+Unlike Bhattacharjee et al. (2006) which used the SignalP webservice which
+defaults to truncating the sequences at 70 amino acids, Whisson et al. (2007)
+used the SignalP 3.0 command line tool with its default of not truncating the
+sequences. This does alter some of the scores, and also takes a little longer.
+
+Additionally HMMER 2.3.2 is run to look for a cross validated HMM for the
+RXLR-ERR domain based on known positive examples. There are no restrictions
+on where within the protein the HMM match must be found.
+
+The output of this model has four classes:
+ * Y = Yes, both the heuristic motif and HMM were found.
+ * re = Only the heuristic SignalP with regular expression motif was found.
+ * hmm = Only the HMM was found.
+ * neither = Niether the heuristic motif nor HMM was found.
+
+-----
+
+**Note**
+
+Both Bhattacharjee et al. (2006) and Win et al. (2007) used SignalP v2.0, which
+is no longer available. The current release is SignalP v3.0 (Mar 5, 2007), so
+this is used instead. SignalP is called with the Eukaryote model and the short
+output (one line per protein). Any sequence truncation (e.g. to 70 amino acids)
+is handled via the intemediate sequence files.
+
+-----
+
+**References**
+
+If you use this Galaxy tool in work leading to a scientific publication please
+cite Cock et al. (2013) and the appropriate method paper(s):
+
+Peter J.A. Cock, Björn A. Grüning, Konrad Paszkiewicz and Leighton Pritchard (2013).
+Galaxy tools and workflows for sequence analysis with applications
+in molecular plant pathology. PeerJ 1:e167
+http://dx.doi.org/10.7717/peerj.167
+
+Stephen C. Whisson, Petra C. Boevink, Lucy Moleleki, Anna O. Avrova, Juan G. Morales, Eleanor M. Gilroy, Miles R. Armstrong, Severine Grouffaud, Pieter van West, Sean Chapman, Ingo Hein, Ian K. Toth, Leighton Pritchard and Paul R. J. Birch (2007).
+A translocation signal for delivery of oomycete effector proteins into host plant cells.
+Nature 450:115-118.
+http://dx.doi.org/10.1038/nature06203
+
+Joe Win, William Morgan, Jorunn Bos, Ksenia V. Krasileva, Liliana M. Cano, Angela Chaparro-Garcia, Randa Ammar, Brian J. Staskawicz and Sophien Kamoun (2007).
+Adaptive evolution has targeted the C-terminal domain of the RXLR effectors of plant pathogenic oomycetes.
+The Plant Cell 19:2349-2369.
+http://dx.doi.org/10.1105/tpc.107.051037
+
+Souvik Bhattacharjee, N. Luisa Hiller, Konstantinos Liolios, Joe Win, Thirumala-Devi Kanneganti, Carolyn Young, Sophien Kamoun and Kasturi Haldar (2006).
+The malarial host-targeting signal is conserved in the Irish potato famine pathogen.
+PLoS Pathogens, 2(5):e50.
+http://dx.doi.org/10.1371/journal.ppat.0020050
+
+Trudy A. Torto, Shuang Li, Allison Styer, Edgar Huitema, Antonino Testa, Neil A.R. Gow, Pieter van West and Sophien Kamoun (2003).
+EST mining and functional expression assays identify extracellular effector proteins from the plant pathogen *phytophthora*.
+Genome Research, 13:1675-1685.
+http://dx.doi.org/10.1101/gr.910003
+
+Sean R. Eddy (1998).
+Profile hidden Markov models.
+Bioinformatics, 14(9):755–763.
+http://dx.doi.org/10.1093/bioinformatics/14.9.755
+
+Nielsen, Engelbrecht, Brunak and von Heijne (1997).
+Identification of prokaryotic and eukaryotic signal peptides and prediction of their cleavage sites.
+Protein Engineering, 10:1-6.
+http://dx.doi.org/10.1093/protein/10.1.1
+
+This wrapper is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/tmhmm_and_signalp
+    </help>
+</tool>

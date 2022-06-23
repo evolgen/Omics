@@ -1,0 +1,30 @@
+
+# For repeats
+[rohit@bloodymary Genome_annotations]$ for file1 in *_repeatmasker.bed; do file2=$(echo $file1 | sed -e 's/^/repeats_/' -e 's/_repeatmasker.bed/_freq.txt/'); cut -f5 $file1 | sort | uniq -c | awk '{print $2"\t"$1}' | sort -k2,2nr >$file2; done
+
+[rohit@bloodymary Genome_annotations]$ printf "L. viridis\tL.bilineata\n" >infile_repeat; paste <(head -n 15 repeats_vir_freq.txt) <(head -n 15 repeats_bil_freq.txt) >>infile_repeat
+[rohit@bloodymary Genome_annotations]$ printf "ID\tL. viridis\tL.bilineata\n" >infile_repeat; paste <(head -n 15 repeats_vir_freq.txt ) <(head -n 15 repeats_bil_freq.txt) | awk -F'\t' '$1==$3' | cut -f1,2,4 >>infile_repeat
+[rohit@bloodymary Genome_annotations]$ printf "ID\tL. viridis\tL.bilineata\n" >infile_repeat; cat <(paste <(head -n 15 repeats_vir_freq.txt ) <(head -n 15 repeats_bil_freq.txt) | awk -F'\t' '$1==$3' | cut -f1,2,4) >>infile_repeat
+[rohit@bloodymary Genome_annotations]$ printf "L. viridis\tL.bilineata\n" >infile_repeat_2; cat <(paste <(head -n 15 repeats_vir_freq.txt) <(head -n 15 repeats_bil_freq.txt) | awk -F'\t' '$1==$3' | cut -f2,4) >>infile_repeat_2
+
+
+[rohit@bloodymary Genome_annotations]$ cut -f5 Rpm_vir_repeatmasker.bed | grep -v -e Unknown -e tRNA -e DNA? | sort | uniq -c | sort -k1,1nr | awk '{print $2"\t"$1}' >repeats_vir_freq.txt 
+[rohit@bloodymary Genome_annotations]$ cut -f5 Rpm_bil_repeatmasker.bed | grep -v -e Unknown -e tRNA -e DNA? | sort | uniq -c | sort -k1,1nr | awk '{print $2"\t"$1}' >repeats_bil_freq.txt 
+
+
+[rohit@bloodymary Genome_annotations]$ grep microRNA Rfam_vir_filt.bed | cut -f8 | sort | uniq -c | sort -k1,1nr | awk '{print $2"\t"$1}' >infile_micro_rfam_vir_ovlrm.bed
+[rohit@bloodymary Genome_annotations]$ grep microRNA Rfam_bil_filt.bed | cut -f8 | sort | uniq -c | sort -k1,1nr | awk '{print $2"\t"$1}' >infile_micro_rfam_bil_ovlrm.bed
+
+
+
+### Segemental duplications
+[rohit@bloodymary Genome_annotations]$ count1=0; count2=0; count3=0; awk -F'\t' '{if($3-$2 >=1000) {count1+=1} if ($3-$2 >=5000) {count2+=1} if ($3-$2 >=10000) {count3+=1}} END {print "1000\t"count1"\tL.viridis\n5000\t"count2"\tL.viridis\n10000\t"count3"\tL.viridis"}' /scr/k61san/nowicklab/Lacerta/self_vir/segm_dupl_vir_filt.bed >Segm_dupl_lacertids.txt; count1=0; count2=0; count3=0; awk -F'\t' '{if($3-$2 >=1000) {count1+=1} if ($3-$2 >=5000) {count2+=1} if ($3-$2 >=10000) {count3+=1}} END {print "1000\t"count1"\tL.bilineata\n5000\t"count2"\tL.bilineata\n10000\t"count3"\tL.bilineata"}' /scr/k61san/nowicklab/Lacerta/self_bil/segm_dupl_bil_filt.bed >>Segm_dupl_lacertids.txt 
+
+
+### Transcripts
+[rohit@bloodymary divergence]$ for file in *_unfil_ALL_trinity.Trinity.fa.fai; do species=$(echo $file | sed -e 's/.*\///' -e 's/unfil_.*//' | sed -e 's/vir_/L.viridis/' -e 's/bil_/L.bilineata/' ); cut -f1 $file | sed -e 's/_i[0-9]*$//' | sort -u | sed -e 's/bil_//' -e 's/vir_//' -e 's/_TR[0-9]*.*//' | sort | uniq -c | awk -vspecies="$species" '{print $2"\t"$1"\t"species}' ; done >/homes/biertank/rohit/Downloads/scripts/Genome_annotations/transcripts_lacertids.txt
+
+[rohit@bloodymary Genome_annotations]$ sed -e 's/Segm_dupl_lacertids.txt/transcripts_lacertids.txt/' Segm_dupl.R >transcripts_lacertids.R
+
+
+

@@ -1,0 +1,97 @@
+<tool id="predictnls" name="PredictNLS" version="0.0.6">
+    <description>Find nuclear localization signals (NLSs) in protein sequences</description>
+    <command interpreter="python">
+      predictnls.py $fasta_file $tabular_file
+    </command>
+    <stdio>
+        <!-- Assume anything other than zero is an error -->
+        <exit_code range="1:" />
+        <exit_code range=":-1" />
+    </stdio>
+    <inputs>
+        <param name="fasta_file" type="data" format="fasta" label="FASTA file of protein sequences"/> 
+    </inputs>
+    <outputs>
+        <data name="tabular_file" format="tabular" label="predictNLS results" />
+    </outputs>
+    <tests>
+        <test>
+             <param name="fasta_file" value="four_human_proteins.fasta"/>
+             <output name="tabular_file" file="four_human_proteins.predictnls.tabular"/>
+        </test>
+    </tests>
+    <requirements>
+        <requirement type="binary">predictnls</requirement>
+    </requirements>
+    <help>
+    
+**What it does**
+
+This calls a Python re-implementation of the PredictNLS tool for prediction of
+nuclear localization signals (NLSs), which works by looking for matches to
+a known set of patterns (described using regular expressions).
+
+The input is a FASTA file of protein sequences, and the output is tabular with
+these columns (multiple rows per protein):
+
+====== ==========================================================================
+Column Description
+------ --------------------------------------------------------------------------
+     1 Sequence identifier
+     2 Start of NLS
+     3 NLS sequence
+     4 NLS pattern (regular expression)
+     5 Number of reference proteins with this NLS
+     6 Percentage of reference proteins with this NLS which are nuclear localized
+     7 Comma separated list of reference proteins
+     8 Comma separated list of reference proteins' localizations
+====== ==========================================================================
+
+If a sequence has no predicted NLS, then there is no line in the output file
+for it. This is a simplification of the text rich output from the command line
+tool, to give a tabular file suitable for use within Galaxy.
+
+Information about potential DNA binding (shown in the original predictnls
+tool) is not given.
+
+**Localizations**
+
+The following abbreviations are used (derived from SWISS-PROT):
+
+==== =======================
+Abbr Localization         
+---- -----------------------
+cyt  Cytoplasm
+pla  Chloroplast
+ret  Eendoplasmic reticululm
+ext  Extracellular
+gol  Golgi
+lys  Lysosomal
+mit  Mitochondria
+nuc  Nuclear
+oxi  Peroxisom
+vac  Vacuolar
+rip  Periplasmic
+==== =======================
+
+**References**
+
+If you use this Galaxy tool in work leading to a scientific publication please
+cite the following papers:
+
+Peter J.A. Cock, Björn A. Grüning, Konrad Paszkiewicz and Leighton Pritchard (2013).
+Galaxy tools and workflows for sequence analysis with applications
+in molecular plant pathology. PeerJ 1:e167
+http://dx.doi.org/10.7717/peerj.167
+
+Murat Cokol, Rajesh Nair, and Burkhard Rost (2000).
+Finding nuclear localization signals.
+EMBO reports 1(5), 411–415
+http://dx.doi.org/10.1093/embo-reports/kvd092
+
+See also http://rostlab.org
+
+This wrapper is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/predictnls
+    </help>
+</tool>

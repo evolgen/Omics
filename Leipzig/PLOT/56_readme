@@ -1,0 +1,67 @@
+
+[kolora@idiv4 correction]$ cut -f8 /data/idiv_schlegel/transciptomes/orthologs/best_lacertids.proteinortho | fgrep -v -e '*' -e 'vir_longest_cds' | sed 's/,vir/\nvir/g' >viridis_cds_ortho_names
+[kolora@idiv4 correction]$ cut -f10 /data/idiv_schlegel/transciptomes/orthologs/best_lacertids.proteinortho | fgrep -v -e '*' -e 'vir_longest_cds' | sed 's/,bil/\nbil/g' >bilineata_cds_ortho_names
+
+[kolora@idiv4 correction]$ sed -i 's/|/_/g' bilineata_cds_ortho_names
+[kolora@idiv4 correction]$ sed -i 's/|/_/g' viridis_cds_ortho_names
+[kolora@idiv4 correction]$ sed -i 's/|/_/g' vir_longest_cds.fa 
+[kolora@idiv4 correction]$ sed -i 's/|/_/g' bil_longest_cds.fa
+[kolora@idiv4 correction]$ xargs samtools faidx vir_longest_cds.fa <viridis_cds_ortho_names >viridis_cds_ortho.fa
+[kolora@idiv4 correction]$ xargs samtools faidx bil_longest_cds.fa <bilineata_cds_ortho_names >bilineata_cds_ortho.fa
+
+[kolora@idiv4 chimera]$ gmap_build -D /work/kolora/chimera/ -d bil_genome /work/kolora/correction/bil_cons_var_3.fasta; cd correction/; gmap -B 5 -t 30 -b --min-identity=0.8 -f samse -n 2 --min-intronlength=20 --no-chimeras -D /work/kolora/chimera/ -d vir_genome viridis_cds_ortho.fa >tranmap_vir_cds.sam; gmap -B 5 -t 30 -b --min-identity=0.8 -f samse -n 2 --min-intronlength=20 --no-chimeras -D /work/kolora/chimera/ -d bil_genome bilineata_cds_ortho.fa >tranmap_bil_cds.sam; samtools view -@ 25 -bS tranmap_vir_cds.sam | samtools sort -@ 25 -m 5G -T /work/kolora/chimera - -o sort_tranmap_vir_cds.bam; samtools index sort_tranmap_vir_cds.bam; samtools view -@ 25 -bS tranmap_bil_cds.sam | samtools sort -@ 25 -m 5G -T /work/kolora/chimera - -o sort_tranmap_bil_cds.bam; samtools index sort_tranmap_bil_cds.bam
+
+### Map cds from proteinortho, with chimera margins and Full-length protein present
+[kolora@idiv4 cds]$ gmap -B 5 -t 30 -b --min-identity=0.8 -f samse -n 2 --min-intronlength=15 -x 30 -F -D /work/kolora/chimera/ -d vir_genome viridis_cds_ortho.fa --split-output cds_map_vir >map_vir_cds.sam; gmap -B 5 -t 30 -b --min-identity=0.8 -f samse -n 2 --min-intronlength=15 -x 30 -F -D /work/kolora/chimera/ -d bil_genome bilineata_cds_ortho.fa --split-output cds_map_bil >map_bil_cds.sam
+
+
+Split reference sequences
+[kolora@idiv4 cds]$ for file in *.bam; do samtools index $file; done
+cd /work/kolora/correction/cds/vir
+[kolora@idiv4 vir]$ ~/kentUtils-master/bin/linux.x86_64/faSplit byname /work/kolora/pacbio/er_ct/viridis/dbg2olc/map/vcf/pbjelly/variant/vir_pbj3_var.fasta outRoot &
+[kolora@idiv4 vir]$ bamtools split -reference -refPrefix vir_ -in /work/kolora/correction/cds/sort_tranmap_vir_cds.bam
+[kolora@idiv4 vir]$ cd /work/kolora/correction/cds/bil
+[kolora@idiv4 bil]$ ~/kentUtils-master/bin/linux.x86_64/faSplit byname /work/kolora/correction/bil_cons_var_3.fasta outRoot &
+[kolora@idiv4 bil]$ bamtools split -reference -refPrefix bil_ -in /work/kolora/correction/cds/sort_tranmap_bil_cds.bam
+cd /work/kolora/correction/cds/
+[kolora@idiv4 cds]$ mv sort_tranmap_bil_cds.bil_Contig* bil; mv sort_tranmap_vir_cds.vir_Contig* vir
+
+
+Faidx indexing fasta
+cd /work/kolora/correction/cds
+[kolora@idiv4 cds]$ sh faidx.sh 
+
+Variant calling, Filtering variants, Making alternate and filered variant consensus
+[kolora@idiv4 cds]$ sh vcf_call.sh; sh filt_vcf_both.sh; sh alt_con_both.sh 
+[kolora@idiv4 cds]$ cat alt/alt_vir_Contig*.fasta >altcds_vir.fasta; cat alt/filt_vir_Contig*.fasta >filtcds_vir.fasta; cat alt/alt_bil_Contig*.fasta >altcds_bil.fasta; cat alt/filt_bil_Contig*.fasta >filtcds_bil.fasta
+
+
+
+################3
+
+[kolora@idiv4 gen_vir]$ pwd
+/work/kolora/chimera/correction/gen_vir
+[kolora@idiv4 gen_vir]$ ~/kentUtils-master/bin/linux.x86_64/faSplit byname vir_pbj3_var.fasta outRoot &
+[kolora@idiv4 gen_bil]$ pwd
+/work/kolora/chimera/correction/gen_bil
+[kolora@idiv4 gen_bil]$ ~/kentUtils-master/bin/linux.x86_64/faSplit byname /work/kolora/pacbio/er_ct/bilineata/dbg2olc/map/vcf/pbjelly/test1/m3_jelly.out.fasta outRoot 
+[kolora@idiv4 gen_vir]$ bamtools split -reference -refPrefix vir_ -in ../../sort_viridis_genome_tranmap.bam; cd ../gen_bil/; bamtools split -reference -refPrefix bil_ -in ../../sort_bilineata_genome_tranmap.bam
+[kolora@idiv4 gen_vir]$ mv ../../sort_viridis_genome_tranmap.vir_* . &
+[kolora@idiv4 gen_vir]$ cd ../gen_bil/
+[kolora@idiv4 gen_bil]$ mv ../../sort_bilineata_genome_tranmap.bil_* . &
+[kolora@idiv4 gen_vir]$ for file in *.bam; do samtools index $file; done; cd ../gen_bil/; for file in *.bam; do samtools index $file; done; cd ../gen_vir/
+[kolora@idiv4 correction]$ gmap -B 5 -t 30 -b --min-identity=0.8 -f samse -n 2 --min-intronlength=20 --no-chimeras -D /work/kolora/chimera/ -d vir_genome /data/idiv_schlegel/transciptomes/splicing/assemblies/longest_vir_unfil_ALL_trinity.Trinity.fa >tranmap_vir.sam; gmap -B 5 -t 30 -b --min-identity=0.8 -f samse -n 2 --min-intronlength=20 --no-chimeras -D /work/kolora/chimera/ -d bil_genome /data/idiv_schlegel/transciptomes/splicing/assemblies/longest_bil_unfil_ALL_trinity.Trinity.fa >tranmap_bil.sam; samtools view -@ 25 -bS tranmap_vir.sam | samtools sort -@ 25 -m 5G -T /work/kolora/chimera - -o sort_tranmap_vir.bam; samtools index sort_tranmap_vir.bam; samtools view -@ 25 -bS tranmap_bil.sam | samtools sort -@ 25 -m 5G -T /work/kolora/chimera - -o sort_tranmap_bil.bam; samtools index sort_tranmap_bil.bam
+[kolora@idiv4 correction]$ bamtools split -reference -refPrefix vir_ -in ./gen_vir/sort_tranmap_vir.bam; bamtools split -reference -refPrefix bil_ -in ./gen_bil/sort_tranmap_bil.bam; for file in ./gen_*/*.bam; do samtools index $file; done; mv sort_tranmap_vir.* gen_vir/; mv sort_tranmap_bil.* gen_bil/
+
+[kolora@idiv4 correction]$ cd sams/; sh ./sams/split_sam.sh
+[kolora@idiv4 correction]$ sh vcf_vir.sh 2>error_vir_vcf; sh vcf_bil.sh 2>error_bil_vcf
+
+
+[kolora@idiv4 correction]$ for file in ./gen_*/Contig*.fa; do samtools faidx $file; done
+[kolora@idiv4 correction]$ sh vcf_vir.sh; sh vcf_bil.sh 
+[kolora@idiv4 correction]$ gmap -B 5 -t 30 -b --min-identity=0.9 -f samse -n 2 --min-intronlength=20 --no-chimeras -D /work/kolora/chimera/ -d vir_genome /data/idiv_schlegel/transciptomes/trinity/vir/vir_unfil_ALL_trinity.Trinity.fa >tranmap_vir.sam 2>error_vir; gmap -B 5 -t 30 -b --min-identity=0.9 -f samse -n 2 --min-intronlength=20 --no-chimeras -D /work/kolora/chimera/ -d bil_genome /data/idiv_schlegel/transciptomes/trinity/bil/bil_unfil_ALL_trinity.Trinity.fa >tranmap_bil.sam 2>error_bil; samtools view -@ 25 -bS tranmap_vir.sam | samtools sort -@ 25 -m 5G -T /work/kolora/chimera - -o sort_tranmap_vir.bam; samtools index sort_tranmap_vir.bam; samtools view -@ 25 -bS tranmap_bil.sam | samtools sort -@ 25 -m 5G -T /work/kolora/chimera - -o sort_tranmap_bil.bam; samtools index sort_tranmap_bil.bam
+
+grep -e 'TYPE=del' -e 'TYPE=ins' /work/kolora/chimera/correction/gen_vir/vcf_vir_Contig614.vcf | awk -F';' 'BEGIN{OFS=FS}{ gsub("LEN=","",$14); print $0}' | awk -F';' '$14<20' | awk -F';' 'BEGIN{OFS=FS}{ gsub("^","LEN=",$14); print $0}' | less -S
+
+
+

@@ -1,0 +1,84 @@
+<tool id="clinod" name="Nucleolar localization sequence Detector (NoD)" version="0.0.7">
+    <description>Find nucleolar localization signals (NoLSs) in protein sequences</description>
+    <requirements>
+        <requirement type="binary">java</requirement>
+        <requirement type="package" version="1.3">clinod</requirement>
+    </requirements>
+    <command>
+##The Galaxy Tool Shed installation should define $CLINOD to point at folder
+##containing both clinod-1.3.jar and the batchman binary:
+java -jar \$CLINOD/clinod-1.3.jar -in="$fasta_file" -out="$tabular_file" -t="\$GALAXY_SLOTS" -f=MEDIUM_TAB -nonols -clean_sequence
+##TODO - Make the -clean_sequence argument a parameter?
+    </command>
+    <stdio>
+        <!-- Assume anything other than zero is an error -->
+        <exit_code range="1:" />
+        <exit_code range=":-1" />
+    </stdio>
+    <inputs>
+        <param name="fasta_file" type="data" format="fasta" label="FASTA file of protein sequences"/> 
+    </inputs>
+    <outputs>
+        <data name="tabular_file" format="tabular" label="NoD results" />
+    </outputs>
+    <tests>
+        <test>
+            <param name="fasta_file" value="four_human_proteins.fasta" ftype="fasta" />
+            <output name="tabular_file" file="four_human_proteins.clinod-1.3.tabular" ftype="tabular" />
+        </test>
+    </tests>
+    <help>
+
+**What it does**
+
+This calls the command line version of the NoD tool from the Barton Group for
+prediction of nucleolar localization sequences (NoLSs). The NoD tool uses an
+artificial neural network trained on a set of human NoLSs.
+
+The nucleolus is a sub-compartmentof the nucleus, thus an NoLS can be regarded
+as a special nuclear localization sequence (NLS).
+
+The input is a FASTA file of protein sequences, and the output is tabular with
+four columns (multiple rows per protein):
+
+====== ===================
+Column Description
+------ -------------------
+     1 Sequence identifier
+     2 Start of NoLS
+     3 End of NoLS
+     4 NoLS sequence
+====== ===================
+
+If a sequence has no predicted NoLS, then there is no line in the output file
+for it.
+
+-----
+
+**References**
+
+If you use this Galaxy tool in work leading to a scientific publication please
+cite the following papers:
+
+Peter J.A. Cock, Björn A. Grüning, Konrad Paszkiewicz and Leighton Pritchard (2013).
+Galaxy tools and workflows for sequence analysis with applications
+in molecular plant pathology. PeerJ 1:e167
+http://dx.doi.org/10.7717/peerj.167
+
+M. S. Scott, F. M. Boisvert, M. D. McDowall, A. I. Lamond and G. J. Barton (2010).
+Characterization and prediction of protein nucleolar localization sequences.
+Nucleic Acids Research 38(21), 7388-7399.
+http://dx.doi.org/10.1093/nar/gkq653
+
+M. S. Scott, P. V. Troshin and G. J. Barton (2011).
+NoD: a Nucleolar localization sequence detector for eukaryotic and viral proteins.
+BMC Bioinformatics, 12:317.
+http://dx.doi.org/10.1186/1471-2105-12-317
+
+See also http://www.compbio.dundee.ac.uk/www-nod/
+
+This wrapper is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/clinod
+
+    </help>
+</tool>

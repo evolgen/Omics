@@ -1,0 +1,6 @@
+Type	L.bilineata	L.viridis
+Pure-illumina		1270	1340
+EC-illumina		2130	2145
+EC-pacbio	10191	12110
+Scaffolded-EC-pacbio	10700	17410
+Hybrid	368212	662319

@@ -1,0 +1,3 @@
+
+Extract sequences with pattern in header of fasta
+perl -ne 'if(/^>(\S+)/){$c=$i{$1}}$c?print:chomp;$i{$_}=1 if @ARGV'  pattern_list infile.fa > outfile.fa

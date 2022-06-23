@@ -1,0 +1,5 @@
+
+[rohit@k48 assemblathon2-analysis-master]$ perl assemblathon_stats.pl /scr/k61san/nowicklab/panTro5.fa -genome_size 3300 >/scr/k61san/nowicklab/stats_panTro5
+
+
+

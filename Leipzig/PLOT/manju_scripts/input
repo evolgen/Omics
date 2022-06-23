@@ -1,0 +1,9 @@
+a score=93236.0
+s hg19.chr14       1 39 + 107349540 TTGTT-----A----AAA
+s panTro4.chr14    2 39 + 106544938 TT-TTATT--TTGGGA-A
+s bonobo.chr14     3 39 + 107357366 TT-TTATT--TTGGGA-A
+s gorGor3.chr14      4 39 +  88974843 TT-TTATT--TTGG-A-A
+s ponAbe2.chrUn     5 39 +  72422247 TT-TTATTAATTGGGA-A
+s nomLeu1.GL397606    6 39 +    264314 TT-TTATT--TTG-GA-A
+s rheMac3.chr7     7 39 - 170124641 TT-TTATT--GG-GGA-A
+s calJac3.chr10    8 39 - 132174527 TT-TTATT--TGG-GA-A

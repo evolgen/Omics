@@ -1,0 +1,88 @@
+
+ls ./new_mod_mafs/Lvir_*.maf | parallel -j 28 run_new_con_4dss.sh
+
+[kolora@idiv4 Multiz]$ msa_view --unordered-ss --aggregate lacvir1,lacbil1,anoCar2,allMis1,galGal3,hg19,xenTro3 --in-format SS --out-format SS new_codons_ss/*.codons.ss > Lacerta_all-cons.sites.ss; msa_view --unordered-ss --aggregate lacvir1,lacbil1,anoCar2,allMis1,galGal3,hg19,xenTro3 --in-format SS --out-format SS new_sites_ss/*.sites.ss > Lacerta_all-4d.sites.ss
+
+[kolora@idiv4 Multiz]$ phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format SS --out-root Lacerta_nonconserved-4d Lacerta_all-4d.sites.ss; phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format SS --out-root Lacerta_conserved-codon1 Lacerta_all-cons.sites.ss
+
+[kolora@idiv4 Multiz]$ phyloBoot --read-mods Lacerta_conserved-codon1.0.mod,Lacerta_conserved-codon1.1.mod,Lacerta_conserved-codon1.2.mod,Lacerta_conserved-codon1.3.mod --output-average Lacerta_ave.cons.mod; phyloBoot --read-mods Lacerta_nonconserved-4d.0.mod,Lacerta_nonconserved-4d.1.mod,Lacerta_nonconserved-4d.2.mod,Lacerta_nonconserved-4d.3.mod --output-average Lacerta_ave.noncons.mod; phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format MAF --out-root Lacerta_init Lacerta_multiple_lacvir1_roast.maf
+
+
+[kolora@idiv4 Multiz]$ msa_view --unordered-ss --aggregate lacvir1,lacbil1,anoCar2,allMis1,galGal3,hg19,xenTro3 --in-format SS --out-format SS new_sites_ss/*.sites.ss > Lacerta_all-4d.sites.ss; phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format SS --out-root Lacerta_nonconserved-4d Lacerta_all-4d.sites.ss; msa_view --unordered-ss --aggregate lacvir1,lacbil1,anoCar2,allMis1,galGal3,hg19,xenTro3 --in-format SS --out-format SS new_codons_ss/*.codons.ss > Lacerta_all-cons.sites.ss; phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format SS --out-root Lacerta_conserved-codon1 Lacerta_all-cons.sites.ss; phyloBoot --read-mods Lacerta_conserved-codon1.0.mod,Lacerta_conserved-codon1.1.mod,Lacerta_conserved-codon1.2.mod,Lacerta_conserved-codon1.3.mod --output-average Lacerta_ave.cons.mod; phyloBoot --read-mods Lacerta_nonconserved-4d.0.mod,Lacerta_nonconserved-4d.1.mod,Lacerta_nonconserved-4d.2.mod,Lacerta_nonconserved-4d.3.mod --output-average Lacerta_ave.noncons.mod
+
+
+
+[kolora@idiv4 Multiz]$ ls new_mod_mafs/*.maf | parallel -j 28 sh run_new_phastcons_1.sh; ls new_Chunks/*.ss | parallel -j 28 sh run_new_phastcons_2.sh; ls new_Trees/*.cons.mod > Lacerta_cons.txt; ls new_Trees/*.noncons.mod > Lacerta_noncons.txt
+
+[kolora@idiv4 Multiz]$ for file in new_Trees/Lvir_*.cons.mod; do printf $file"\t"$(grep TREE $file | sed -e 's/.* (/(/' -e 's/,/ /g' -e 's/(+/ /g' -e 's/)+/ /g' | sed 's/ \s +/ /' | wc -w | awk '{print $0-1}')"\n"; done | sort -k2,2n >new_count_species
+awk -F'\t' '{print >>"new_count_species."$2}' new_count_species
+for file in new_count_species.[0-9]*; do awk -F'\t' '{print $1}' $file >new_phyloboot_$file; done
+[kolora@idiv4 Multiz]$ awk -F'\t' '{print >>"new_count_species."$2}' new_count_species; for file in new_count_species.[0-9]*; do awk -F'\t' '{print $1}' $file >new_phyloboot_$file; done; for file in new_phyloboot_*; do file2=$(echo $file | sed 's/.*\.//'); str=$(printf "'*"$file"'"); echo phyloBoot --read-mods $str --output-average Lacerta_ave.cons.mod_$file2 ; done
+[kolora@idiv4 Multiz]$ phyloBoot --read-mods '*new_phyloboot_new_count_species.1' --output-average Lacerta_ave.cons.mod_1; phyloBoot --read-mods '*new_phyloboot_new_count_species.2' --output-average Lacerta_ave.cons.mod_2; phyloBoot --read-mods '*new_phyloboot_new_count_species.3' --output-average Lacerta_ave.cons.mod_3; phyloBoot --read-mods '*new_phyloboot_new_count_species.4' --output-average Lacerta_ave.cons.mod_4; phyloBoot --read-mods '*new_phyloboot_new_count_species.5' --output-average Lacerta_ave.cons.mod_5; phyloBoot --read-mods '*new_phyloboot_new_count_species.6' --output-average Lacerta_ave.cons.mod_6
+
+
+[kolora@idiv4 Multiz]$ for file in new_count_species.[0-9]*; do awk -F'\t' '{print $1}' $file | sed 's/\.cons\.mod/.noncons.mod/' >new_phyloboot_nc_$file; done
+[kolora@idiv4 Multiz]$ for file in new_phyloboot_nc_*.[1-6]; do file2=$(echo $file | sed 's/.*\.//'); str=$(printf "'*"$file"'"); cmd1=$(echo phyloBoot --read-mods $str --output-average Lacerta_ave.noncons.mod_$file2); eval $cmd1 ; done
+
+
+
+[kolora@idiv4 Multiz]$ ls new_Chunks/*.ss | parallel -j 28 sh run_new_phastcons_4.sh
+cat new_Scores/Lvir_*.[1-6] >Lacerta_most-conserved.wig
+cat new_Scores/Lvir_*.1 >Lacerta_most-conserved.1.wig; cat new_Scores/Lvir_*.2 >Lacerta_most-conserved.2.wig; cat new_Scores/Lvir_*.3 >Lacerta_most-conserved.3.wig; cat new_Scores/Lvir_*.4 >Lacerta_most-conserved.4.wig; cat new_Scores/Lvir_*.5 >Lacerta_most-conserved.5.wig; cat new_Scores/Lvir_*.6 >Lacerta_most-conserved.6.wig
+[kolora@idiv4 Multiz]$ for file in Lacerta_most-conserved.[1-6].wig; do ~/kentUtils-master/bin/linux.x86_64/wigToBigWig -clip $file vir.sizes $file.bigwig; done; ~/kentUtils-master/bin/linux.x86_64/bigWigMerge Lacerta_most-conserved.1.wig.bigwig Lacerta_most-conserved.2.wig.bigwig Lacerta_most-conserved.3.wig.bigwig Lacerta_most-conserved.4.wig.bigwig Lacerta_most-conserved.5.wig.bigwig Lacerta_most-conserved.6.wig.bigwig Lacerta_most-conserved.wig.bedgraph; ~/kentUtils-master/bin/linux.x86_64/bedGraphToBigWig Lacerta_most-conserved.wig.bedgraph vir.sizes Lacerta_most-conserved.bigwig; ~/kentUtils-master/bin/linux.x86_64/bigWigToWig Lacerta_most-conserved.bigwig Lacerta_most-conserved.wig
+
+
+
+### Phylop
+ls new_Chunks/Lvir_*.ss | parallel -j 28 sh run_new_phylop_1.sh
+ls new_Chunks/Lvir_*.ss | parallel -j 28 sh run_new_phylop_1_byb.sh
+
+cat new_phylop_elements/*.txt | fgrep -v '#chr' | sed 's/^lacvir1.//' >Lacerta_phylop_scores.txt
+[kolora@idiv4 Multiz]$ awk -F'\t' '$7==0' Lacerta_phylop_scores.txt >Lacerta_phylop_scores.bed_zero
+
+cat new_phylop_elements_bb/*.txt >Lacerta_phylop_base-scores.txt
+
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/wigToBigWig Lacerta_phylop_base-scores.txt vir.sizes check; ~/kentUtils-master/bin/linux.x86_64/bigWigToBedGraph check Lacerta_phylop_base-scores.bed; rm check
+
+[kolora@idiv4 Multiz]$ awk -F'\t' '$4<0' Lacerta_phylop_base-scores.bed >Lacerta_phylop_base-scores.bed_negative
+[kolora@idiv4 bedtools2]$ ~/bedtools2/bin/bedtools merge -d 5 -i /work/kolora/Genome/Multiz/Lacerta_phylop_base-scores.bed_negative -c 4,4 -o count,mean >/work/kolora/Genome/Multiz/Lacerta_phylop_base-scores.bed_negative_merge
+
+
+
+[kolora@idiv4 Multiz]$ cat new_phylop_elements_bb/*.wig >Lacerta_phylop_base-scores.wig ; ~/kentUtils-master/bin/linux.x86_64/wigToBigWig Lacerta_phylop_base-scores.wig vir.sizes check; ~/kentUtils-master/bin/linux.x86_64/bigWigToBedGraph check Lacerta_phylop_base-scores.bed; awk -F'\t' '$4<0' Lacerta_phylop_base-scores.bed >Lacerta_phylop_base-scores.bed_negative; sort -k1,1 -k2,2n Lacerta_phylop_base-scores.bed_negative >Lacerta_phylop_base-scores.bed_negative_sort; ~/bedtools2/bin/bedtools merge -d 5 -i Lacerta_phylop_base-scores.bed_negative_sort -c 4,4 -o count,mean >Lacerta_phylop_base-scores.bed_negative_merge
+
+[kolora@idiv4 Multiz]$ msa_view --unordered-ss --aggregate lacvir1,lacbil1,anoCar2,allMis1,galGal3,hg19,xenTro3 --in-format SS --out-format SS new_codons_ss/*.codons.ss > Lacerta_all-cons.sites.ss; msa_view --unordered-ss --aggregate lacvir1,lacbil1,anoCar2,allMis1,galGal3,hg19,xenTro3 --in-format SS --out-format SS new_sites_ss/*.sites.ss > Lacerta_all-4d.sites.ss; phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format SS --out-root Lacerta_nonconserved-4d Lacerta_all-4d.sites.ss; phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format SS --out-root Lacerta_conserved-codon1 Lacerta_all-cons.sites.ss; phyloBoot --read-mods Lacerta_conserved-codon1.0.mod,Lacerta_conserved-codon1.1.mod,Lacerta_conserved-codon1.2.mod,Lacerta_conserved-codon1.3.mod --output-average Lacerta_ave.cons.mod; phyloBoot --read-mods Lacerta_nonconserved-4d.0.mod,Lacerta_nonconserved-4d.1.mod,Lacerta_nonconserved-4d.2.mod,Lacerta_nonconserved-4d.3.mod --output-average Lacerta_ave.noncons.mod; phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format MAF --out-root Lacerta_init Lacerta_multiple_lacvir1_roast.maf; msa_view --unordered-ss --aggregate lacvir1,lacbil1,anoCar2,allMis1,galGal3,hg19,xenTro3 --in-format SS --out-format SS new_sites_ss/*.sites.ss > Lacerta_all-4d.sites.ss; phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format SS --out-root Lacerta_nonconserved-4d Lacerta_all-4d.sites.ss; msa_view --unordered-ss --aggregate lacvir1,lacbil1,anoCar2,allMis1,galGal3,hg19,xenTro3 --in-format SS --out-format SS new_codons_ss/*.codons.ss > Lacerta_all-cons.sites.ss; phyloFit --tree "(xenTro3,(((anoCar2,(lacvir1,lacbil1)),(galGal3,allMis1)),hg19))" --msa-format SS --out-root Lacerta_conserved-codon1 Lacerta_all-cons.sites.ss; phyloBoot --read-mods Lacerta_conserved-codon1.0.mod,Lacerta_conserved-codon1.1.mod,Lacerta_conserved-codon1.2.mod,Lacerta_conserved-codon1.3.mod --output-average Lacerta_ave.cons.mod; phyloBoot --read-mods Lacerta_nonconserved-4d.0.mod,Lacerta_nonconserved-4d.1.mod,Lacerta_nonconserved-4d.2.mod,Lacerta_nonconserved-4d.3.mod --output-average Lacerta_ave.noncons.mod; ls new_mod_mafs/*.maf | parallel -j 10 sh run_new_phastcons_1.sh; ls new_Chunks/*.ss | parallel -j 10 sh run_new_phastcons_2.sh; ls new_Trees/*.cons.mod > Lacerta_cons.txt; ls new_Trees/*.noncons.mod > Lacerta_noncons.txt; for file in new_Trees/Lvir_*.cons.mod; do printf $file"\t"$(grep TREE $file | sed -e 's/.* (/(/' -e 's/,/ /g' -e 's/(+/ /g' -e 's/)+/ /g' | sed 's/ \s +/ /' | wc -w | awk '{print $0-1}')"\n"; done | sort -k2,2n >new_count_species; awk -F'\t' '{print >>"new_count_species."$2}' new_count_species; for file in new_count_species.[0-9]*; do awk -F'\t' '{print $1}' $file >new_phyloboot_$file; done; awk -F'\t' '{print >>"new_count_species."$2}' new_count_species; for file in new_count_species.[0-9]*; do awk -F'\t' '{print $1}' $file >new_phyloboot_$file; done; for file in new_phyloboot_*; do file2=$(echo $file | sed 's/.*\.//'); str=$(printf "'*"$file"'"); echo phyloBoot --read-mods $str --output-average Lacerta_ave.cons.mod_$file2 ; done; phyloBoot --read-mods '*new_phyloboot_new_count_species.1' --output-average Lacerta_ave.cons.mod_1; phyloBoot --read-mods '*new_phyloboot_new_count_species.2' --output-average Lacerta_ave.cons.mod_2; phyloBoot --read-mods '*new_phyloboot_new_count_species.3' --output-average Lacerta_ave.cons.mod_3; phyloBoot --read-mods '*new_phyloboot_new_count_species.4' --output-average Lacerta_ave.cons.mod_4; phyloBoot --read-mods '*new_phyloboot_new_count_species.5' --output-average Lacerta_ave.cons.mod_5; phyloBoot --read-mods '*new_phyloboot_new_count_species.6' --output-average Lacerta_ave.cons.mod_6; for file in new_count_species.[0-9]*; do awk -F'\t' '{print $1}' $file | sed 's/\.cons\.mod/.noncons.mod/' >new_phyloboot_nc_$file; done; for file in new_phyloboot_nc_*.[1-6]; do file2=$(echo $file | sed 's/.*\.//'); str=$(printf "'*"$file"'"); cmd1=$(echo phyloBoot --read-mods $str --output-average Lacerta_ave.noncons.mod_$file2); eval $cmd1 ; done; ls new_Chunks/*.ss | parallel -j 10 sh run_new_phastcons_4.sh; cat new_Scores/Lvir_*.[1-6] >Lacerta_most-conserved.wig; cat new_Scores/Lvir_*.1 >Lacerta_most-conserved.1.wig; cat new_Scores/Lvir_*.2 >Lacerta_most-conserved.2.wig; cat new_Scores/Lvir_*.3 >Lacerta_most-conserved.3.wig; cat new_Scores/Lvir_*.4 >Lacerta_most-conserved.4.wig; cat new_Scores/Lvir_*.5 >Lacerta_most-conserved.5.wig; cat new_Scores/Lvir_*.6 >Lacerta_most-conserved.6.wig; for file in Lacerta_most-conserved.[1-6].wig; do ~/kentUtils-master/bin/linux.x86_64/wigToBigWig -clip $file vir.sizes $file.bigwig; done; ~/kentUtils-master/bin/linux.x86_64/bigWigMerge Lacerta_most-conserved.1.wig.bigwig Lacerta_most-conserved.2.wig.bigwig Lacerta_most-conserved.3.wig.bigwig Lacerta_most-conserved.4.wig.bigwig Lacerta_most-conserved.5.wig.bigwig Lacerta_most-conserved.6.wig.bigwig Lacerta_most-conserved.wig.bedgraph; ~/kentUtils-master/bin/linux.x86_64/bedGraphToBigWig Lacerta_most-conserved.wig.bedgraph vir.sizes Lacerta_most-conserved.bigwig; ~/kentUtils-master/bin/linux.x86_64/bigWigToWig Lacerta_most-conserved.bigwig Lacerta_most-conserved.wig; ls new_Chunks/Lvir_*.ss | parallel -j 10 sh run_new_phylop_1.sh; ls new_Chunks/Lvir_*.ss | parallel -j 10 sh run_new_phylop_1_byb.sh; cat new_phylop_elements_bb/*.txt >Lacerta_phylop_base-scores.txt; ~/kentUtils-master/bin/linux.x86_64/wigToBigWig Lacerta_phylop_base-scores.txt vir.sizes check; ~/kentUtils-master/bin/linux.x86_64/bigWigToBedGraph check Lacerta_phylop_base-scores.bed; rm check; awk -F'\t' '$4<0' Lacerta_phylop_base-scores.bed >Lacerta_phylop_base-scores.bed_negative; ~/bedtools2/bin/bedtools merge -d 5 -i /work/kolora/Genome/Multiz/Lacerta_phylop_base-scores.bed_negative -c 4,4 -o count,mean >/work/kolora/Genome/Multiz/Lacerta_phylop_base-scores.bed_negative_merge; ~/kentUtils-master/bin/linux.x86_64/wigToBigWig Lacerta_phylop_scores.wig vir.sizes stdout | ~/kentUtils-master/bin/linux.x86_64/bigWigToBedGraph stdin Lacerta_phylop_scores.bed; awk -F'\t' '$4==0' Lacerta_phylop_scores.bed >Lacerta_phylop_scores.bed_zero
+
+
+
+# Regions with similarity in other species but not L. bilineata
+[kolora@idiv4 Multiz]$ for file in new_count_species.[2-5]; do echo $file; count=$(echo $file | sed 's/new_count_species\.//'); cut -f1 $file | while read line; do printf $line"\t"$(cat $line | fgrep lacbil1 | wc -l)"\n"; done | awk -F'\t' '$2==0' | sed -e 's/\.1-[0-9]*.cons.mod/.maf/' -e 's/new_Trees/new_mod_mafs/' | cut -f1 | tr "\n" " " | xargs cat | fgrep -A ${count} 's lacvir1.' | fgrep -v 's lacvir1.' | awk '{print $2"\t"$4}' | awk -F'\t' '$2>0' | grep -v -w maf_parse | sed 's/\..*\t/\t/' | awk -F '\t' '{a[$1] += $2} END{for (i in a) print i"\t"a[i]}' ; done 
+new_count_species.2
+allMis1	16975
+hg19	11130
+xenTro3	33330
+anoCar2	76980
+new_count_species.3
+allMis1	30825
+hg19	4270
+xenTro3	9885
+anoCar2	171880
+galGal3	11760
+new_count_species.4
+allMis1	70070
+hg19	17385
+xenTro3	19975
+anoCar2	83565
+galGal3	47380
+new_count_species.5
+allMis1	130770
+hg19	66445
+xenTro3	48300
+anoCar2	184225
+galGal3	91435
+
+
+[rohit@bloodymary Multiz]$ for file in new_count_species.[2-5]; do fileout=$(echo $file | sed -e 's/new_count_species/missing_count_species/' -e 's/$/.bed/' ); cut -f1 $file | while read line; do printf $line"\t"$(cat $line | fgrep lacbil1 | wc -l)"\n"; done | awk -F'\t' '$2==0' | sed -e 's/\.1-[0-9]*.cons.mod/.maf/' -e 's/new_Trees/new_mod_mafs/' | cut -f1 | tr "\n" " " | xargs cat | fgrep -A ${count} 's lacvir1.' | grep -v -w maf_parse | awk '{print $2"\t"$3-1"\t"$4+$3"\t"$6"\tMissing\t"$5}' | awk -F'\t' '$2>0' | sed -e '/^anoCar2/ s/\t.*//' -e '/^allMis1/ s/\t.*//' -e '/^hg19/ s/\t.*//' -e '/^galGal3/ s/\t.*//' -e '/^xenTro3/ s/\t.*//' | tr "\n" "," | sed 's/,lacvir1\./\nlacvir1./g' | awk -F'\t' 'BEGIN{OFS="\t"} {gsub("+,","+\t",$6); print}' | awk -F'\t' 'BEGIN{OFS="\t"} {print $1,$2,$3,$4,$7,$6}' | sed 's/^lacvir1\.//' >${fileout}; done
+
+
+

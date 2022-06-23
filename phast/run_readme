@@ -1,0 +1,396 @@
+
+
+[kolora@idiv4 Multiz]$ tail -n +15 ../maf_Anolis/alignments/allMis1*maf ../maf_Anolis/aligns/allMis1*.maf ../maf_Anolis/aligns/test_runs/allMis1*.maf | sed 's/==>.*//' | sed '/^$/d' >allMis12Lacvir.maf; tail -n +15 ../maf_Anolis/alignments/galGal3*maf ../maf_Anolis/aligns/galGal3*.maf ../maf_Anolis/aligns/test_runs/galGal3*.maf | sed 's/==>.*//' | sed '/^$/d' >galGal32Lacvir.maf; tail -n +15 ../maf_Anolis/alignments/hg19*maf ../maf_Anolis/aligns/hg19*.maf ../maf_Anolis/aligns/test_runs/hg19*.maf | sed 's/==>.*//' | sed '/^$/d' >hg192Lacvir.maf; tail -n +15 ../maf_Anolis/aligns/xenTro3*.maf ../maf_Anolis/aligns/test_runs/xenTro3*.maf | sed 's/==>.*//' | sed '/^$/d' >xenTro32Lacvir.maf; #tail -n +15 ../maf_Anolis/alignments/anoCar2*maf ../maf_Anolis/aligns/anoCar2*.maf ../maf_Anolis/aligns/test_runs/anoCar2*.maf | sed 's/==>.*//' | sed '/^$/d' >anoCar22Lacvir.maf; tail -n +15 ../maf_Anolis/aligns/lacbil1*.maf ../maf_Anolis/aligns/test_runs/lacbil1*.maf | sed 's/==>.*//' | sed '/^$/d' >lacbil12Lacvir.maf
+[kolora@idiv4 Multiz]$ tail -n +15 ../maf_Anolis/alignments/anoCar2*maf ../maf_Anolis/aligns/anoCar2*.maf ../maf_Anolis/aligns/test_runs/anoCar2*.maf | sed 's/==>.*//' | sed '/^$/d' >anoCar22Lacvir.maf; tail -n +15 ../maf_Anolis/aligns/lacbil1*.maf ../maf_Anolis/aligns/test_runs/lacbil1*.maf | sed 's/==>.*//' | sed '/^$/d' >lacbil12Lacvir.maf
+
+
+# [kolora@idiv4 Multiz]$ for file1 in lacbil12Lacvir.maf anoCar22Lacvir.maf xenTro32Lacvir.maf hg192Lacvir.maf galGal32Lacvir.maf allMis12Lacvir.maf; do file2=$(echo $file1 | sed 's/\.maf/.axt/'); file3=$(echo $file2 | sed 's/^/sort_/'); ~/last-638/scripts/maf-convert axt $file1 >$file2; echo "Axt changed already"; ~/kentUtils-master/bin/linux.x86_64/axtSort $file2 $file3; rm $file2; echo $file1"            DONE"; done
+
+# [kolora@idiv4 Multiz]$ for file1 in anoCar22Lacvir.maf xenTro32Lacvir.maf hg192Lacvir.maf galGal32Lacvir.maf allMis12Lacvir.maf; do file2=$(echo $file1 | sed 's/\.maf/.axt/'); file3=$(echo $file1 | sed 's/^/sort_/'); echo "##maf version=1" >$file2; cat $file1 >>$file2; printf "\n" >>$file2; ~/mafTools/bin/mafSorter -m $file2 -s Lvir_ >$file3; rm $file2; echo $file1"            DONE"; done
+
+[kolora@idiv4 Multiz]$ for file1 in anoCar22Lacvir.maf xenTro32Lacvir.maf hg192Lacvir.maf galGal32Lacvir.maf allMis12Lacvir.maf; do file2=$(echo $file1 | sed 's/\.maf/.axt/'); file3=$(echo $file1 | sed 's/^/sort_/'); sed -e '1i\##maf version=1' -e '$i \\n' $file1 >$file2; ~/last-638/scripts/maf-sort_tmp $file2 >$file3; echo "$file1            DONE"; done
+
+
+[kolora@idiv4 Multiz]$ for file in sort_*.maf; do sed -i '/^$/d' $file; sed -i '$i \\n' $file; done
+
+[kolora@idiv4 Multiz]$ for file1 in sort_*.maf; do file2=$(echo $file1 | sed 's/\.maf/.psl/'); name2=$(echo $file1 | sed -e 's/sort_//' -e 's/2Lacvir.*//'); ~/last-638/scripts/maf-convert psl $file1 >$file2; echo "$file1       DONE"; done
+
+
+[kolora@idiv4 Multiz]$ for file1 in *.lift; do file2=$(echo $file1 | sed 's/\.lift/.SIZES/'); cut -f2,3 $file1 >$file2; done
+
+
+
+[kolora@idiv4 Multiz]$ for file1 in ../maf_Anolis/aligns/*.maf ../maf_Anolis/alignments/*.maf ../maf_Anolis/aligns/test_runs/*.maf; do file2=$(echo $file1 | sed -e 's/.*allMis1/allMis1/' -e 's/.*anoCar2/anoCar2/' -e 's/.*galGal3/galGal3/' -e 's/.*hg19/hg19/' -e 's/.*laclbil1/lacbil1/' -e 's/.*xenTro3/xenTro3/' -e 's/\.maf$/.psl/' | sed -e 's/.*test_runs\///'); name2=$(echo $file1 | sed -e 's/.*allMis1/allMis1/' -e 's/.*anoCar2/anoCar2/' -e 's/.*galGal3/galGal3/' -e 's/.*hg19/hg19/' -e 's/.*lacbil1/lacbil1/' -e 's/.*xenTro3/xenTro3/' -e 's/\.maf//' | sed -e 's/_.*//' -e 's/-.*//'); if [ ! -f $file2 ]; then echo "~/kentUtils-master/bin/linux.x86_64/mafToPsl $name2 Lvir $file1 >./all_psls/$file2"; ~/kentUtils-master/bin/linux.x86_64/mafToPsl $name2 Lvir $file1 >./all_psls/$file2; fi; done
+
+[kolora@idiv4 Multiz]$ for file1 in ../maf_Anolis/aligns/*.maf ../maf_Anolis/alignments/*.maf ../maf_Anolis/aligns/test_runs/*.maf; do file2=$(echo $file1 | sed -e 's/.*allMis1/allMis1/' -e 's/.*anoCar2/anoCar2/' -e 's/.*galGal3/galGal3/' -e 's/.*hg19/hg19/' -e 's/.*laclbil1/lacbil1/' -e 's/.*xenTro3/xenTro3/' -e 's/\.maf$/.axt/' | sed -e 's/.*test_runs\///'); $file3=$(echo $file2 | sed 's/\.axt/.psl/'); name2=$(echo $file1 | sed -e 's/.*allMis1/allMis1/' -e 's/.*anoCar2/anoCar2/' -e 's/.*galGal3/galGal3/' -e 's/.*hg19/hg19/' -e 's/.*lacbil1/lacbil1/' -e 's/.*xenTro3/xenTro3/' -e 's/\.maf//' | sed -e 's/_.*//' -e 's/-.*//'); if [ ! -f $file2 ]; then echo "~/kentUtils-master/bin/linux.x86_64/mafToAxt $file1 Lvir $name2 ./all_psls/$file2"; ~/kentUtils-master/bin/linux.x86_64/mafToAxt $file1 Lvir $name2 ./all_psls/$file2; ~/kentUtils-master/bin/linux.x86_64/axtToPsl $file2 ../maf_Anolis/viridis.sizes ${name2}.sizes ./all_psls/$file3; fi; done
+
+
+[kolora@idiv4 Multiz]$ for file1 in ../maf_Anolis/aligns/*.maf ../maf_Anolis/alignments/*.maf ../maf_Anolis/aligns/test_runs/*.maf; do file2=$(echo $file1 | sed -e 's/.*allMis1/allMis1/' -e 's/.*anoCar2/anoCar2/' -e 's/.*galGal3/galGal3/' -e 's/.*hg19/hg19/' -e 's/.*laclbil1/lacbil1/' -e 's/.*xenTro3/xenTro3/' -e 's/\.maf$/.axt/' | sed -e 's/.*test_runs\///'); $file3=$(echo $file2 | sed 's/\.axt/.psl/'); name2=$(echo $file1 | sed -e 's/.*allMis1/allMis1/' -e 's/.*anoCar2/anoCar2/' -e 's/.*galGal3/galGal3/' -e 's/.*hg19/hg19/' -e 's/.*lacbil1/lacbil1/' -e 's/.*xenTro3/xenTro3/' -e 's/\.maf//' | sed -e 's/_.*//' -e 's/-.*//'); if [ ! -f $file2 ]; then echo "~/kentUtils-master/bin/linux.x86_64/mafToAxt $file1 Lvir $name2 ./all_psls/$file2"; ~/kentUtils-master/bin/linux.x86_64/mafToAxt ${file1} Lvir ${name2} ./all_psls/${file2}; ~/kentUtils-master/bin/linux.x86_64/axtToPsl ./all_psls/${file2} viridis.sizes ${name2}.SIZES ./all_psls/${file3}; fi; done
+[kolora@idiv4 Multiz]$ for file1 in ../maf_Anolis/aligns/*.maf ../maf_Anolis/alignments/*.maf ../maf_Anolis/aligns/test_runs/*.maf; do file2=$(echo $file1 | sed -e 's/.*allMis1/allMis1/' -e 's/.*anoCar2/anoCar2/' -e 's/.*galGal3/galGal3/' -e 's/.*hg19/hg19/' -e 's/.*laclbil1/lacbil1/' -e 's/.*xenTro3/xenTro3/' -e 's/\.maf$/.axt/' | sed -e 's/.*test_runs\///'); $file3=$(echo $file2 | sed 's/\.axt/.psl/'); name2=$(echo $file1 | sed -e 's/.*allMis1/allMis1/' -e 's/.*anoCar2/anoCar2/' -e 's/.*galGal3/galGal3/' -e 's/.*hg19/hg19/' -e 's/.*lacbil1/lacbil1/' -e 's/.*xenTro3/xenTro3/' -e 's/\.maf//' | sed -e 's/_.*//' -e 's/-.*//'); if [ ! -f $file2 ]; then echo "~/kentUtils-master/bin/linux.x86_64/mafToAxt $file1 Lvir $name2 ./all_psls/$file2"; ~/kentUtils-master/bin/linux.x86_64/mafToAxt ${file1} Lvir ${name2} ./all_psls/${file2}; ~/kentUtils-master/bin/linux.x86_64/axtToPsl ./all_psls/${file2} viridis.sizes ${name2}.SIZES ./all_psls/${file3}; fi; done
+[kolora@idiv4 Multiz]$ for file1 in ./all_psls/*.axt; do file2=$(echo $file1 | sed -e 's/\.axt/.psl/'); name2=$(echo $file1 | sed -e 's/.*allMis1/allMis1/' -e 's/.*anoCar2/anoCar2/' -e 's/.*galGal3/galGal3/' -e 's/.*hg19/hg19/' -e 's/.*lacbil1/lacbil1/' -e 's/.*xenTro3/xenTro3/' -e 's/\.maf//' | sed -e 's/_.*//' -e 's/-.*//'); if [ ! -f $file2 ]; then ~/kentUtils-master/bin/linux.x86_64/axtToPsl ${file1} viridis.sizes ${name2}.SIZES ${file2}; fi; done
+
+
+
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/pslCat -nohead all_psls/allMis1*.psl >psl_allMis1.psl
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/pslCat -nohead all_psls/galGal3*.psl >psl_galGal3.psl
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/pslCat -nohead all_psls/hg19*.psl >psl_hg19.psl
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/pslCat -nohead all_psls/xenTro3*.psl >psl_xenTro3.psl
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/pslCat -nohead all_psls/xenTro3*.psl >psl_xenTro3.psl
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/pslCat -nohead all_psls/anoCar2*.psl >psl_anoCar2.psl
+
+
+[kolora@idiv4 Multiz]$ for file1 in psl_*.psl; do cp $file1 temp_sort/; file2=$(echo $file1 | sed 's/psl_/psl_sort_/'); ~/kentUtils-master/bin/linux.x86_64/pslSort -nohead dirs[2] $file2 TMP/ temp_sort/; rm temp_sort/${file1}; done
+
+
+[kolora@idiv4 Multiz]$ for file1 in psl_sort_*.psl; do file2=$(echo $file1 | sed -e 's/\.psl$//' -e 's/psl_sort_/lifted_psl_sort_/'); name1=$(echo $file1 | sed -e 's/\.psl$/.lift/' -e 's/psl_sort_//' -e 's/2Lacvir//'); echo "~/kentUtils-master/bin/linux.x86_64/liftUp -nohead -pslQ $file2 -type=.psl $name1 error $file1"; ~/kentUtils-master/bin/linux.x86_64/liftUp -nohead -pslQ $file2 -type=.psl $name1 error $file1; done 
+
+[kolora@idiv4 Multiz]$ for file1 in single_cov2/allMis1.2bit single_cov2/anoCar2.2bit single_cov2/galGal3.2bit single_cov2/hg19.2bit single_cov2/xenTro3.2bit; do file2=$(echo $file1 | sed -e 's/.2bit//' -e 's/.*\///' -e 's/$/.fa/'); ~/kentUtils-master/bin/linux.x86_64/twoBitToFa $file1 $file2; done
+#for file1 in lifted_psl_sort_*; do file2=$(echo $file1 | sed -e 's/lifted_psl_sort_//' -e 's/$/.fa/'); file3=$(echo $file1 | sed -e 's/lifted_psl_sort_/chained_lifted_psl_sort_/'; name1=$(echo $file1 | sed -e 's/lifted_psl_sort_//'); outfile=$(echo $file1 | sed -e 's/lifted_psl_sort_/final/' -e 's/$/.axt/' ); ~/kentUtils-master/bin/linux.x86_64/axtChain -psl -linearGap=medium $file1 -faT ../maf_Anolis/viridis.fasta -faQ $file2 -details=details_$name1 $file3 1>log_axtchain 2>&1; ~/kentUtils-master/bin/linux.x86_64/chainSort $file3 stdout | ~/kentUtils-master/bin/linux.x86_64/chainPreNet stdin viridis.sizes ${name1}.sizes stdout | ~/kentUtils-master/bin/linux.x86_64/chainNet -minSpace=20 -minFill=10 stdin viridis.sizes ${name1}.sizes lacvir1.net ${name1}.net; ~/kentUtils-master/bin/linux.x86_64/netSyntenic ${name1}.net ${name1}.Synt.net; ~/kentUtils-master/bin/linux.x86_64/netToAxt ${name1}.Synt.net $file3 -maxGap=3000000 ./single_cov2/lacvir1.2bit ./single_cov2/${name1}.2bit $outfile; rm log_axtchain; done
+
+[kolora@idiv4 Multiz]$ for file1 in lifted_psl_sort_*; do file2=$(echo $file1 | sed -e 's/lifted_psl_sort_//' -e 's/$/.fa/'); file3=$(echo $file1 | sed -e 's/lifted_psl_sort_/chained_lifted_psl_sort_/'); name1=$(echo $file1 | sed -e 's/lifted_psl_sort_//'); outfile=$(echo $file1 | sed -e 's/lifted_psl_sort_/final_/' -e 's/$/.axt/'); ~/kentUtils-master/bin/linux.x86_64/axtChain -psl -linearGap=medium $file1 -faT ../maf_Anolis/viridis.fasta -faQ $file2 $file3 1>log_axtchain 2>&1; ~/kentUtils-master/bin/linux.x86_64/chainSort $file3 stdout | ~/kentUtils-master/bin/linux.x86_64/chainPreNet stdin viridis.sizes ${name1}.sizes stdout | ~/kentUtils-master/bin/linux.x86_64/chainNet -minSpace=20 -minFill=10 stdin viridis.sizes ${name1}.sizes lacvir1.net ${name1}.net; ~/kentUtils-master/bin/linux.x86_64/netSyntenic ${name1}.net ${name1}.Synt.net; ~/kentUtils-master/bin/linux.x86_64/netToAxt ${name1}.Synt.net $file3 -maxGap=3000000 ./single_cov2/${name1}.2bit ./single_cov2/lacvir1.2bit $outfile; rm log_axtchain; done
+
+[kolora@idiv4 Multiz]$ for file1 in lifted_psl_sort_*; do file2=$(echo $file1 | sed -e 's/lifted_psl_sort_//' -e 's/$/.fa/'); file3=$(echo $file1 | sed -e 's/lifted_psl_sort_/chained_lifted_psl_sort_/'); name1=$(echo $file1 | sed -e 's/lifted_psl_sort_//'); outfile=$(echo $file1 | sed -e 's/lifted_psl_sort_/final_/' -e 's/$/.axt/'); ~/kentUtils-master/bin/linux.x86_64/axtChain -psl -linearGap=medium $file1 -faT ../maf_Anolis/viridis.fasta -faQ $file2 $file3 1>log_axtchain 2>&1; ~/kentUtils-master/bin/linux.x86_64/chainSort $file3 stdout | ~/kentUtils-master/bin/linux.x86_64/chainPreNet stdin viridis.sizes ${name1}.sizes stdout | ~/kentUtils-master/bin/linux.x86_64/chainNet -minSpace=20 -minFill=5 stdin viridis.sizes ${name1}.sizes lacvir1_${name1}.net ${name1}.net; ~/kentUtils-master/bin/linux.x86_64/netSyntenic lacvir1_${name1}.net ${name1}.Synt.net; ~/kentUtils-master/bin/linux.x86_64/netToAxt ${name1}.Synt.net $file3 -maxGap=3000000 ./single_cov2/lacvir1.2bit ./single_cov2/${name1}.2bit $outfile; rm log_axtchain; done
+
+
+[kolora@idiv4 Multiz]$ for file1 in final_*.axt; do file2=$(echo $file1 | sed -e 's/\.axt/.maf/'); name1=$(echo $file1 | sed -e 's/final_//' -e 's/.axt//'); ~/kentUtils-master/bin/linux.x86_64/axtToMaf -tPrefix=lacvir1. -qPrefix=${name1}. $file1 viridis.sizes ${name1}.sizes $file2; done
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/axtToMaf -tPrefix=lacvir1. -qPrefix=lacbil1. lacbil12Lacvir.axt viridis.sizes bilineata.sizes final_lacbil12Lacvir.maf
+[kolora@idiv4 Multiz]$ mv lacbil12Lacvir.maf final_lacbil1.maf
+
+
+[kolora@idiv4 Multiz]$ for file1 in final_*.maf; do file2=$(echo $file1 | sed -e 's/final_/final_singlecov_/'); name1=$(echo $file1 | sed -e 's/final_//' -e 's/.maf//'); ~/multiz-tba.012109/bin/single_cov2 $file1 >$file2; done
+51102376 bases loss out of 316879665
+366965882 bases loss out of 858714545
+33521254 bases loss out of 216906440
+31181460 bases loss out of 148371167
+133670198 bases loss out of 210915484
+
+
+[kolora@idiv4 Multiz]$ for file1 in final_singlecov_*.maf; do file2=$(echo $file1 | sed -e 's/\.maf/.sing.maf/' -e 's/final_singlecov_/lacvir1./'); mv $file1 $file2; done
+[kolora@idiv4 Multiz]$ roast + X=0 E=lacvir1 '((((((lacvir1)anoCar2)allMis1)galGal3)hg19)xenTro3)' lacvir1.*.sing.maf multiple_lacvir1_roast.maf
+
+[kolora@idiv4 Multiz]$ ~/multiz-tba.012109/bin/single_cov2 final_lacbil1.maf >lacvir1.lacbil1.sing.maf
+[kolora@idiv4 Multiz]$ roast + X=0 E=lacvir1 '(((((((lacvir1)lacbil1)anoCar2)allMis1)galGal3)hg19)xenTro3)' lacvir1.*.sing.maf Lacerta_multiple_lacvir1_roast.maf
+
+
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/axtToMaf -tPrefix=lacvir1. -qPrefix=lacadr1. lacadr12lacavir1.axt viridis.sizes adr_.sizes final_lacadr1.maf; ~/multiz-tba.012109/bin/single_cov2 final_lacadr1.maf >lacvir1.lacadr1.sing.maf
+[kolora@idiv4 Multiz]$ roast + X=0 E=lacvir1 '((((((((lacvir1)lacadr1)lacbil1)anoCar2)allMis1)galGal3)hg19)xenTro3)' lacvir1.*.sing.maf Lacertidae_multiple_lacvir1_roast.maf
+
+
+[kolora@idiv4 Multiz]$ ~/mafTools/bin/mafStats -m multiple_lacvir1_roast.maf >statistics_multiple_maf
+[kolora@idiv4 Multiz]$ ~/mafTools/bin/mafStats -m Lacerta_multiple_lacvir1_roast.maf >statistics_Lacerta_multiple_maf
+
+
+### PHASTCONS
+[kolora@idiv4 Multiz]$ export PATH=$PATH:~/phast-1.3/bin
+[kolora@idiv4 Multiz]$ cp ./single_cov2/phastcons/trials/lacvir1.bed .
+[kolora@idiv4 Multiz]$ mkdir -p mafs gffs codons_ss sites_ss
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/mafSplit -byTarget -useFullSequenceName lacvir1.bed ./mafs/ ./multiple_lacvir1_roast.maf
+[kolora@idiv4 gffs]$ grep -v '^#' CDS_viridis.gff | awk '{print >> "./gffs/"$1".gff"}'; for file in gffs/Lvir_*; do sed -i 's/^/lacvir1./' $file; done
+[kolora@idiv4 Multiz]$ cp -r single_cov2/phastcons/trials/seqs .
+[kolora@idiv4 Multiz]$ mkdir -p mod_mafs; for file1 in ./mafs/Lvir_*.maf; do file2=$(echo $file1 | sed 's/mafs/mod_mafs/'); maf_parse -o MAF -O lacvir1,anoCar2,allMis1,galGal3,hg19,xenTro3 $file1 >$file2; done
+[kolora@idiv4 Multiz]$ cp single_cov2/phastcons/trials/run_* .
+[kolora@idiv4 Multiz]$ ls ./mod_mafs/Lvir_*.maf | parallel -j 28 run_con_4dss.sh
+[kolora@idiv4 Multiz]$ msa_view --unordered-ss --aggregate lacvir1,anoCar2,allMis1,galGal3,hg19,xenTro3 --in-format SS --out-format SS sites_ss/*.sites.ss > all-4d.sites.ss
+[kolora@idiv4 Multiz]$ phyloFit --tree "(((((lacvir1,anoCar2),allMis1),galGal3),hg19),xenTro3)" --msa-format SS --out-root nonconserved-4d all-4d.sites.ss
+[kolora@idiv4 Multiz]$ msa_view --unordered-ss --aggregate lacvir1,anoCar2,allMis1,galGal3,hg19,xenTro3 --in-format SS --out-format SS codons_ss/*.codons.ss > all-cons.sites.ss
+[kolora@idiv4 Multiz]$ phyloFit --tree "(((((lacvir1,anoCar2),allMis1),galGal3),hg19),xenTro3)" --msa-format SS --out-root conserved-codon1 all-cons.sites.ss
+
+
+[kolora@idiv4 Multiz]$ phyloFit --tree "(((((lacvir1,anoCar2),allMis1),galGal3),hg19),xenTro3)" --msa-format MAF --out-root init multiple_lacvir1_roast.maf
+Reading alignment from multiple_lacvir1_roast.maf ...
+Compacting sufficient statistics ...
+Fitting tree model to multiple_lacvir1_roast.maf using REV ...
+numpar = 15
+Done.  log(likelihood) = -905544249.141426 numeval=602
+Writing model to init.mod ...
+Done.
+
+
+[kolora@idiv4 Multiz]$ phyloFit --tree "(((((lacvir1,anoCar2),allMis1),galGal3),hg19),xenTro3)" --msa-format MAF --out-root init multiple_lacvir1_roast.maf
+Reading alignment from multiple_lacvir1_roast.maf ...
+Compacting sufficient statistics ...
+Fitting tree model to multiple_lacvir1_roast.maf using REV ...
+numpar = 15
+Done.  log(likelihood) = -905544249.141426 numeval=602
+Writing model to init.mod ...
+Done.
+[kolora@idiv4 Multiz]$ ls mod_mafs/*.maf | parallel -j 28 sh run_phastcons_1.sh
+[kolora@idiv4 Multiz]$ ls Chunks/*.ss | parallel -j 28 sh run_phastcons_2.sh
+[kolora@idiv4 Multiz]$ ls Trees/*.cons.mod > cons.txt
+[kolora@idiv4 Multiz]$ ls Trees/*.noncons.mod > noncons.txt
+[kolora@idiv4 Multiz]$ for file in Trees/*.cons.mod; do printf $file"\t"$(grep TREE $file | sed -e 's/.* (/(/' -e 's/lacvir1.*//' | wc -c | awk '{print $0-1}')"\n"; done | sort -k2,2n >count_species
+[kolora@idiv4 Multiz]$ awk -F'\t' '{print >>"count_species."$2}' count_species
+[kolora@idiv4 Multiz]$ cut -f1 count_species.1 | while read line; do printf $line"\t"; grep TREE $line | sed -e 's/.* (//' -e 's/:[0-9]*\.[0-9]*//g' -e 's/,/\t/' -e 's/);//'; done | grep -v anoCar2
+[kolora@idiv4 Multiz]$ for file in count_species.[0-9]*; do awk -F'\t' '{print $1}' $file >phyloboot_$file; done
+[kolora@idiv4 Multiz]$ for file in phyloboot_*; do file2=$(echo $file | sed 's/.*\.//'); str=$(printf "'*"$file"'"); echo phyloBoot --read-mods $str --output-average ave.cons.mod_$file2 ; done
+
+
+
+[kolora@idiv4 Multiz]$ phyloBoot --read-mods '*phyloboot_count_species.1' --output-average ave.cons.mod_1
+param   description                    mean     stdev    median       min       max   95%_min   95%_max   90%_min   90%_max
+0       branch (spans root)        81.62661 306.32924   0.16002   0.04881 1416.35000   0.05850 1004.89610   0.07101 548.47078
+1       branch (spans root)        81.62661 306.32924   0.16002   0.04881 1416.35000   0.05850 1004.89610   0.07101 548.47078
+2       background freq(A)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+3       background freq(C)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+4       background freq(G)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+5       background freq(T)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+6       rmatrix                     0.91576   0.20345   0.88323   0.51748   1.54258   0.60714   1.31259   0.67353   1.18521
+7       rmatrix                     2.31448   0.53584   2.50505   0.56087   3.08397   0.72917   2.97299   1.11196   2.82852
+8       rmatrix                     0.78158   0.38456   0.63394   0.39687   2.03076   0.42332   1.99913   0.46323   1.67478
+9       rmatrix                     0.94663   0.27353   0.96275   0.34485   1.51783   0.40023   1.44986   0.48702   1.36798
+10      rmatrix                     2.33267   0.56990   2.41005   0.61078   2.98225   0.71048   2.96683   1.06213   2.93492
+11      rmatrix                     0.96697   0.29126   0.92355   0.58724   1.91600   0.60732   1.65109   0.62666   1.43925
+Writing average model to ave.cons.mod_1...
+Done.
+[kolora@idiv4 Multiz]$ phyloBoot --read-mods '*phyloboot_count_species.2' --output-average ave.cons.mod_2
+param   description                    mean     stdev    median       min       max   95%_min   95%_max   90%_min   90%_max
+0       branch (spans root)         0.35192   2.35141   0.10084   0.00000  23.01360   0.00034   0.43430   0.01160   0.27973
+1       branch (lf_lacvir1->anc_1)   9.29528  88.99289   0.05452   0.00000 867.50200   0.00000   0.18294   0.00000   0.14127
+2       branch (lf_anoCar2->anc_1)   9.16952  86.97579   0.10823   0.00000 847.89600   0.02087   0.45141   0.02974   0.29923
+3       branch (spans root)         0.35192   2.35141   0.10084   0.00000  23.01360   0.00034   0.43430   0.01160   0.27973
+4       background freq(A)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+5       background freq(C)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+6       background freq(G)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+7       background freq(T)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+8       rmatrix                     0.90682   0.21927   0.87141   0.35859   1.76101   0.58075   1.44150   0.64824   1.27300
+9       rmatrix                     2.32667   0.37743   2.35433   0.65291   3.22613   1.35476   2.88638   1.82284   2.83470
+10      rmatrix                     0.70920   0.22593   0.68623   0.02455   2.02702   0.35739   1.03628   0.41655   0.99869
+11      rmatrix                     0.95226   0.26659   0.94885   0.00000   1.86540   0.45446   1.41711   0.55252   1.31993
+12      rmatrix                     2.44298   0.50406   2.44531   0.62954   5.27667   1.78545   3.19388   1.96864   2.87866
+13      rmatrix                     0.95822   0.23520   0.89653   0.52501   1.99282   0.63731   1.42819   0.67111   1.38605
+Writing average model to ave.cons.mod_2...
+Done.
+[kolora@idiv4 Multiz]$ phyloBoot --read-mods '*phyloboot_count_species.3' --output-average ave.cons.mod_3
+param   description                    mean     stdev    median       min       max   95%_min   95%_max   90%_min   90%_max
+0       branch (spans root)         0.09004   0.14373   0.06554   0.00000   1.83157   0.00024   0.21589   0.00089   0.19667
+1       branch (anc_2->anc_1)       0.04392   0.03893   0.03728   0.00000   0.18621   0.00000   0.13412   0.00000   0.12320
+2       branch (lf_lacvir1->anc_2)   0.22684   2.48763   0.04646   0.00000  34.24210   0.00000   0.11385   0.00000   0.10429
+3       branch (lf_anoCar2->anc_2)   0.30101   2.49862   0.10889   0.00015  34.45580   0.00686   0.31688   0.02054   0.26078
+4       branch (lf_allMis1->anc_1)   0.06398   0.04951   0.05899   0.00000   0.35882   0.00015   0.19138   0.00186   0.13966
+5       branch (spans root)         0.09004   0.14373   0.06554   0.00000   1.83157   0.00024   0.21589   0.00089   0.19667
+6       background freq(A)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+7       background freq(C)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+8       background freq(G)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+9       background freq(T)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+10      rmatrix                     0.92086   0.19603   0.88782   0.38821   2.11003   0.59940   1.31407   0.65953   1.24196
+11      rmatrix                     2.43616   0.29170   2.44982   1.15668   3.87901   1.90595   2.95116   1.99966   2.82902
+12      rmatrix                     0.66422   0.15597   0.65697   0.27869   1.77053   0.39764   0.90135   0.43801   0.87239
+13      rmatrix                     0.99563   0.22796   0.96986   0.45644   1.76694   0.58511   1.47338   0.63471   1.39788
+14      rmatrix                     2.41786   0.29721   2.44343   0.67171   3.10361   1.74901   2.87417   1.98275   2.80674
+15      rmatrix                     0.89836   0.19270   0.87362   0.34590   1.78448   0.58946   1.37937   0.62108   1.22996
+Writing average model to ave.cons.mod_3...
+Done.
+[kolora@idiv4 Multiz]$ phyloBoot --read-mods '*phyloboot_count_species.4' --output-average ave.cons.mod_4
+param   description                    mean     stdev    median       min       max   95%_min   95%_max   90%_min   90%_max
+0       branch (spans root)       126.48635 2453.05202   0.09313   0.00000 47629.80000   0.00000   0.33577   0.00005   0.26191
+1       branch (anc_2->anc_1)     178.50826 3388.32690   0.00527   0.00000 65776.00000   0.00000   0.08065   0.00000   0.06168
+2       branch (anc_3->anc_2)     107.75055 2008.99052   0.05196   0.00000 38979.50000   0.00000   0.15036   0.00000   0.12295
+3       branch (lf_lacvir1->anc_3) 280.05676 5300.72918   0.04879   0.00000 102897.00000   0.00000   0.13383   0.00009   0.10254
+4       branch (lf_anoCar2->anc_3) 125.05880 2372.25560   0.10783   0.00144 46053.60000   0.02358   0.38982   0.04492   0.22572
+5       branch (lf_galGal3->anc_2) 162.59809 3131.05198   0.05583   0.00000 60793.70000   0.00602   0.19574   0.01209   0.14139
+6       branch (lf_hg19->anc_1)   132.55159 2495.70813   0.06805   0.00000 48438.60000   0.00000   0.19719   0.00226   0.15709
+7       branch (spans root)       126.48635 2453.05202   0.09313   0.00000 47629.80000   0.00000   0.33577   0.00005   0.26191
+8       background freq(A)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+9       background freq(C)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+10      background freq(G)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+11      background freq(T)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+12      rmatrix                     0.88018   0.13436   0.86214   0.56965   1.40908   0.65955   1.25312   0.70420   1.13798
+13      rmatrix                     2.46690   0.28632   2.51478   0.42025   3.55744   1.93555   2.87478   2.05511   2.78419
+14      rmatrix                     0.66891   0.20551   0.62651   0.29123   2.51940   0.45642   0.96852   0.49215   0.89460
+15      rmatrix                     0.99101   0.23014   0.95207   0.32014   2.36431   0.65497   1.56722   0.70874   1.42416
+16      rmatrix                     2.45059   0.26595   2.49761   0.54334   3.11754   1.97001   2.79907   2.12365   2.74281
+17      rmatrix                     0.87162   0.13933   0.85820   0.27305   1.55418   0.62323   1.15199   0.67589   1.11078
+Writing average model to ave.cons.mod_4...
+Done.
+[kolora@idiv4 Multiz]$ phyloBoot --read-mods '*phyloboot_count_species.5' --output-average ave.cons.mod_5
+param   description                    mean     stdev    median       min       max   95%_min   95%_max   90%_min   90%_max
+0       branch (spans root)         0.23664   3.89022   0.14989   0.00000 189.39180   0.00620   0.27165   0.03400   0.22947
+1       branch (anc_2->anc_1)       0.20251   7.05042   0.02407   0.00000 380.67300   0.00000   0.06203   0.00000   0.05248
+2       branch (anc_3->anc_2)       1.01761  51.48883   0.00584   0.00000 3109.89000   0.00000   0.02464   0.00000   0.01846
+3       branch (anc_4->anc_3)       1.12660  54.88273   0.06239   0.00000 3321.16000   0.00000   0.11026   0.00520   0.10109
+4       branch (lf_lacvir1->anc_4)   4.88471 221.12051   0.05187   0.00000 13041.10000   0.00144   0.08965   0.01498   0.07875
+5       branch (lf_anoCar2->anc_4)   3.93905 172.61351   0.10603   0.00115 10124.40000   0.05005   0.24884   0.06049   0.20390
+6       branch (lf_allMis1->anc_3)   0.23509  10.11970   0.06251   0.00000 620.21200   0.02056   0.14450   0.02620   0.11774
+7       branch (lf_galGal3->anc_2)   0.96001  48.80856   0.08075   0.00000 2978.53000   0.02928   0.17706   0.03812   0.14806
+8       branch (lf_hg19->anc_1)     0.20413   3.91135   0.10961   0.00000 195.81100   0.03128   0.21001   0.04785   0.18564
+9       branch (spans root)         0.23664   3.89022   0.14989   0.00000 189.39180   0.00620   0.27165   0.03400   0.22947
+10      background freq(A)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+11      background freq(C)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+12      background freq(G)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+13      background freq(T)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+14      rmatrix                     0.85134   0.08403   0.83989   0.49436   1.64633   0.70224   1.05453   0.73821   0.99570
+15      rmatrix                     2.50091   0.16904   2.53814   0.39069   3.61307   2.10875   2.75514   2.19473   2.68787
+16      rmatrix                     0.63447   0.09653   0.62564   0.28066   2.60097   0.48605   0.83592   0.52043   0.78561
+17      rmatrix                     1.01713   0.22741   0.94393   0.51029   3.08781   0.75529   1.63470   0.80093   1.48972
+18      rmatrix                     2.49714   0.16815   2.53360   0.59597   3.52362   2.11609   2.75210   2.18516   2.68907
+19      rmatrix                     0.85414   0.08810   0.84017   0.48052   1.56826   0.70604   1.07049   0.74556   1.01604
+Writing average model to ave.cons.mod_5...
+Done.
+
+
+
+
+
+
+
+[kolora@idiv4 Multiz]$ for file in count_species.[0-9]*; do awk -F'\t' '{print $1}' $file | sed 's/\.cons\.mod/.noncons.mod/' >phyloboot_nc_$file; done
+[kolora@idiv4 Multiz]$ for file in phyloboot_nc_*; do file2=$(echo $file | sed 's/.*\.//'); str=$(printf "'*"$file"'"); cmd1=$(echo phyloBoot --read-mods $str --output-average ave.noncons.mod_$file2); eval $cmd1 ; done
+param   description                    mean     stdev    median       min       max   95%_min   95%_max   90%_min   90%_max
+0       branch (spans root)       111.72290 400.47363   0.51189   0.34392 1533.46800   0.37027 1490.98270   0.38615 1028.33163
+1       branch (spans root)       111.72290 400.47363   0.51189   0.34392 1533.46800   0.37027 1490.98270   0.38615 1028.33163
+2       background freq(A)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+3       background freq(C)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+4       background freq(G)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+5       background freq(T)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+6       rmatrix                     0.91576   0.20345   0.88323   0.51748   1.54258   0.60714   1.31259   0.67353   1.18521
+7       rmatrix                     2.31448   0.53584   2.50505   0.56087   3.08397   0.72917   2.97299   1.11196   2.82852
+8       rmatrix                     0.78158   0.38456   0.63394   0.39687   2.03076   0.42332   1.99913   0.46323   1.67478
+9       rmatrix                     0.94663   0.27353   0.96275   0.34485   1.51783   0.40023   1.44986   0.48702   1.36798
+10      rmatrix                     2.33267   0.56990   2.41005   0.61078   2.98225   0.71048   2.96683   1.06213   2.93492
+11      rmatrix                     0.96697   0.29126   0.92355   0.58724   1.91600   0.60732   1.65109   0.62666   1.43925
+Writing average model to ave.noncons.mod_1...
+Done.
+param   description                    mean     stdev    median       min       max   95%_min   95%_max   90%_min   90%_max
+0       branch (spans root)         0.72888   3.39667   0.32848   0.00000  33.18080   0.01286   2.51512   0.07647   0.75304
+1       branch (lf_lacvir1->anc_1)  14.08000 128.42953   0.18257   0.00000 1250.76000   0.00000   0.63195   0.00000   0.45739
+2       branch (lf_anoCar2->anc_1)  14.16276 125.58314   0.33480   0.00000 1222.49000   0.09598   4.19440   0.14675   0.77899
+3       branch (spans root)         0.72888   3.39667   0.32848   0.00000  33.18080   0.01286   2.51512   0.07647   0.75304
+4       background freq(A)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+5       background freq(C)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+6       background freq(G)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+7       background freq(T)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+8       rmatrix                     0.90682   0.21927   0.87141   0.35859   1.76101   0.58075   1.44150   0.64824   1.27300
+9       rmatrix                     2.32667   0.37743   2.35433   0.65291   3.22613   1.35476   2.88638   1.82284   2.83470
+10      rmatrix                     0.70920   0.22593   0.68623   0.02455   2.02702   0.35739   1.03628   0.41655   0.99869
+11      rmatrix                     0.95226   0.26659   0.94885   0.00000   1.86540   0.45446   1.41711   0.55252   1.31993
+12      rmatrix                     2.44298   0.50406   2.44531   0.62954   5.27667   1.78545   3.19388   1.96864   2.87866
+13      rmatrix                     0.95822   0.23520   0.89653   0.52501   1.99282   0.63731   1.42819   0.67111   1.38605
+Writing average model to ave.noncons.mod_2...
+Done.
+param   description                    mean     stdev    median       min       max   95%_min   95%_max   90%_min   90%_max
+0       branch (spans root)         0.30190   0.58704   0.21045   0.00000   5.95026   0.00154   0.71866   0.04664   0.48980
+1       branch (anc_2->anc_1)       0.13592   0.09939   0.13068   0.00000   0.46206   0.00000   0.34661   0.00000   0.32195
+2       branch (lf_lacvir1->anc_2)   0.68987   7.57061   0.14178   0.00000 104.21000   0.00000   0.34855   0.00000   0.28699
+3       branch (lf_anoCar2->anc_2)   0.92773   7.60390   0.32606   0.05320 104.86000   0.12416   0.86391   0.17335   0.66549
+4       branch (lf_allMis1->anc_1)   0.20556   0.21937   0.17505   0.00000   2.77042   0.00407   0.48619   0.03881   0.39911
+5       branch (spans root)         0.30190   0.58704   0.21045   0.00000   5.95026   0.00154   0.71866   0.04664   0.48980
+6       background freq(A)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+7       background freq(C)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+8       background freq(G)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+9       background freq(T)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+10      rmatrix                     0.92086   0.19603   0.88782   0.38821   2.11003   0.59940   1.31407   0.65953   1.24196
+11      rmatrix                     2.43616   0.29170   2.44982   1.15668   3.87901   1.90595   2.95116   1.99966   2.82902
+12      rmatrix                     0.66422   0.15597   0.65697   0.27869   1.77053   0.39764   0.90135   0.43801   0.87239
+13      rmatrix                     0.99563   0.22796   0.96986   0.45644   1.76694   0.58511   1.47338   0.63471   1.39788
+14      rmatrix                     2.41786   0.29721   2.44343   0.67171   3.10361   1.74901   2.87417   1.98275   2.80674
+15      rmatrix                     0.89836   0.19270   0.87362   0.34590   1.78448   0.58946   1.37937   0.62108   1.22996
+Writing average model to ave.noncons.mod_3...
+Done.
+param   description                    mean     stdev    median       min       max   95%_min   95%_max   90%_min   90%_max
+0       branch (spans root)        76.10394 1470.66989   0.28788   0.00000 28555.60000   0.00000   0.95338   0.00037   0.74340
+1       branch (anc_2->anc_1)     108.76954 2032.35913   0.01624   0.00000 39434.90000   0.00000   0.23976   0.00000   0.17452
+2       branch (anc_3->anc_2)      66.66752 1206.27315   0.16616   0.00000 23369.50000   0.00000   0.40595   0.00000   0.34268
+3       branch (lf_lacvir1->anc_3) 171.57490 3179.66999   0.13918   0.00000 61690.20000   0.00000   0.38147   0.00031   0.27275
+4       branch (lf_anoCar2->anc_3)  76.91752 1422.78675   0.30472   0.07311 27610.70000   0.17722   1.63247   0.20993   0.60380
+5       branch (lf_galGal3->anc_2)  98.28834 1877.23326   0.15829   0.00000 36447.90000   0.03121   0.62940   0.06928   0.43842
+6       branch (lf_hg19->anc_1)    81.34862 1497.54975   0.20406   0.00000 29040.60000   0.00000   0.59954   0.00605   0.43633
+7       branch (spans root)        76.10394 1470.66989   0.28788   0.00000 28555.60000   0.00000   0.95338   0.00037   0.74340
+8       background freq(A)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+9       background freq(C)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+10      background freq(G)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+11      background freq(T)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+12      rmatrix                     0.88018   0.13436   0.86214   0.56965   1.40908   0.65955   1.25312   0.70420   1.13798
+13      rmatrix                     2.46690   0.28632   2.51478   0.42025   3.55744   1.93555   2.87478   2.05511   2.78419
+14      rmatrix                     0.66891   0.20551   0.62651   0.29123   2.51940   0.45642   0.96852   0.49215   0.89460
+15      rmatrix                     0.99101   0.23014   0.95207   0.32014   2.36431   0.65497   1.56722   0.70874   1.42416
+16      rmatrix                     2.45059   0.26595   2.49761   0.54334   3.11754   1.97001   2.79907   2.12365   2.74281
+17      rmatrix                     0.87162   0.13933   0.85820   0.27305   1.55418   0.62323   1.15199   0.67589   1.11078
+Writing average model to ave.noncons.mod_4...
+Done.
+param   description                    mean     stdev    median       min       max   95%_min   95%_max   90%_min   90%_max
+0       branch (spans root)         0.54005   5.35729   0.40664   0.00000 240.74600   0.02920   0.80717   0.11364   0.67473
+1       branch (anc_2->anc_1)       0.30929   9.06568   0.06662   0.00000 449.71400   0.00000   0.16988   0.00000   0.14246
+2       branch (anc_3->anc_2)       1.50793  77.38515   0.01605   0.00000 4696.08000   0.00000   0.06230   0.00000   0.04910
+3       branch (anc_4->anc_3)       1.74137  82.53548   0.18283   0.00000 5015.11000   0.00000   0.27653   0.01720   0.25737
+4       branch (lf_lacvir1->anc_4)   7.24946 331.31263   0.14354   0.00000 19692.70000   0.00565   0.21790   0.05023   0.19424
+5       branch (lf_anoCar2->anc_4)   5.93466 258.19159   0.28350   0.07580 15288.40000   0.21393   0.59075   0.22813   0.50680
+6       branch (lf_allMis1->anc_3)   0.43480  15.27881   0.16794   0.00000 936.55000   0.08829   0.36819   0.10079   0.31032
+7       branch (lf_galGal3->anc_2)   1.53152  73.57627   0.22244   0.00000 4497.72000   0.11119   0.43949   0.13263   0.37151
+8       branch (lf_hg19->anc_1)     0.43212   5.08474   0.30412   0.00000 231.32400   0.12145   0.52983   0.16684   0.47334
+9       branch (spans root)         0.54005   5.35729   0.40664   0.00000 240.74600   0.02920   0.80717   0.11364   0.67473
+10      background freq(A)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+11      background freq(C)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+12      background freq(G)          0.20000   0.00000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000   0.20000
+13      background freq(T)          0.30000   0.00000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000   0.30000
+14      rmatrix                     0.85134   0.08403   0.83989   0.49436   1.64633   0.70224   1.05453   0.73821   0.99570
+15      rmatrix                     2.50091   0.16904   2.53814   0.39069   3.61307   2.10875   2.75514   2.19473   2.68787
+16      rmatrix                     0.63447   0.09653   0.62564   0.28066   2.60097   0.48605   0.83592   0.52043   0.78561
+17      rmatrix                     1.01713   0.22741   0.94393   0.51029   3.08781   0.75529   1.63470   0.80093   1.48972
+18      rmatrix                     2.49714   0.16815   2.53360   0.59597   3.52362   2.11609   2.75210   2.18516   2.68907
+19      rmatrix                     0.85414   0.08810   0.84017   0.48052   1.56826   0.70604   1.07049   0.74556   1.01604
+Writing average model to ave.noncons.mod_5...
+Done.
+
+
+[kolora@idiv4 Multiz]$ ls Chunks/*.ss | parallel -j 28 sh run_phastcons_4.sh
+[kolora@idiv4 Multiz]$ cat Elements/*.bed.[1-5] | sort -k1,1 -k2,2n > most-conserved.bed
+[kolora@idiv4 Multiz]$ cat Elements/*.bed.1 | sort -k1,1 -k2,2n > most-conserved.1.bed; cat Elements/*.bed.2 | sort -k1,1 -k2,2n > most-conserved.2.bed; cat Elements/*.bed.3 | sort -k1,1 -k2,2n > most-conserved.3.bed; cat Elements/*.bed.4 | sort -k1,1 -k2,2n > most-conserved.4.bed; cat Elements/*.bed.5 | sort -k1,1 -k2,2n > most-conserved.5.bed
+[kolora@idiv4 Multiz]$ cat Scores/Lvir_*.[1-5] >most-conserved.wig
+[kolora@idiv4 Multiz]$ cat Scores/Lvir_*.1 >most-conserved.1.wig
+[kolora@idiv4 Multiz]$ cat Scores/Lvir_*.2 >most-conserved.2.wig
+[kolora@idiv4 Multiz]$ cat Scores/Lvir_*.3 >most-conserved.3.wig
+[kolora@idiv4 Multiz]$ cat Scores/Lvir_*.4 >most-conserved.4.wig
+[kolora@idiv4 Multiz]$ cat Scores/Lvir_*.5 >most-conserved.5.wig
+# [kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/wigToBigWig -clip most-conserved.wig vir.sizes most-conserved.bigwig
+[kolora@idiv4 Multiz]$ for file in most-conserved.[1-5].wig; do ~/kentUtils-master/bin/linux.x86_64/wigToBigWig -clip $file vir.sizes $file.bigwig; done
+[kolora@idiv4 Multiz]$ ~/kentUtils-master/bin/linux.x86_64/bigWigMerge most-conserved.1.wig.bigwig most-conserved.2.wig.bigwig most-conserved.3.wig.bigwig most-conserved.4.wig.bigwig most-conserved.5.wig.bigwig most-conserved.wig.bedgraph; ~/kentUtils-master/bin/linux.x86_64/bedGraphToBigWig most-conserved.wig.bedgraph vir.sizes most-conserved.bigwig; ~/kentUtils-master/bin/linux.x86_64/bigWigToWig most-conserved.bigwig most-conserved.wig
+
+[kolora@idiv4 Multiz]$ mv most-conserved.wig most-conserved.wig_2
+[kolora@idiv4 Multiz]$ perl ~/scripts/bedgraph2wig_nostep.pl most-conserved.wig.bedgraph most-conserved.wig
+sed -e '/chrom/{n;d}' Lacerta_most-conserved.wig.bedgraph | less
+
+
+# [kolora@idiv4 Multiz]$ perl ~/scripts/bedgraph2wig.pl --bedgraph <(head -n 1000 Lacerta_most-conserved.wig.bedgraph) --wig check.wig --step 1
+
+
+
+[kolora@idiv4 Multiz]$ cut -f1 count_species.1 | while read line; do printf $line"\t"; grep TREE $line | sed -e 's/.* (//' -e 's/:[0-9]*\.[0-9]*//g' -e 's/,/\t/' -e 's/);//'; done | grep -v -e anoCar2 -e hg19 -e allMis
+Trees/Lvir_3223.1-17602.cons.mod        lacvir1 galGal3
+Trees/Lvir_4121.1-9646.cons.mod lacvir1 xenTro3
+[kolora@idiv4 Multiz]$ cut -f1 count_species.2 | while read line; do printf $line"\t"; grep TREE $line | sed -e 's/.* (//' -e 's/:[0-9]*\.[0-9]*//g' -e 's/,/\t/' -e 's/);//'; done | grep -v -e anoCar2 -e hg19 -e allMis
+Trees/Lvir_2157.1-13437.cons.mod        (lacvir1        galGal3)e-18,xenTro3e-18
+# Lvir_3223, Lvir_2157 = Chr4 in chicken
+# Lvir_4121 = W-chromosome
+
+
+
+
+
+
+
+########### PhyloP
+[kolora@idiv4 Multiz]$ phyloFit --tree "(((((lacvir1,anoCar2),allMis1),galGal3),hg19),xenTro3)" --msa-format MAF --out-root init multiple_lacvir1_roast.maf
+[kolora@idiv4 Multiz]$ phyloP init.mod --msa-format MAF multiple_lacvir1_roast.maf > phylop_report.txt
+[kolora@idiv4 Multiz]$ phyloP --null 10 init.mod >phylop_null.txt
+[kolora@idiv4 Multiz]$ phyloP --posterior init.mod --msa-format MAF multiple_lacvir1_roast.maf >phylop_posterior.txt
+[kolora@idiv4 Multiz]$ mkdir -p phylop_elements phylop_scores
+
+# [kolora@idiv4 Multiz]$ phyloP --wig-scores --method LRT init.mod --msa-format MAF multiple_lacvir1_roast.maf >phylop_scores.wig
+# [kolora@idiv4 Multiz]$ phyloP --features elements.bed --method SCORE --mode CONACC init.mod --msa-format MAF multiple_lacvir1_roast.maf >phylop_element-scores.txt
+# [kolora@idiv4 Multiz]$ for file1 in Chunks/Lvir_*.ss; do file2=$(echo $file1 | sed -e 's/Chunks/phylop_elements/' -e 's/\..*/.element-scores.txt/'); phyloP --features CDS_viridis.gff --method SCORE --mode CONACC init.mod --msa-format SS $file1 >$file2; done 
+
+[kolora@idiv4 Multiz]$ ls Chunks/Lvir_*.ss | parallel -j 28 sh run_phylop_1.sh
+[kolora@idiv4 Multiz]$ cat phylop_elements/Lvir_*.element-scores.txt | fgrep -v '#chr' | sort -k1,1V -k2,2n >phylop_element-scores.txt; sed -i -e 's/lacvir1\.//' -e '1s/^/chr\tstart\tend\tname\tderiv\tteststat\tpval\n/' phylop_element-scores.txt
+[kolora@idiv4 Multiz]$ ls mod_mafs/Lvir_*.maf | parallel -j 28 sh run_phylop_2.sh
+[kolora@idiv4 Multiz]$ cat phylop_scores/*.scores.wig >phylop_scores.wig 
+
+
+
+[kolora@idiv4 Multiz]$ tail -n +2 most-conserved.5.bed | awk -F'\t' '{sum+=($3-$2)-1} END {print sum}'
+109152407
+[kolora@idiv4 Multiz]$ tail -n +2 phylop_element-scores.txt | awk -F'\t' '{sum+=($3-$2)-1} END {print sum}'
+80988006
+
+
+
+

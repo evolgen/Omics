@@ -1,0 +1,157 @@
+
+
+[rohit@bloodymary ~]$ /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/mafToPsl anoCar2 lacvir1 /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.anoCar2.sing.maf /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.anoCar2.sing.psl
+
+[rohit@bloodymary ~]$ grep -w -e 'chr[1-6]' -e 'chrLG[a-h]' /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.anoCar2.sing.psl | awk -F'\t' '$1>=1000' | cut -f14 -d$'\t' | sort -u | wc -l
+1364
+[rohit@bloodymary ~]$ grep -w -e 'chr[1-6]' -e 'chrLG[a-h]' /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.anoCar2.sing.psl | awk -F'\t' '$1>=5000' | cut -f14 -d$'\t' | sort -u | wc -l
+40
+[rohit@bloodymary ~]$ grep -w -e 'chr[1-6]' -e 'chrLG[a-h]' /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.anoCar2.sing.psl | awk -F'\t' '$1>=5000' | cut -f14 -d$'\t' | sort -u | grep -w -f - /scr/k61san/nowicklab/Lacerta/Multiz/Lacertids/lacerta_lastz.psl | cut -f10 | sort -u | wc -l
+443
+[rohit@bloodymary ~]$ grep -w -e 'chr[1-6]' -e 'chrLG[a-h]' /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.anoCar2.sing.psl | awk -F'\t' '$1>=5000' | cut -f14 -d$'\t' | sort -u | grep -w -f - /scr/k61san/nowicklab/Lacerta/Multiz/Lacertids/lacerta_lastz.psl | awk -F'\t' '$1>=5000' | cut -f10 | sort -u | wc -l
+166
+
+
+
+[rohit@bloodymary ~]$ /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/mafToPsl galGal3 lacvir1 /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.galGal3.sing.maf /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.galGal3.sing.psl
+[rohit@bloodymary ~]$ grep -w -e 'chr[0-9]*' -e 'chr[W-Z]' /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.galGal3.sing.psl | awk -F'\t' '$1>=3500' | cut -f14 -d$'\t' | sort -u | wc -l
+35
+[rohit@bloodymary ~]$ grep -w -e 'chr[0-9]*' -e 'chr[W-Z]' /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.galGal3.sing.psl | awk -F'\t' '$1>=3500' | cut -f14 -d$'\t' | sort -u | grep -w -f - /scr/k61san/nowicklab/Lacerta/Multiz/Lacertids/lacerta_lastz.psl | awk -F'\t' '$1>=35000' | cut -f10 | sort -u | wc -l
+92
+
+
+[rohit@bloodymary Multiz]$ grep -v -e chrM -e chrUn lacvir1.anoCar2.sing.psl | sort -k1,1nr | awk -F'\t' '$1>=500' | sort -k14,14 -k10,10 | awk '!x[$14$10]++' | cut -f10,14 | sort | uniq -u | cut -f2 | sort | uniq -u | wc -l
+1647
+
+
+
+### Missing alignments with L. bilineata
+[rohit@bloodymary Multiz]$ cat missing_count_species.*bed  | sort -k1,1 -k2,2n | bedtools merge -i - -s | awk -F'\t' '{sum+=$3-$2} END {print sum}'
+152462
+
+
+[rohit@bloodymary Multiz]$ for file1 in /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_cdsbasedannotation.bed /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.tRNAs.gff /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.miRNA_mipf.gff /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.snoRNAs.gff /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.compete.gff /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.LNCrna.gff /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/TUC/Lacerta_viridis_Cis-reg.bed /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/TUC/Lviridis_remaining.bed /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/TUC/Lviridis_spliceosome.bed /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/TUC/Lviridis_TUC.bed; do printf $file1"\t"; cat missing_count_species.*bed  | sort -k1,1 -k2,2n | bedtools intersect -u -a $file1 -b - | wc -l; done
+/scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_cdsbasedannotation.bed 4
+/scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.tRNAs.gff        0
+/scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.miRNA_mipf.gff   0
+/scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.snoRNAs.gff      0
+/scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.compete.gff      3
+/scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.LNCrna.gff       0
+/scr/bloodymary/rohit/Lacerta_viridis/Noncoding/TUC/Lacerta_viridis_Cis-reg.bed 0
+/scr/bloodymary/rohit/Lacerta_viridis/Noncoding/TUC/Lviridis_remaining.bed      0
+/scr/bloodymary/rohit/Lacerta_viridis/Noncoding/TUC/Lviridis_spliceosome.bed    0
+/scr/bloodymary/rohit/Lacerta_viridis/Noncoding/TUC/Lviridis_TUC.bed    0
+
+
+[rohit@bloodymary Multiz]$ for file1 in /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_cdsbasedannotation.bed /scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.compete.gff /scr/k61san/nowicklab/Lacerta/RepeatMasker/viridis.fa.out.10div.bed; do printf $file1"\t"; cat missing_count_species.*bed  | sort -k1,1 -k2,2n | bedtools intersect -u -a $file1 -b -  | wc -l; done
+/scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_cdsbasedannotation.bed 4
+/scr/bloodymary/rohit/Lacerta_viridis/Noncoding/ANNO/L.viridis.compete.gff      3
+/scr/k61san/nowicklab/Lacerta/RepeatMasker/viridis.fa.out.10div.bed     103
+
+
+[rohit@bloodymary Multiz]$ cat missing_count_species.*bed  | sort -k1,1 -k2,2n | bedtools intersect -u -a /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_cdsbasedannotation.bed -b - | cut -f5 | fgrep -w -f - /scr/bloodymary/rohit/Lacerta_viridis/divergence/viridis_ALL_whole_annotation | cut -f4 | sed 's/_.*//'
+S9WA06
+A0A099ZPH1
+R4GDA8
+G1KTB6
+
+
+[rohit@bloodymary Multiz]$ for file1 in /scr/k61san/nowicklab/Lacerta/RepeatMasker/viridis.fa.out.10div.bed; do printf $file1"\t"; cat missing_count_species.*bed  | sort -k1,1 -k2,2n | bedtools intersect -u -a $file1 -b - ; done | cut -f4,5 | sort -k1,1 -k2,2 | awk -F'\t' '!x[$1$2]++' | wc -l
+75
+
+
+[rohit@bloodymary Multiz]$ cat missing_count_species.*bed  | sort -k1,1 -k2,2n | bedtools intersect -u -a <(for file1 in /scr/bloodymary/rohit/Lacerta_viridis/Potion/LATEST/Bilineata/bs_step_3_results /scr/bloodymary/rohit/Lacerta_viridis/Potion/LATEST/Viridis/bs_step_3_results; do fgrep -w -f <(fgrep -w -f <(awk -F'\t' '$11>$10 && $11>1 && $1==$16 && $2!="" && $11!=999 && $10<=1 && $12<=1 && $15>0 && $17<=0.05 && $18<=0.05' $file1 | cut -f1 | sort -u) /scr/bloodymary/rohit/Lacerta_viridis/Potion/LATEST/cluster_file | grep -e vir | grep -e bil | sed 's/.*\tvir_/vir_/' | sed -e 's/__/|/g' -e 's/(.*//') /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_cdsbasedannotation.bed; done) -b - | wc -l
+0
+[rohit@bloodymary Multiz]$ cat missing_count_species.*bed  | sort -k1,1 -k2,2n | bedtools intersect -u -a /scr/bloodymary/rohit/Lacerta_viridis/DEseq/coords_DE_reps.bed -b - | wc -l0
+
+
+
+### Bilineata as reference and Anolis
+[rohit@k61 Multiz]$ /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/mafSpeciesSubset Lacerta_multiple_lacvir1_roast.MAF list_bilano.lst bilrefano.maf 
+[rohit@k61 Multiz]$ /scr/bloodymary/rohit/mafTools/bin/mafStrander --maf bilrefano.maf --seq lacbil1 --strand + >bilref_anoseq.maf; rm bilrefano.maf
+[rohit@k61 Multiz]$ /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/mafFilter -needComp=anoCar2 bilref_anoseq.maf >bilref_anoseq.MAF; rm bilref_anoseq.maf
+[rohit@k61 Multiz]$ /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/mafToPsl anoCar2 lacbil1 bilref_anoseq.MAF bilref_anoseq.psl 
+[rohit@k61 Multiz]$ sort -k14,14V -t$'\t' bilref_anoseq.psl >bilref_anoseq.PSL
+# [rohit@k61 Multiz]$ /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/pslDropOverlap bilref_anoseq.PSL bilref_anoseq_filt.PSL 
+
+
+
+### Accelerated evolution by bases
+[rohit@k61 Multiz]$ awk -F'\t' '$NF<0' Lacerta_phylop_base-scores.bed  | wc -l
+117098720
+
+
+[rohit@k61 Multiz]$ echo "W chromosome"; fgrep -w -f /scr/bloodymary/rohit/Lacerta_viridis/Wchromosome/Sex_chromosome_W.txt ~/Lacertidae/vir_filt_var_1_checked_final.fasta.fai | awk -F'\t' '{sum+=$2} END {print "W chromosome\t"sum}'; echo "Z chromosome"; fgrep -w -f /scr/bloodymary/rohit/Lacerta_viridis/Wchromosome/Sex_chromosome_Z.txt ~/Lacertidae/vir_filt_var_1_checked_final.fasta.fai | awk -F'\t' '{sum+=$2} END {print "Z chromosome\t"sum}'; echo "Autosomal chromosomes"; cat /scr/bloodymary/rohit/Lacerta_viridis/Wchromosome/Sex_chromosome_W.txt /scr/bloodymary/rohit/Lacerta_viridis/Wchromosome/Sex_chromosome_Z.txt | fgrep -v -w -f - ~/Lacertidae/vir_filt_var_1_checked_final.fasta.fai | awk -F'\t' '{sum+=$2} END {print "Autosomal chromosomes\t"sum}'
+W chromosome
+W chromosome    3336642
+Z chromosome
+Z chromosome    82299911
+Autosomal chromosomes
+Autosomal chromosomes   1354206473
+
+
+[rohit@k61 Multiz]$ echo "W chromosome"; fgrep -w -f /scr/bloodymary/rohit/Lacerta_viridis/Wchromosome/Sex_chromosome_W.txt Lacerta_phylop_base-scores.bed | awk -F'\t' '$NF<0' | wc -l; echo "Z chromosome"; fgrep -w -f /scr/bloodymary/rohit/Lacerta_viridis/Wchromosome/Sex_chromosome_Z.txt Lacerta_phylop_base-scores.bed | awk -F'\t' '$NF<0' | wc -l; echo "Autosomal chromosomes"; cat /scr/bloodymary/rohit/Lacerta_viridis/Wchromosome/Sex_chromosome_W.txt /scr/bloodymary/rohit/Lacerta_viridis/Wchromosome/Sex_chromosome_Z.txt | fgrep -v -w -f - Lacerta_phylop_base-scores.bed | awk -F'\t' '$NF<0' | wc -l; 
+W chromosome
+228358
+Z chromosome
+7735093
+Autosomal chromosomes
+109135269
+
+
+
+228358÷3336642	=	0.068439467
+7735093÷82299911	=	0.093986651
+109135269÷1354206473	=	0.08058983
+
+
+
+[rohit@k61 Multiz]$ cat lacvir1.lacbil1.sing.psl | awk -F'\t' '{matches+=$1; sizes1+=$13-$12; sizes2+=$17-$16} END {print "Matches\t"matches"\tQuery\t"sizes1"\tTarget\t"sizes2"\tMatch/Ref\t"matches/sizes2}' 
+Matches	1245443041	Query	1360990270	Target	1283491892	Match/Ref	0.970355
+[rohit@bloodymary Multiz]$ cat ./BIL_ref/lacbil1.lacvir1.sing.maf.psl | awk -F'\t' '{matches+=$1; sizes1+=$13-$12; sizes2+=$17-$16} END {print "Matches\t"matches"\tQuery\t"sizes1"\tTarget\t"sizes2"\tMatch/Ref\t"matches/sizes2}'
+Matches	1229300670	Query	1346714750	Target	1264337316	Match/Ref	0.972289
+
+
+### MAF2BED
+[rohit@bloodymary Large_SVs]$ cat /scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.hg19.sing.maf | grep -v '^\-\-$' |  awk 'BEGIN{OFS="\t"} {if($5=="-") {print $2,$3-$4-1,$3,$6,".",$5} else {print $2,$3-1,$3+$4,$6,".",$5}}' | awk 'BEGIN{OFS="\t"} {if($2<0) $2=0; print $0}' | awk 'BEGIN{OFS="\t"} {if($8<0) $8=0; print $0}' | tr "\n" "\t" | sed -e 's/\tlacvir1./\nlacvir1./g' | sed -e 's/^lacvir1.//g' | grep -v 'version' | cut -f1-6,9-14 >/scr/k61san/nowicklab/Lacerta/Multiz/lacvir1.hg19.sing.maf.bed
+
+
+
+##### SAUROPSIDS
+[rohit@k61 Multiz]$ grep TREE /scr/k61san/nowicklab/Lacerta/Multiz/new_Trees/Lvir_*.*.cons.mod | grep -e lacvir1 | grep -e lacbil1 | grep -e anoCar2 | grep -e galGal | grep -e allMis1 | sed -e 's/\.1\-.*\.cons\.mod:TREE: /\t/' -e 's/.*Lvir_/Lvir_/' -e 's/(/\t/g' -e 's/)/\t/g' -e 's/,/\t/g' -e 's/:/\t/g' -e 's/;$//' | tr -s '\t' '\t' | cut -f1 >list_sauropsids.contigs
+
+[rohit@k61 Multiz]$ grep TREE /scr/k61san/nowicklab/Lacerta/Multiz/Tetrapods/new_Trees/Lvir_*.*.cons.mod | grep -e lacvir1 | grep -e lacbil1 | grep -e anoCar2 | grep -e galGal | grep -e allMis1 | grep hg19 | grep xenTro | sed -e 's/\.1\-.*\.cons\.mod:TREE: /\t/' -e 's/.*Lvir_/Lvir_/' -e 's/(/\t/g' -e 's/)/\t/g' -e 's/,/\t/g' -e 's/:/\t/g' -e 's/;$//' | tr -s '\t' '\t' | cut -f1 >list_tetrapods.contigs
+
+[rohit@k61 Multiz]$ for file in Lacerta_phylop_base-scores.bed_*; do printf $file"\t\t"; awk -F'\t' '{sum+=$3-$2} END {print sum}' $file; done
+Lacerta_phylop_base-scores.bed_negative         83642260
+Lacerta_phylop_base-scores.bed_neutral          12887970
+Lacerta_phylop_base-scores.bed_positive         856287236
+
+[rohit@k61 Multiz]$ fgrep -w -f list_sauropsids.contigs Lacerta_phylop_base-scores.bed_negative | awk -F'\t' '{sum+=$3-$2} END {print sum}'
+82821695
+[rohit@k61 Multiz]$ fgrep -w -f list_sauropsids.contigs Lacerta_phylop_base-scores.bed_positive | awk -F'\t' '{sum+=$3-$2} END {print sum}'
+846247212
+[rohit@k61 Multiz]$ fgrep -w -f list_sauropsids.contigs Lacerta_phylop_base-scores.bed_neutral | awk -F'\t' '{sum+=$3-$2} END {print sum}'
+12678538
+
+
+[rohit@k61 Multiz]$ awk -F'\t' '{if($4<0) sum+=$3-$2} END {print sum}' ./Tetrapods/Lacerta_phylop_base-scores.bed
+122564891
+[rohit@k61 Multiz]$ awk -F'\t' '{if($4>0) sum+=$3-$2} END {print sum}' ./Tetrapods/Lacerta_phylop_base-scores.bed
+1153522239
+[rohit@k61 Multiz]$ awk -F'\t' '{sum+=$3-$2} END {print sum}' ./Tetrapods/Lacerta_phylop_base-scores.bed
+1293495545
+
+
+
+[rohit@k61 Multiz]$ wc -l /scr/k61san/nowicklab/Lacerta/Multiz/Lacerta_phylop_base-scores.bed_negative
+71488064 /scr/k61san/nowicklab/Lacerta/Multiz/Lacerta_phylop_base-scores.bed_negative
+
+[rohit@k61 Multiz]$ cut -f1-3 /scr/k61san/nowicklab/Lacerta/Multiz/Lacerta_phylop_scores.txt_accl | bedtools intersect -f 0.9 -u -b - -a /scr/bloodymary/rohit/Lacerta_viridis/annotation/Lacerta_viridis_cdsbasedannotation.bed_names | cut -f8 | sort -u | wc -l
+363
+
+
+[rohit@k61 Other]$ /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/mafSpeciesSubset /scr/k61san/nowicklab/Lacerta/Multiz/Lacerta_viridis_multiple.roast.maf species.lst stdout | /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/mafFilter -minCol=100 -minRow=2 -minScore=500 stdin | gzip -c >L.viridis.MSA.Tetrapods.maf.gz; /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/mafSpeciesSubset /scr/k61san/nowicklab/Lacerta/Multiz/BIL_ref/Lacerta_bilineata_multiple.roast.maf species.lst stdout | /scr/bloodymary/rohit/kentUtils-master/bin/linux.x86_64/mafFilter -minCol=100 -minRow=2 -minScore=500 stdin | gzip -c >L.bilineata.MSA.Tetrapods.maf.gz
+
+
+

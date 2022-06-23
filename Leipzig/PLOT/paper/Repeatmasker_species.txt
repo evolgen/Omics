@@ -1,0 +1,15 @@
+Species(Genome-version)	SINEs(% in genome)	LINEs(% in genome)	DNA transposons(% in genome)
+Alligator mississippiensis	0.60 	12.41 	16.24 
+Anolis carolinensis	4.19 	13.14 	9.50 
+Chelonia mydas	1.89 	11.97 	8.09 
+Gallus gallus	0.08 	7.02 	1.05 
+Gekko japonicus	3.91 	10.45 	0.72 
+Homo sapiens	8.78 	14.76 	1.29 
+Lacerta bilineata	2.66 	8.88 	1.62 
+Lacerta viridis	2.65 	8.54 	1.64 
+Lepisosteus oculatus	1.58 	0.88 	1.59 
+Mus musculus	3.72 	16.52 	0.32 
+Ornithorhynchus anatinus	20.05 	19.95 	0.88 
+Python bivittatus	1.20 	6.98 	1.12 
+Taeniopygia guttata	0.08 	3.62 	0.22 
+Xenopus tropicalis	0.29 	4.83 	19.62 

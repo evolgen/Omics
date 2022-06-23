@@ -1,0 +1,151 @@
+<tool id="sample_seqs" name="Sub-sample sequences files" version="0.1.2">
+    <description>e.g. to reduce coverage</description>
+    <requirements>
+        <requirement type="package" version="1.63">biopython</requirement>
+        <requirement type="python-module">Bio</requirement>
+    </requirements>
+    <version_command interpreter="python">sample_seqs.py --version</version_command>
+    <command interpreter="python">
+sample_seqs.py -f "$input_file.ext" -i "$input_file" -o "$output_file"
+#if str($sampling.type) == "everyNth":
+-n "${sampling.every_n}"
+#else
+##elif str($sampling.type) == "percentage":
+-p "${sampling.percent}"
+#end if
+#if $interleaved
+--interleaved
+#end if
+    </command>
+    <stdio>
+        <!-- Anything other than zero is an error -->
+        <exit_code range="1:" />
+        <exit_code range=":-1" />
+    </stdio>
+    <inputs>
+        <param name="input_file" type="data" format="fasta,fastq,sff" label="Sequence file" help="FASTA, FASTQ, or SFF format." />
+        <conditional name="sampling">
+            <param name="type" type="select" label="Sub-sampling approach">
+                <option value="everyNth">Take every N-th sequence (e.g. every fifth sequence)</option>
+                <option value="percentage">Take some percentage of the sequences (e.g. 20% will take every fifth sequence)</option>
+                <!-- TODO - target coverage etc -->
+            </param>
+            <when value="everyNth">
+                <param name="every_n" value="5" type="integer" min="2" label="N" help="At least 2, e.g. 5 will take every 5th sequence (taking 20% of the sequences)" />
+            </when>
+            <when value="percentage">
+                <param name="percent" value="20.0" type="float" min="0" max="100" label="Percentage" help="Between 0 and 100, e.g. 20% will take every 5th sequence" />
+            </when>
+        </conditional>
+        <param name="interleaved" type="boolean" label="Interleaved paired reads" help="Tick to preserve interleaved pairs on output" />
+    </inputs>
+    <outputs>
+        <data name="output_file" format="input" metadata_source="input_file" label="${input_file.name} (sub-sampled)"/>
+    </outputs>
+    <tests>
+        <test>
+            <param name="input_file" value="get_orf_input.Suis_ORF.prot.fasta" />
+            <param name="type" value="everyNth" />
+            <param name="every_n" value="100" />
+            <output name="output_file" file="get_orf_input.Suis_ORF.prot.sample_N100.fasta" />
+        </test>
+        <test>
+            <param name="input_file" value="ecoli.fastq" />
+            <param name="type" value="everyNth" />
+            <param name="every_n" value="100" />
+            <output name="output_file" file="ecoli.sample_N100.fastq" />
+        </test>
+        <test>
+            <param name="input_file" value="ecoli.fastq" />
+            <param name="type" value="everyNth" />
+            <param name="every_n" value="100" />
+            <param name="interleaved" value="true" />
+            <output name="output_file" file="ecoli.pair_sample_N100.fastq" />
+        </test>
+        <test>
+            <param name="input_file" value="MID4_GLZRM4E04_rnd30_frclip.sff" ftype="sff" />
+            <param name="type" value="everyNth" />
+            <param name="every_n" value="5" />
+            <output name="output_file" file="MID4_GLZRM4E04_rnd30_frclip.sample_N5.sff" ftype="sff"/>
+        </test>
+        <test>
+            <param name="input_file" value="get_orf_input.Suis_ORF.prot.fasta" />
+            <param name="type" value="percentage" />
+            <param name="percent" value="1.0" />
+            <output name="output_file" file="get_orf_input.Suis_ORF.prot.sample_N100.fasta" />
+        </test>
+        <test>
+            <param name="input_file" value="get_orf_input.Suis_ORF.prot.fasta" />
+            <param name="type" value="everyNth" />
+            <param name="every_n" value="100" />
+            <param name="interleaved" value="true" />
+            <output name="output_file" file="get_orf_input.Suis_ORF.prot.pair_sample_N100.fasta" />
+        </test>
+        <test>
+            <param name="input_file" value="ecoli.fastq" />
+            <param name="type" value="percentage" />
+            <param name="percent" value="1.0" />
+            <output name="output_file" file="ecoli.sample_N100.fastq" />
+        </test>
+        <test>
+            <param name="input_file" value="MID4_GLZRM4E04_rnd30_frclip.sff" ftype="sff" />
+            <param name="type" value="percentage" />
+            <param name="percent" value="20.0" />
+            <output name="output_file" file="MID4_GLZRM4E04_rnd30_frclip.sample_N5.sff" ftype="sff"/>
+        </test>
+        <test>
+            <param name="input_file" value="MID4_GLZRM4E04_rnd30_frclip.sff" ftype="sff" />
+            <param name="type" value="everyNth" />
+            <param name="percent" value="5" />
+            <param name="interleaved" value="true" />
+            <output name="output_file" file="MID4_GLZRM4E04_rnd30_frclip.pair_sample_N5.sff" ftype="sff"/>
+        </test>
+    </tests>
+    <help>
+**What it does**
+
+Takes an input file of sequences (typically FASTA or FASTQ, but also
+Standard Flowgram Format (SFF) is supported), and returns a new sequence
+file sub-sampling from this (in the same format).
+
+Several sampling modes are supported, all designed to be non-random. This
+allows reproducibility, and also works on paired sequence files. Also
+note that by sampling uniformly through the file, this avoids any bias
+should reads in any part of the file are of lesser quality (e.g. one part
+of the slide).
+
+The simplest mode is to take every N-th sequence, for example taking
+every 2nd sequence would sample half the file - while taking every 5th
+sequence would take 20% of the file.
+
+If you tick the interleaved option, the file is processed as pairs of
+records - taking for example using 20% would take every 5th pair of
+records. This ensures your read pairs are preserved. Note this does not
+actually check your read names match a known pair naming scheme!
+
+**Example Usage**
+
+Suppose you have some Illumina paired end data as files ``R1.fastq`` and
+``R2.fastq`` which give an estimated x200 coverage, and you wish to do a
+*de novo* assembly with a tool like MIRA which recommends lower coverage.
+Taking every 3rd read would reduce the estimated coverage to about x66,
+and would preserve the pairing as well.
+
+Similarly, if you had some Illumina paired end data interleaved into one
+file with an estimated x200 coverage, you would run this tool in
+interleaved mode. Taking every 3rd read pair. This would reduce the
+estimated coverage to about x66, while preserving the read pairing.
+
+**Citation**
+
+This tool uses Biopython, so if you use this Galaxy tool in work leading to a
+scientific publication please cite the following paper:
+
+Cock et al (2009). Biopython: freely available Python tools for computational
+molecular biology and bioinformatics. Bioinformatics 25(11) 1422-3.
+http://dx.doi.org/10.1093/bioinformatics/btp163 pmid:19304878.
+
+This tool is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/sample_seqs
+    </help>
+</tool>

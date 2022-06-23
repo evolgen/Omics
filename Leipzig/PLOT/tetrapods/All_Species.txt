@@ -1,0 +1,13 @@
+Lepisosteus oculatus
+Xenopus tropicalis
+Chelonia mydas
+Alligator mississippiensis
+Gekko japonicus
+Lacerta viridis
+Anolis carolinensis
+Python molurus
+Gallus gallus
+Taeniopygia guttata
+Ornithorhynchus anatinus
+Mus musculus
+Homo sapiens

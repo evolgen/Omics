@@ -1,0 +1,8 @@
+Homo sapiens
+Gallus gallus
+Lacerta viridis
+Lacerta bilineata
+Anolis carolinensis
+Alligator mississippiensis
+Python molurus
+Xenopus tropicalis

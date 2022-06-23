@@ -1,0 +1,74 @@
+<tool id="seq_rename" name="Rename sequences" version="0.0.6">
+    <description>with ID mapping from a tabular file</description>
+    <requirements>
+        <requirement type="package" version="1.62">biopython</requirement>
+        <requirement type="python-module">Bio</requirement>
+    </requirements>
+    <version_commmand interpreter="python">seq_rename.py --version</version_commmand>
+    <command interpreter="python">
+seq_rename.py $input_tabular $old_column $new_column $input_file $input_file.ext $output_file
+    </command>
+    <stdio>
+        <!-- Anything other than zero is an error -->
+        <exit_code range="1:" />
+        <exit_code range=":-1" />
+    </stdio>
+    <inputs>
+        <param name="input_file" type="data" format="fasta,qual,fastq,sff" label="Sequence file" help="FASTA, QUAL, FASTQ, or SFF format." />
+        <param name="input_tabular" type="data" format="tabular" label="Tabular file containing sequence identifiers"/>
+        <param name="old_column" type="data_column" data_ref="input_tabular" multiple="False" numerical="False" label="Column containing current (old) sequence identifiers"/>
+        <param name="new_column" type="data_column" data_ref="input_tabular" multiple="False" numerical="False" label="Column containing new sequence identifiers"/>
+    </inputs>
+    <outputs>
+        <data name="output_file" format="input" metadata_source="input_file" label="Renamed ${on_string}"/>
+    </outputs>
+    <tests>
+        <test>
+            <param name="input_file" value="four_human_proteins.fasta" ftype="fasta" />
+            <param name="input_tabular" value="four_human_proteins.rename.tabular" ftype="tabular" />
+            <param name="old_column" value="1" />
+            <param name="new_column" value="2" />
+            <output name="output_file" file="four_human_proteins.rename.fasta" ftype="fasta" />
+        </test>
+        <test>
+            <param name="input_file" value="four_human_proteins.fasta" ftype="fasta" />
+            <param name="input_tabular" value="four_human_proteins.rename.tabular" ftype="tabular" />
+            <param name="old_column" value="c1" />
+            <param name="new_column" value="c2" />
+            <output name="output_file" file="four_human_proteins.rename.fasta" ftype="fasta" />
+        </test>
+    </tests>
+    <help>
+**What it does**
+
+Takes a FASTA, QUAL, FASTQ or Standard Flowgram Format (SFF) file and produces a
+new sequence file (of the same format) where the sequence identifiers have been
+renamed according to the specified columns in your tabular file.
+
+WARNING: If you have any duplicates in the input sequence file, you will still
+have duplicate sequences in the output.
+
+WARNING: If the tabular file has more than one new name for any old ID, the
+last one is used.
+
+**References**
+
+If you use this Galaxy tool in work leading to a scientific publication please
+cite the following papers:
+
+Peter J.A. Cock, Björn A. Grüning, Konrad Paszkiewicz and Leighton Pritchard (2013).
+Galaxy tools and workflows for sequence analysis with applications
+in molecular plant pathology. PeerJ 1:e167
+http://dx.doi.org/10.7717/peerj.167
+
+This tool uses Biopython to read and write SFF files, so you may also wish to
+cite the Biopython application note (and Galaxy too of course):
+
+Cock et al (2009). Biopython: freely available Python tools for computational
+molecular biology and bioinformatics. Bioinformatics 25(11) 1422-3.
+http://dx.doi.org/10.1093/bioinformatics/btp163 pmid:19304878.
+
+This tool is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/seq_rename
+    </help>
+</tool>

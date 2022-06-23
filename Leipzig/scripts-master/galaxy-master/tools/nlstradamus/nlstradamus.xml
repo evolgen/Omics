@@ -1,0 +1,93 @@
+<tool id="nlstradamus" name="NLStradamus" version="0.0.8">
+    <description>Find nuclear localization signals (NLSs) in protein sequences</description>
+    <command>
+      NLStradamus -i $fasta_file -t $threshold -m $model -a $algorithm -tab > $tabular_file
+    </command>
+    <stdio>
+        <!-- Assume anything other than zero is an error -->
+        <exit_code range="1:" />
+        <exit_code range=":-1" />
+    </stdio>
+    <inputs>
+        <param name="fasta_file" type="data" format="fasta" label="FASTA file of protein sequences"/> 
+        <param name="model" type="select" display="radio" label="Model">
+            <option value="1" selected="True">Two state</option>
+            <option value="2">Four state</option>
+        </param>
+        <param name="algorithm" type="select" display="radio" label="Algorithm">
+            <option value="0">Viterbi</option>
+            <option value="1" selected="True">Posterior with threshold</option>
+            <option value="2">Both</option>
+        </param>
+        <param name="threshold" type="float" label="Posterior theshold" value="0.6">
+            <validator type="in_range" min="0" max="1" message="Threshold value should be between 0 and 1."/>
+        </param>
+    </inputs>
+    <outputs>
+        <data name="tabular_file" format="tabular" label="NLStradamus results" />
+    </outputs>
+    <requirements>
+        <requirement type="binary">NLStradamus</requirement>
+        <requirement type="package" version="1.8">NLStradamus</requirement>
+    </requirements>
+    <tests>
+        <test>
+            <param name="fasta_file" value="four_human_proteins.fasta" ftype="fasta" />
+            <param name="model" value="1" />
+            <param name="algorithm" value="1" />
+            <param name="threshold" value="0.6" />
+            <output name="tabular_file" file="four_human_proteins.nlstradamus.tabular" ftype="tabular" />
+        </test>
+        <test>
+            <param name="fasta_file" value="empty.fasta" ftype="fasta" />
+            <param name="model" value="2" />
+            <param name="algorithm" value="2" />
+            <param name="threshold" value="0.125"/>
+            <output name="tabular_file" file="empty_nlstradamus.tabular" ftype="tabular" />
+        </test>
+    </tests>
+    <help>
+    
+**What it does**
+
+This calls the NLStradamus tool for prediction of nuclear localization
+signals (NLSs), which uses a Hidden Markov Model (HMM).
+
+The input is a FASTA file of protein sequences, and the output is tabular
+with six columns (one row per NLS):
+
+====== ===================================================================
+Column Description
+------ -------------------------------------------------------------------
+    c1 Sequence identifier
+    c2 Algorithm (posterior or Viterbi)
+    c3 Score (probability between threshold and 1 for posterior algorithm)
+    c4 Start
+    c5 End
+    c6 Sequence of NLS
+====== ===================================================================
+
+-----
+
+**References**
+
+
+If you use this Galaxy tool in work leading to a scientific publication please
+cite the following papers:
+
+Peter J.A. Cock, Björn A. Grüning, Konrad Paszkiewicz and Leighton Pritchard (2013).
+Galaxy tools and workflows for sequence analysis with applications
+in molecular plant pathology. PeerJ 1:e167
+http://dx.doi.org/10.7717/peerj.167
+
+A. N. Nguyen Ba, A. Pogoutse, N. Provart, A. M. Moses (2009).
+NLStradamus: a simple Hidden Markov Model for nuclear localization signal prediction.
+BMC Bioinformatics 10(1):202.
+http://dx.doi.org/10.1186/1471-2105-10-202
+
+See also http://www.moseslab.csb.utoronto.ca/NLStradamus
+
+This wrapper is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/nlstradamus
+    </help>
+</tool>

@@ -1,0 +1,102 @@
+<tool id="effectiveT3" name="Effective T3" version="0.0.13">
+    <description>Find bacterial effectors in protein sequences</description>
+    <requirements>
+        <requirement type="package" version="1.0.1">effectiveT3</requirement>
+    </requirements>
+    <version_command interpreter="python">effectiveT3.py --version</version_command>
+    <command interpreter="python">
+effectiveT3.py $module.fields.path
+#if $restrict.type=="cutoff":
+  cutoff=$restrict.cutoff
+#else:
+  $restrict.type
+#end if
+$fasta_file $tabular_file</command>
+    <stdio>
+        <!-- Anything other than zero is an error -->
+        <exit_code range="1:" />
+        <exit_code range=":-1" />
+    </stdio>
+    <inputs>
+        <param name="fasta_file" type="data" format="fasta" label="FASTA file of protein sequences"/> 
+        <param name="module" type="select" display="radio" label="Classification module">
+            <options from_file="effectiveT3.loc">
+                <column name="value" index="0"/>
+                <column name="name" index="1"/>
+                <column name="path" index="2"/>
+            </options>
+        </param>
+        <conditional name="restrict">
+            <param name="type" type="select" label="Cut-off setting">
+                <option value="selective">Selective (threshold set in module)</option>
+                <option value="sensitive">Sensitive (threshold set in module)</option>
+                <option value="cutoff">User defined cut-off</option>
+            </param>
+            <when value="selective" />
+            <when value="sensitive" />
+            <when value="cutoff" >
+                <param name="cutoff" type="float" min="0" max="1" label="Cut-off" value="" help="Threshold cut-off between 0 and 1"  />
+            </when>
+        </conditional>
+    </inputs>
+    <outputs>
+        <data name="tabular_file" format="tabular" label="Effective T3 $module.value_label on ${on_string}" />
+    </outputs>
+    <tests>
+        <test>
+            <param name="fasta_file" value="four_human_proteins.fasta" ftype="fasta" />
+            <param name="module" value="animal" />
+            <param name="type" value="selective" />
+            <output name="tabular_file" file="four_human_proteins.effectiveT3.tabular" ftype="tabular" lines_diff="2"/>
+        </test>
+        <test>
+            <param name="fasta_file" value="empty.fasta" ftype="fasta" />
+            <param name="module" value="plant" />
+            <param name="type" value="sensitive" />
+            <output name="tabular_file" file="empty_effectiveT3.tabular" ftype="tabular" />
+        </test>
+    </tests>
+    <help>
+    
+**What it does**
+
+This calls the command line Effective T3 v1.0.1 tool for prediction of bacterial effector proteins.
+
+The input is a FASTA file of protein sequences, and the output is tabular with four columns (one row per protein):
+
+====== ==============================================================================
+Column Description
+------ ------------------------------------------------------------------------------
+     1 Sequence identifier
+     2 Sequence description (from the FASTA file)
+     3 Score (between 0 and 1, or negative for an error such as a very short peptide)
+     4 Predicted effector (true/false)
+====== ==============================================================================
+
+
+**References**
+
+If you use this Galaxy tool in work leading to a scientific publication please
+cite the following papers:
+
+Peter J.A. Cock, Björn A. Grüning, Konrad Paszkiewicz and Leighton Pritchard (2013).
+Galaxy tools and workflows for sequence analysis with applications
+in molecular plant pathology. PeerJ 1:e167
+http://dx.doi.org/10.7717/peerj.167
+
+Jehl, Arnold and Rattei (2011).
+Effective - a database of predicted secreted bacterial proteins
+Nucleic Acids Research, 39(Database issue), D591-5.
+http://dx.doi.org/10.1093/nar/gkq1154
+
+Arnold, Brandmaier, Kleine, Tischler, Heinz, Behrens, Niinikoski, Mewes, Horn and Rattei (2009).
+Sequence-based prediction of type III secreted proteins.
+PLoS Pathog. 5(4):e1000376.
+http://dx.doi.org/10.1371/journal.ppat.1000376
+
+See also http://effectors.org/
+
+This wrapper is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/effectivet3
+    </help>
+</tool>

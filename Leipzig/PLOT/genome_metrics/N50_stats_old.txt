@@ -1,0 +1,3 @@
+Species	Pure-illumina	EC-illumina	EC-pacbio	Scaffolded-EC-pacbio	Hybrid
+L bilineata	1270	2130	10190	10700	368212
+L viridis	1340	2045	12100	17410	662519

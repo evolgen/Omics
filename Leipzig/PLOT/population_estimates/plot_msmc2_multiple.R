@@ -1,0 +1,75 @@
+setwd("~/Downloads/scripts/population_estimates/")
+
+library(ggplot2)
+library(gridExtra)
+
+bilDat_1<-read.table("./bil.msmc2.final.txt", header=TRUE)
+png(file="~/Downloads/scripts/population_estimates/MSMC2_multi-Mus_multi-Gen.png",width=1200,height=1100)
+par( mfrow = c( 2, 2 ) )
+
+mu <- 1e-8
+plot(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, log="x",ylim=c(0,500000), xlim=c(2000,4500000),
+     type="n", main = "MSMC2 => Mu=1e-8", xlab="Time (Years ago)", ylab="Effective population size")
+gen <- 1
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="red")
+gen <- 1.25
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="pink")
+gen <- 1.5
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="orange")
+gen <- 1.7
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="darkblue")
+gen <- 2
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type = "s", col="black")
+legend("topleft",legend=c("1","1.25","1.5","1.7","2"), col=c("red","pink","orange","darkblue","black"), bty="n", lty=c(1,1))
+
+
+mu <- 3e-8
+plot(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, log="x",ylim=c(0,200000), xlim=c(2000,2000000),
+     type="n", main = "MSMC2 => Mu=3e-8", xlab="Time (Years ago)", ylab="Effective population size")
+gen <- 1
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="red")
+gen <- 1.25
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="pink")
+gen <- 1.5
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="orange")
+gen <- 1.7
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="darkblue")
+gen <- 2
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type = "s", col="black")
+legend("topleft",legend=c("1","1.25","1.5","1.7","2"), col=c("red","pink","orange","darkblue","black"), bty="n", lty=c(1,1))
+
+
+mu <- 5e-8
+plot(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, log="x",ylim=c(0,100000), xlim=c(2000,1000000),
+     type="n", main = "MSMC2 => Mu=5e-8", xlab="Time (Years ago)", ylab="Effective population size")
+gen <- 1
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="red")
+gen <- 1.25
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="pink")
+gen <- 1.5
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="orange")
+gen <- 1.7
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="darkblue")
+gen <- 2
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type = "s", col="black")
+legend("topleft",legend=c("1","1.25","1.5","1.7","2"), col=c("red","pink","orange","darkblue","black"), bty="n", lty=c(1,1))
+
+
+mu <- 7.5e-8
+plot(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, log="x",ylim=c(0,100000), xlim=c(2000,1000000),
+     type="n", main = "MSMC2 => Mu=7.5e-8", xlab="Time (Years ago)", ylab="Effective population size")
+gen <- 1
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="red")
+gen <- 1.25
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="pink")
+gen <- 1.5
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="orange")
+gen <- 1.7
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type="s", col="darkblue")
+gen <- 2
+lines(bilDat_1$left_time_boundary/mu*gen, (1/bilDat_1$lambda)/mu, type = "s", col="black")
+legend("topleft",legend=c("1","1.25","1.5","1.7","2"), col=c("red","pink","orange","darkblue","black"), bty="n", lty=c(1,1))
+
+
+dev.off()
+

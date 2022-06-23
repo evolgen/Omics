@@ -1,0 +1,6 @@
+Lacerta viridis
+Anolis carolinensis
+Gallus gallus
+Xenopus tropicalis
+Homo sapiens
+Alligator mississippiensis

@@ -1,0 +1,103 @@
+<tool id="Psortb" name="psortb" version="0.0.4">
+  <description>Determines sub-cellular localisation of bacterial/archaeal protein sequences</description>
+  <!-- If job splitting is enabled, break up the query file into parts -->
+  <!-- Using 2000 chunks meaning 4 threads doing 500 each is ideal -->
+  <parallelism method="basic" split_inputs="fasta_file" split_mode="to_size" split_size="2000" merge_outputs="tabular_file"></parallelism>
+  <version_command interpreter="python">psortb.py --version</version_command>
+  <command interpreter="python">
+    psortb.py "\$GALAXY_SLOTS" "$type" "$long" "$cutoff" "$divergent" "$sequence" "$outfile"
+    ##If the environment variable isn't set, get "", and python wrapper
+    ##defaults to four threads.
+  </command>
+  <stdio>
+    <!-- Anything other than zero is an error -->
+    <exit_code range="1:" />
+    <exit_code range=":-1" />
+  </stdio>
+  <inputs>
+    <param format="fasta" name="sequence" type="data"
+           label="Input sequences for which to predict localisation (protein FASTA format)" />
+    <param name="type" type="select"
+           label="Organism type (N.B. all sequences in the above file must be of the same type)" >
+      <option value="-p">Gram positive bacteria</option>
+      <option value="-n">Gram negative bacteria</option>
+      <option value="-a">Archaea</option>
+    </param>
+    <param name="long" type="select" label="Output type">
+      <option value="terse">Short (terse, tabular with 3 columns)</option>
+      <!-- The normal output is text, not tabular - worth offering?
+      <option value="normal">Normal</option>
+      -->
+      <option value="long">Long (verbose, tabular with about 30 columns, depending on organism type)</option>
+    </param>
+    <param name="cutoff" size="10" type="float" optional="true" value=""
+           label="Sets a cutoff value for reported results (e.g. 7.5)"
+           help="Leave blank or use zero for no cutoff." />
+    <param name="divergent" size="10" type="float" optional="true" value=""
+           label="Sets a cutoff value for the multiple localization flag (e.g. 4.5)"
+           help="Leave blank or use zero for no cutoff." />
+  </inputs>
+  <outputs>
+    <data format="tabular" name="outfile" />
+  </outputs>
+  <requirements>
+    <requirement type="binary">psort</requirement>
+  </requirements>
+  <tests>
+    <test>
+      <param name="sequence" value="empty.fasta" ftype="fasta"/>
+      <param name="long" value="terse"/>
+      <output name="outfile" file="empty_psortb_terse.tabular" ftype="tabular"/>
+    </test>
+    <test>
+      <param name="sequence" value="k12_ten_proteins.fasta" ftype="fasta"/>
+      <param name="long" value="terse"/>
+      <output name="outfile" file="k12_ten_proteins_psortb_p_terse.tabular" ftype="tabular"/>
+    </test>
+  </tests>
+  <help>
+
+**What it does**
+
+This calls the command line tool PSORTb v3.0 for prediction of prokaryotic
+localization sites. The input dataset needs to be protein FASTA sequences.
+The default output is a simple tabular file with three columns, one row
+per query sequence:
+
+====== ==============================
+Column Description
+------ ------------------------------
+     1 Sequence identifier
+     2 Localisation, e.g. Cytoplasmic
+     3 Score
+====== ==============================
+
+The long output is also tabular with one row per query sequence, but has
+lots more columns (a different set for each supported organism type). In
+both cases, a simple header line is included (starting with a hash, #,
+so that Galaxy treats it as a comment) giving the column names.
+
+
+**References**
+
+If you use this Galaxy tool in work leading to a scientific publication please
+cite the following papers:
+
+Peter J.A. Cock, Björn A. Grüning, Konrad Paszkiewicz and Leighton Pritchard (2013).
+Galaxy tools and workflows for sequence analysis with applications
+in molecular plant pathology. PeerJ 1:e167
+http://dx.doi.org/10.7717/peerj.167
+
+N.Y. Yu, J.R. Wagner, M.R. Laird, G. Melli, S. Rey, R. Lo, P. Dao,
+S.C. Sahinalp, M. Ester, L.J. Foster, F.S.L. Brinkman (2010)
+PSORTb 3.0: Improved protein subcellular localization prediction with
+refined localization subcategories and predictive capabilities for all
+prokaryotes, Bioinformatics 26(13):1608-1615
+http://dx.doi.org/10.1093/bioinformatics/btq249
+
+See also http://www.psort.org/documentation/index.html
+
+This wrapper is available to install into other Galaxy Instances via the Galaxy
+Tool Shed at http://toolshed.g2.bx.psu.edu/view/peterjc/tmhmm_and_signalp
+  </help>
+</tool>

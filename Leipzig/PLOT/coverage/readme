@@ -1,0 +1,7 @@
+
+rohit@k52 ~/Downloads/lacerta $ /opt/bin/Rscript coverage.R 
+
+rohit@k52 ~/Downloads/lacerta $ time cut -f2 pbraw.out.sizes | sort -n | awk '{len[i++]=$1;sum+=$1} END {for (j=0;j<i+1;j++) {csum+=len[j]; if (csum>sum/2) {print len[j];break}}}'
+13499
+
+
