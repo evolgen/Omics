@@ -1,5 +1,5 @@
 # THALI
-## Accumulation of scripts from postdoc and grad
+## Accumulation of scripts from grad school and postdoc projects
 -------------
 
 ### Code, pipelines, and analyses for Data analysis & visualization, Genetics, and Multi-Omics
